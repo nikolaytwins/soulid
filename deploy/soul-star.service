@@ -1,0 +1,18 @@
+[Unit]
+Description=Soul Star (Next.js, test.twinlabs.ru)
+After=network.target postgresql@16-main.service
+
+[Service]
+Type=simple
+User=root
+WorkingDirectory=/root/soul-star/.next/standalone
+Environment=NODE_ENV=production
+Environment=PORT=3010
+Environment=HOSTNAME=localhost
+EnvironmentFile=-/etc/soul-star.env
+ExecStart=/usr/bin/node server.js
+Restart=on-failure
+RestartSec=3
+
+[Install]
+WantedBy=multi-user.target

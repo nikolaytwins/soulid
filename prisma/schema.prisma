@@ -1,0 +1,263 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String    @id @default(cuid())
+  authId        String?   @unique
+  email         String    @unique
+  passwordHash  String    @default("")
+  name          String?
+  role          String    @default("user")
+  locale        String    @default("ru")
+  emailVerified DateTime?
+  blockedAt     DateTime?
+  adminNote     String    @default("")
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  profiles     BirthProfile[]
+  purchases    Purchase[]
+  entitlements Entitlement[]
+  resetTokens  PasswordResetToken[]
+  analytics    AnalyticsEvent[]
+  emails       EmailLog[]
+
+  @@map("users")
+}
+
+model PasswordResetToken {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  token     String   @unique
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  @@map("password_reset_tokens")
+}
+
+model BirthProfile {
+  id              String   @id @default(cuid())
+  userId          String?
+  user            User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  guestKey        String?
+  dateOfBirth     String
+  displayName     String   @default("")
+  relation        String   @default("self")
+  calculationJson String
+  locale          String   @default("ru")
+  utmSource       String?
+  utmMedium       String?
+  utmCampaign     String?
+  referrer        String?
+  landingPage     String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  purchases    Purchase[]
+  entitlements Entitlement[]
+
+  @@index([guestKey])
+  @@index([userId])
+  @@map("birth_profiles")
+}
+
+model Product {
+  id          String   @id @default(cuid())
+  sku         String   @unique
+  sphere      String?
+  kind        String   @default("sphere")
+  sortOrder   Int      @default(0)
+  priceAmount Int
+  currency    String   @default("RUB")
+  isActive    Boolean  @default(true)
+  isFree      Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  translations ProductTranslation[]
+  purchases    Purchase[]
+
+  @@map("products")
+}
+
+model ProductTranslation {
+  id          String  @id @default(cuid())
+  productId   String
+  product     Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  locale      String
+  name        String
+  description String  @default("")
+
+  @@unique([productId, locale])
+  @@map("product_translations")
+}
+
+model UnlockRule {
+  id             String  @id @default(cuid())
+  sphere         String  @unique
+  sortOrder      Int
+  requiredPrev   String?
+  whyTitleRu     String  @default("")
+  whyBodyRu      String  @default("")
+  whyTitleEn     String  @default("")
+  whyBodyEn      String  @default("")
+  whyTitleAr     String  @default("")
+  whyBodyAr      String  @default("")
+  blockedTitleRu String  @default("")
+  blockedBodyRu  String  @default("")
+  blockedTitleEn String  @default("")
+  blockedBodyEn  String  @default("")
+  blockedTitleAr String  @default("")
+  blockedBodyAr  String  @default("")
+
+  @@map("unlock_rules")
+}
+
+model Interpretation {
+  id          String   @id @default(cuid())
+  sphere      String
+  point       String
+  arcanaValue Int
+  contentType String   @default("plain")
+  locale      String
+  title       String
+  body        String
+  isDemo      Boolean  @default(true)
+  origin      String   @default("demo")
+  updatedAt   DateTime @updatedAt
+  createdAt   DateTime @default(now())
+
+  @@unique([sphere, point, arcanaValue, locale])
+  @@index([sphere, locale])
+  @@map("interpretations")
+}
+
+model PatternRule {
+  id          String   @id @default(cuid())
+  kind        String
+  matchKey    String
+  valuesJson  String
+  minCount    Int      @default(2)
+  scope       String   @default("star")
+  sphere      String?
+  locale      String
+  title       String
+  body        String
+  contentType String   @default("plain")
+  isDemo      Boolean  @default(true)
+  isActive    Boolean  @default(true)
+  sortOrder   Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@unique([kind, matchKey, locale])
+  @@index([kind, locale, isActive])
+  @@map("pattern_rules")
+}
+
+model Purchase {
+  id                String    @id @default(cuid())
+  userId            String
+  user              User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  profileId         String
+  profile           BirthProfile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  productId         String
+  product           Product   @relation(fields: [productId], references: [id])
+  status            String    @default("pending")
+  amount            Int
+  currency          String
+  provider          String
+  idempotencyKey    String    @unique
+  eventId           String    @unique
+  providerPaymentId String?
+  metadataJson      String    @default("{}")
+  paidAt            DateTime?
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+
+  entitlements Entitlement[]
+  emails       EmailLog[]
+
+  @@map("purchases")
+}
+
+model Entitlement {
+  id         String    @id @default(cuid())
+  userId     String
+  user       User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  profileId  String
+  profile    BirthProfile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  sphere     String
+  purchaseId String?
+  purchase   Purchase? @relation(fields: [purchaseId], references: [id], onDelete: SetNull)
+  source     String    @default("purchase")
+  createdAt  DateTime  @default(now())
+
+  @@unique([profileId, sphere])
+  @@index([userId])
+  @@map("entitlements")
+}
+
+model WebhookEvent {
+  id        String   @id @default(cuid())
+  provider  String
+  eventKey  String
+  payload   String
+  processed Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  @@unique([provider, eventKey])
+  @@map("webhook_events")
+}
+
+model EmailLog {
+  id         String    @id @default(cuid())
+  userId     String?
+  user       User?     @relation(fields: [userId], references: [id], onDelete: SetNull)
+  purchaseId String?
+  purchase   Purchase? @relation(fields: [purchaseId], references: [id], onDelete: SetNull)
+  toEmail    String
+  template   String
+  subject    String
+  body       String
+  provider   String
+  status     String    @default("sent")
+  createdAt  DateTime  @default(now())
+
+  @@map("email_logs")
+}
+
+model AnalyticsEvent {
+  id          String   @id @default(cuid())
+  userId      String?
+  user        User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  profileId   String?
+  name        String
+  eventId     String
+  locale      String?
+  path        String?
+  utmSource   String?
+  utmMedium   String?
+  utmCampaign String?
+  referrer    String?
+  payload     String   @default("{}")
+  createdAt   DateTime @default(now())
+
+  @@index([name, createdAt])
+  @@index([eventId])
+  @@map("analytics_events")
+}
+
+model SiteSetting {
+  key   String @id
+  value String
+
+  @@map("site_settings")
+}

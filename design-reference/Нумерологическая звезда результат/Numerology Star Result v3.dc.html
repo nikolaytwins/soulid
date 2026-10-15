@@ -1,0 +1,558 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>body{margin:0;background:#F5F0EA;-webkit-font-smoothing:antialiased}a{color:#B9813F}a:hover{color:#8E5F2A}button{font-family:inherit}</style>
+</helmet>
+<div style="background:#F5F0EA;min-height:100vh;color:#2A211D;font-family:Manrope,sans-serif">
+
+<sc-if value="{{ isDesktop }}" hint-placeholder-val="{{ true }}">
+<div style="min-width:1280px;position:relative;overflow:clip">
+<div style="position:absolute;left:50%;top:40px;width:1000px;height:860px;transform:translateX(-50%);background:radial-gradient(closest-side,rgba(242,205,150,.45),rgba(245,240,234,0));pointer-events:none"></div>
+<div style="position:relative;max-width:1440px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;padding:28px 56px;box-sizing:border-box">
+<div style="font-family:'Cormorant Garamond',serif;font-size:30px;font-weight:500">Soul Star</div>
+<div style="width:44px;height:44px;border-radius:50%;border:1px solid rgba(80,60,45,.2);display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:600;color:#5E534C">АК</div>
+</div>
+<div style="position:relative;max-width:1440px;margin:0 auto;display:grid;grid-template-columns:320px minmax(0,1fr) 380px;gap:24px;padding:8px 56px 72px;align-items:center;box-sizing:border-box">
+<div style="display:flex;flex-direction:column;gap:24px">
+<div style="font-size:11px;letter-spacing:.22em;color:#8E8178;font-weight:600">ВАША ПЕРСОНАЛЬНАЯ ЗВЕЗДА</div>
+<div style="font-family:'Cormorant Garamond',serif;font-size:56px;line-height:1;font-weight:500;text-wrap:balance">Карта вашей уникальной энергии</div>
+<div style="font-size:15px;line-height:1.6;color:#5E534C;text-wrap:pretty">Звезда состоит из пяти сфер и Миссии души в центре. Сферы раскрываются по очереди: каждая следующая открывается после предыдущей.</div>
+<div style="display:flex;align-items:center;gap:14px;background:#FBF8F4;border:1px solid rgba(80,60,45,.10);border-radius:16px;padding:14px 16px">
+<div style="width:40px;height:40px;border-radius:12px;background:#F1E7DA;display:flex;align-items:center;justify-content:center;color:#B9813F"><svg width="18" height="18" viewBox="0 0 18 18" fill="none"><rect x="2" y="3.5" width="14" height="12" rx="2.5" stroke="currentColor" stroke-width="1.4"></rect><path d="M2 7.5h14M6 2v3M12 2v3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"></path></svg></div>
+<div style="display:flex;flex-direction:column;gap:2px;flex:1"><span style="font-size:12px;color:#8E8178">Дата рождения</span><span style="font-size:16px;font-weight:600">05.03.1992</span></div>
+<div style="font-size:13px;color:#5E534C;border:1px solid rgba(80,60,45,.15);border-radius:999px;padding:8px 14px">Изменить</div>
+</div>
+<div style="display:flex;flex-direction:column;gap:10px">
+<div style="display:flex;justify-content:space-between;font-size:13px"><span style="color:#5E534C">Открыто сфер</span><span style="font-weight:700">{{ progressText }}</span></div>
+<div style="display:grid;grid-template-columns:repeat(5,1fr);gap:5px"><sc-for list="{{ segs }}" as="sg" hint-placeholder-count="5"><span style="{{ sg.style }}"></span></sc-for></div>
+</div>
+</div>
+<div style="display:flex;justify-content:center">
+<div style="position:relative;width:100%;max-width:640px">{{ starD }}
+<sc-if value="{{ tip }}" hint-placeholder-val="{{ false }}">
+<div style="{{ tip.style }}">
+<span style="font-size:11px;letter-spacing:.14em;font-weight:700;color:#F3CF94">{{ tip.type }}</span>
+<span style="font-size:15px;font-weight:600">{{ tip.value }}</span>
+<span style="font-size:12px;line-height:1.45;color:#CFC4BA">{{ tip.hint }}</span>
+</div>
+</sc-if>
+</div>
+</div>
+<div style="background:rgba(251,248,244,.92);border:1px solid rgba(80,60,45,.10);border-radius:24px;padding:32px;display:flex;flex-direction:column;gap:20px;box-shadow:0 20px 50px rgba(120,85,50,.08)">
+<div style="display:flex;align-items:center;justify-content:space-between;gap:12px"><span style="font-size:11px;letter-spacing:.22em;color:#B9813F;font-weight:700">ОТКРЫТАЯ СФЕРА</span>{{ act.icon }}</div>
+<div style="display:flex;flex-direction:column;gap:12px;align-items:flex-start">
+<div style="font-family:'Cormorant Garamond',serif;font-size:42px;line-height:1;font-weight:500">{{ act.name }}</div>
+<div style="display:flex;align-items:center;gap:10px"><span style="background:#E3EBDD;color:#4B6B43;font-size:13px;font-weight:600;padding:6px 12px;border-radius:999px">✓ Открыто</span><span style="font-size:13px;color:#8E8178">{{ act.part }}</span></div>
+</div>
+<div style="font-size:15px;line-height:1.6;color:#5E534C;text-wrap:pretty">{{ act.purpose }}</div>
+<div style="display:flex;flex-direction:column;gap:10px">
+<span style="font-size:13px;font-weight:600">Ваши числа в этой сфере</span>
+<div style="display:flex;gap:8px;flex-wrap:wrap"><sc-for list="{{ chips }}" as="ch" hint-placeholder-count="6"><button onClick="{{ ch.onClick }}" title="{{ ch.title }}" style="{{ ch.style }}">{{ ch.v }}</button></sc-for></div>
+</div>
+<div style="display:flex;gap:10px;align-items:flex-start;font-size:13px;line-height:1.5;color:#5E534C;background:#F5F0EA;border-radius:12px;padding:12px 14px"><span style="width:8px;height:8px;margin-top:5px;border-radius:50%;border:1.5px solid #C78A3E;flex-shrink:0"></span><span>Нажмите на точку внутри звезды, чтобы прочитать её значение в этой сфере.</span></div>
+<button onClick="{{ goDecode }}" style="display:flex;align-items:center;justify-content:center;gap:10px;background:#2A211D;color:#FBF8F4;font-size:15px;font-weight:600;padding:16px;border-radius:14px;border:none;cursor:pointer">Перейти к расшифровке ↓</button>
+</div>
+</div>
+
+<div id="decode" style="position:relative;max-width:1440px;margin:0 auto;padding:0 56px 112px;display:flex;flex-direction:column;gap:28px;box-sizing:border-box">
+<div style="height:1px;background:rgba(80,60,45,.10)"></div>
+<div style="font-family:'Cormorant Garamond',serif;font-size:48px;font-weight:500;padding-top:16px">Ваша расшифровка</div>
+<div style="position:sticky;top:0;z-index:5;display:flex;align-items:center;gap:10px;padding:14px 0;background:#F5F0EA;border-bottom:1px solid rgba(80,60,45,.10)">
+<sc-for list="{{ pills }}" as="pl" hint-placeholder-count="5"><button onClick="{{ pl.onClick }}" style="{{ pl.style }}">{{ pl.name }}<sc-if value="{{ pl.done }}"><span style="color:#E2AE63">✓</span></sc-if><sc-if value="{{ pl.lockd }}"><svg width="11" height="11" viewBox="0 0 12 12"><rect x="2" y="5.5" width="8" height="5.5" rx="1.4" fill="currentColor"></rect><path d="M4 5.5V4a2 2 0 0 1 4 0v1.5" stroke="currentColor" stroke-width="1.3" fill="none"></path></svg></sc-if></button></sc-for>
+<span style="margin-left:auto;font-size:13px;color:#5E534C">Открыто сфер: <b style="color:#2A211D">{{ progressText }}</b></span>
+</div>
+<div style="display:grid;grid-template-columns:340px minmax(0,1fr);gap:80px;align-items:start;padding-top:16px">
+<div style="position:sticky;top:96px;background:#FBF8F4;border:1px solid rgba(80,60,45,.10);border-radius:24px;padding:28px;display:flex;flex-direction:column;gap:22px">
+<div style="display:flex;align-items:center;gap:12px">{{ act.icon }}<div style="display:flex;flex-direction:column;gap:2px"><span style="font-size:14px;font-weight:600">Фрагмент вашей звезды</span><span style="font-size:12px;color:#8E8178">{{ act.part }}</span></div></div>
+<div style="display:flex;justify-content:center;padding:4px 0">{{ triD }}</div>
+<div style="height:1px;background:rgba(80,60,45,.10)"></div>
+<div style="display:flex;flex-direction:column;gap:4px">
+<span style="font-size:11px;letter-spacing:.18em;color:#8E8178;font-weight:600;padding-bottom:6px">СОДЕРЖАНИЕ</span>
+<sc-for list="{{ arcs }}" as="ar" hint-placeholder-count="6">
+<button onClick="{{ ar.go }}" style="display:flex;align-items:center;gap:12px;background:none;border:none;padding:8px 6px;border-radius:10px;cursor:pointer;text-align:left;color:#2A211D" style-hover="background:#F1E7DA"><span style="width:28px;height:28px;border-radius:50%;border:1px solid #E2AE63;color:#8E5F2A;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0">{{ ar.v }}</span><span style="display:flex;flex-direction:column;gap:1px"><span style="font-size:14px;font-weight:600">{{ ar.title }}</span><span style="font-size:12px;color:#8E8178">{{ ar.role }}</span></span></button>
+</sc-for>
+</div>
+</div>
+<div style="display:flex;flex-direction:column;gap:40px;max-width:720px">
+<div style="display:flex;flex-direction:column;gap:16px;align-items:flex-start">
+<span style="font-size:11px;letter-spacing:.22em;color:#B9813F;font-weight:700">{{ act.eyebrow }}</span>
+<div style="display:flex;align-items:center;gap:16px"><span style="font-family:'Cormorant Garamond',serif;font-size:60px;line-height:1;font-weight:500">{{ act.name }}</span><span style="background:#E3EBDD;color:#4B6B43;font-size:13px;font-weight:600;padding:6px 12px;border-radius:999px">✓ Открыто</span></div>
+<div style="font-size:18px;line-height:1.65;color:#5E534C;text-wrap:pretty">{{ act.purpose }}</div>
+</div>
+<sc-for list="{{ arcs }}" as="ar" hint-placeholder-count="3">
+<section id="{{ ar.id }}" style="display:flex;flex-direction:column;gap:18px;padding-top:36px;border-top:1px solid rgba(80,60,45,.10)">
+<div style="display:flex;align-items:center;gap:16px"><span style="width:52px;height:52px;border-radius:50%;background:linear-gradient(160deg,#F3CF94,#D9A055);color:#3A2716;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:700;flex-shrink:0">{{ ar.v }}</span><div style="display:flex;flex-direction:column;gap:4px"><span style="font-size:11px;letter-spacing:.18em;color:#B9813F;font-weight:700">{{ ar.roleUp }}</span><span style="font-family:'Cormorant Garamond',serif;font-size:34px;line-height:1.05;font-weight:500">{{ ar.title }}</span></div></div>
+<sc-if value="{{ ar.structured }}" hint-placeholder-val="{{ false }}">
+<div style="display:flex;flex-direction:column;gap:14px">
+<sc-for list="{{ ar.subs }}" as="sb" hint-placeholder-count="4">
+<div style="background:#FBF8F4;border:1px solid rgba(80,60,45,.10);border-radius:18px;padding:22px 24px;display:flex;flex-direction:column;gap:10px">
+<div style="display:flex;align-items:center;gap:10px"><span style="width:24px;height:24px;border-radius:50%;background:#F1E7DA;color:#8E5F2A;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700">{{ sb.mark }}</span><span style="font-size:16px;font-weight:600">{{ sb.label }}</span></div>
+<div style="font-size:17px;line-height:1.7;color:#5E534C;text-wrap:pretty">{{ sb.text }}</div>
+</div>
+</sc-for>
+</div>
+</sc-if>
+<sc-if value="{{ ar.plain }}" hint-placeholder-val="{{ true }}">
+<sc-for list="{{ ar.paras }}" as="pp" hint-placeholder-count="3"><div style="font-size:17px;line-height:1.75;color:#5E534C;text-wrap:pretty">{{ pp }}</div></sc-for>
+</sc-if>
+</section>
+</sc-for>
+
+<sc-if value="{{ next.offer }}" hint-placeholder-val="{{ true }}">
+<div style="background:#2A211D;color:#FBF8F4;border-radius:24px;padding:36px;display:flex;flex-direction:column;gap:20px;margin-top:16px">
+<span style="font-size:11px;letter-spacing:.22em;color:#E2AE63;font-weight:700">СЛЕДУЮЩИЙ ШАГ</span>
+<div style="display:flex;align-items:center;gap:16px">{{ next.icon }}<div style="display:flex;flex-direction:column;gap:6px"><span style="font-family:'Cormorant Garamond',serif;font-size:38px;line-height:1.05;font-weight:500">Следующий уровень: {{ next.name }}</span><span style="font-size:14px;color:#CFC4BA">{{ next.lead }}</span></div></div>
+<div style="font-size:16px;line-height:1.6;color:#E6DCD2">{{ next.purpose }}</div>
+<div style="display:flex;align-items:center;gap:20px;flex-wrap:wrap">
+<button onClick="{{ buy }}" style="background:#E2AE63;color:#2A211D;border:none;border-radius:14px;padding:16px 26px;font-size:15px;font-weight:700;cursor:pointer">Открыть сферу — 490 ₽</button>
+<sc-if value="{{ next.showAll }}"><button onClick="{{ buyAll }}" style="background:none;border:none;color:#CFC4BA;font-size:14px;text-decoration:underline;text-underline-offset:4px;cursor:pointer;padding:8px 0">или открыть всю звезду сразу — 1 490 ₽</button></sc-if>
+</div>
+</div>
+</sc-if>
+<sc-if value="{{ next.read }}" hint-placeholder-val="{{ false }}">
+<div style="background:#FBF8F4;border:1.5px solid #E2AE63;border-radius:24px;padding:32px;display:flex;align-items:center;gap:20px;margin-top:16px">{{ next.icon }}<div style="display:flex;flex-direction:column;gap:4px;flex:1"><span style="font-size:11px;letter-spacing:.22em;color:#B9813F;font-weight:700">ДАЛЬШЕ ПО ЗВЕЗДЕ</span><span style="font-family:'Cormorant Garamond',serif;font-size:32px;font-weight:500">{{ next.name }}</span></div><button onClick="{{ readNext }}" style="background:#2A211D;color:#FBF8F4;border:none;border-radius:14px;padding:15px 22px;font-size:15px;font-weight:600;cursor:pointer">Читать сферу ↑</button></div>
+</sc-if>
+<sc-if value="{{ next.done }}" hint-placeholder-val="{{ false }}">
+<div style="background:#2A211D;color:#FBF8F4;border-radius:24px;padding:36px;display:flex;flex-direction:column;gap:16px;margin-top:16px"><span style="font-size:11px;letter-spacing:.22em;color:#E2AE63;font-weight:700">ВСЯ ЗВЕЗДА РАСКРЫТА</span><span style="font-family:'Cormorant Garamond',serif;font-size:38px;font-weight:500">Миссия души</span><span style="font-size:16px;color:#E6DCD2;line-height:1.6">Все пять сфер открыты. Центр звезды теперь доступен для чтения.</span><button onClick="{{ openMission }}" style="align-self:flex-start;background:#E2AE63;color:#2A211D;border:none;border-radius:14px;padding:16px 26px;font-size:15px;font-weight:700;cursor:pointer">Открыть Миссию души</button></div>
+</sc-if>
+</div>
+</div>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ isMobile }}" hint-placeholder-val="{{ false }}">
+<div style="max-width:430px;margin:0 auto;position:relative;overflow:clip;padding-bottom:40px">
+<div style="position:absolute;left:50%;top:150px;width:520px;height:520px;transform:translateX(-50%);background:radial-gradient(closest-side,rgba(242,205,150,.45),rgba(245,240,234,0));pointer-events:none"></div>
+<div style="position:relative;display:flex;align-items:center;justify-content:space-between;padding:16px 20px"><span style="font-family:'Cormorant Garamond',serif;font-size:24px;font-weight:500">Soul Star</span><span style="width:36px;height:36px;border-radius:50%;border:1px solid rgba(80,60,45,.2);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;color:#5E534C">АК</span></div>
+<div style="position:relative;display:flex;flex-direction:column;align-items:center;gap:10px;padding:6px 20px 0;text-align:center">
+<span style="font-size:10px;letter-spacing:.22em;color:#8E8178;font-weight:600">ВАША ПЕРСОНАЛЬНАЯ ЗВЕЗДА</span>
+<span style="font-family:'Cormorant Garamond',serif;font-size:32px;line-height:1.05;font-weight:500">Карта вашей уникальной энергии</span>
+<div style="display:flex;align-items:center;gap:10px;font-size:14px"><span style="font-weight:600">05.03.1992</span><span style="color:#5E534C;border:1px solid rgba(80,60,45,.15);border-radius:999px;padding:5px 12px;font-size:12px">Изменить</span></div>
+</div>
+<div style="position:relative;padding:4px 6px 0">{{ starM }}</div>
+<div style="position:relative;display:flex;flex-direction:column;gap:8px;padding:0 20px 16px">
+<div style="display:grid;grid-template-columns:repeat(5,1fr);gap:4px"><sc-for list="{{ segs }}" as="sg" hint-placeholder-count="5"><span style="{{ sg.style }}"></span></sc-for></div>
+<div style="display:flex;justify-content:space-between;font-size:12px;color:#5E534C"><span>Открыто сфер: {{ progressText }}</span><span style="color:#8E8178">Нажмите на сферу или точку</span></div>
+</div>
+<div style="position:relative;margin:0 14px;background:#FBF8F4;border:1.5px solid #E2AE63;border-radius:22px;padding:20px;display:flex;flex-direction:column;gap:14px">
+<div style="display:flex;align-items:center;gap:10px">{{ act.icon }}<span style="font-size:17px;font-weight:600;flex:1">{{ act.name }}</span><span style="background:#E3EBDD;color:#4B6B43;font-size:11px;font-weight:600;padding:4px 9px;border-radius:999px">✓ Открыто</span></div>
+<div style="font-size:14px;line-height:1.55;color:#5E534C">{{ act.purpose }}</div>
+<div style="display:flex;gap:6px;flex-wrap:wrap"><sc-for list="{{ chipsM }}" as="ch" hint-placeholder-count="6"><button onClick="{{ ch.onClick }}" style="{{ ch.style }}">{{ ch.v }}</button></sc-for></div>
+<button onClick="{{ goDecode }}" style="display:flex;align-items:center;justify-content:center;background:#2A211D;color:#FBF8F4;font-size:15px;font-weight:600;padding:14px;border-radius:14px;border:none;cursor:pointer;min-height:48px">Перейти к расшифровке ↓</button>
+</div>
+
+<div id="decode" style="position:relative;padding-top:36px;display:flex;flex-direction:column;gap:6px">
+<span style="padding:0 20px;font-family:'Cormorant Garamond',serif;font-size:32px;font-weight:500">Ваша расшифровка</span>
+<div style="position:sticky;top:0;z-index:5;background:#F5F0EA;border-bottom:1px solid rgba(80,60,45,.10)">
+<div style="display:flex;gap:8px;overflow-x:auto;padding:12px 20px;scrollbar-width:none"><sc-for list="{{ pills }}" as="pl" hint-placeholder-count="5"><button onClick="{{ pl.onClick }}" style="{{ pl.style }}">{{ pl.name }}<sc-if value="{{ pl.done }}"><span style="color:#E2AE63">✓</span></sc-if><sc-if value="{{ pl.lockd }}"><svg width="11" height="11" viewBox="0 0 12 12"><rect x="2" y="5.5" width="8" height="5.5" rx="1.4" fill="currentColor"></rect><path d="M4 5.5V4a2 2 0 0 1 4 0v1.5" stroke="currentColor" stroke-width="1.3" fill="none"></path></svg></sc-if></button></sc-for></div>
+</div>
+<div style="padding:20px 20px 0;display:flex;flex-direction:column;gap:14px;align-items:flex-start">
+<span style="font-size:10px;letter-spacing:.22em;color:#B9813F;font-weight:700">{{ act.eyebrow }}</span>
+<div style="display:flex;align-items:center;gap:12px"><span style="font-family:'Cormorant Garamond',serif;font-size:40px;line-height:1;font-weight:500">{{ act.name }}</span><span style="background:#E3EBDD;color:#4B6B43;font-size:11px;font-weight:600;padding:4px 9px;border-radius:999px">✓ Открыто</span></div>
+<div style="font-size:16px;line-height:1.65;color:#5E534C">{{ act.purpose }}</div>
+<div style="width:100%;box-sizing:border-box;display:flex;align-items:center;gap:16px;background:#FBF8F4;border:1px solid rgba(80,60,45,.10);border-radius:20px;padding:16px">{{ triM }}<div style="display:flex;flex-direction:column;gap:6px"><span style="font-size:12px;color:#8E8178">Фрагмент вашей звезды</span><span style="font-size:13px;font-weight:600">Нажмите на угол треугольника, чтобы прочитать значение точки</span></div></div>
+</div>
+<div style="padding:8px 20px 0;display:flex;flex-direction:column;gap:28px">
+<sc-for list="{{ arcs }}" as="ar" hint-placeholder-count="3">
+<section id="{{ ar.id }}" style="display:flex;flex-direction:column;gap:14px;padding-top:24px;border-top:1px solid rgba(80,60,45,.10)">
+<div style="display:flex;align-items:center;gap:12px"><span style="width:44px;height:44px;border-radius:50%;background:linear-gradient(160deg,#F3CF94,#D9A055);color:#3A2716;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:700;flex-shrink:0">{{ ar.v }}</span><div style="display:flex;flex-direction:column;gap:3px"><span style="font-size:10px;letter-spacing:.16em;color:#B9813F;font-weight:700">{{ ar.roleUp }}</span><span style="font-family:'Cormorant Garamond',serif;font-size:28px;line-height:1.05;font-weight:500">{{ ar.title }}</span></div></div>
+<sc-if value="{{ ar.structured }}" hint-placeholder-val="{{ false }}">
+<sc-for list="{{ ar.subs }}" as="sb" hint-placeholder-count="4">
+<div style="background:#FBF8F4;border:1px solid rgba(80,60,45,.10);border-radius:16px;padding:16px 18px;display:flex;flex-direction:column;gap:8px">
+<div style="display:flex;align-items:center;gap:10px"><span style="width:22px;height:22px;border-radius:50%;background:#F1E7DA;color:#8E5F2A;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700">{{ sb.mark }}</span><span style="font-size:15px;font-weight:600">{{ sb.label }}</span></div>
+<div style="font-size:16px;line-height:1.65;color:#5E534C">{{ sb.text }}</div>
+</div>
+</sc-for>
+</sc-if>
+<sc-if value="{{ ar.plain }}" hint-placeholder-val="{{ true }}">
+<sc-for list="{{ ar.paras }}" as="pp" hint-placeholder-count="3"><div style="font-size:16px;line-height:1.7;color:#5E534C">{{ pp }}</div></sc-for>
+</sc-if>
+</section>
+</sc-for>
+<sc-if value="{{ next.offer }}" hint-placeholder-val="{{ true }}">
+<div style="background:#2A211D;color:#FBF8F4;border-radius:22px;padding:24px 20px;display:flex;flex-direction:column;gap:14px">
+<span style="font-size:10px;letter-spacing:.22em;color:#E2AE63;font-weight:700">СЛЕДУЮЩИЙ ШАГ</span>
+<div style="display:flex;align-items:center;gap:12px">{{ next.icon }}<span style="font-family:'Cormorant Garamond',serif;font-size:28px;line-height:1.05;font-weight:500">Следующий уровень: {{ next.name }}</span></div>
+<span style="font-size:14px;color:#CFC4BA;line-height:1.5">{{ next.lead }}</span>
+<span style="font-size:15px;line-height:1.55;color:#E6DCD2">{{ next.purpose }}</span>
+<button onClick="{{ buy }}" style="background:#E2AE63;color:#2A211D;border:none;border-radius:14px;padding:15px;font-size:15px;font-weight:700;cursor:pointer;min-height:48px">Открыть сферу — 490 ₽</button>
+<sc-if value="{{ next.showAll }}"><button onClick="{{ buyAll }}" style="background:none;border:none;color:#CFC4BA;font-size:13px;text-decoration:underline;text-underline-offset:4px;cursor:pointer;padding:10px 0;min-height:44px">или открыть всю звезду сразу — 1 490 ₽</button></sc-if>
+</div>
+</sc-if>
+<sc-if value="{{ next.read }}" hint-placeholder-val="{{ false }}">
+<div style="background:#FBF8F4;border:1.5px solid #E2AE63;border-radius:22px;padding:20px;display:flex;flex-direction:column;gap:12px"><div style="display:flex;align-items:center;gap:12px">{{ next.icon }}<div style="display:flex;flex-direction:column;gap:2px"><span style="font-size:10px;letter-spacing:.22em;color:#B9813F;font-weight:700">ДАЛЬШЕ ПО ЗВЕЗДЕ</span><span style="font-family:'Cormorant Garamond',serif;font-size:26px;font-weight:500">{{ next.name }}</span></div></div><button onClick="{{ readNext }}" style="background:#2A211D;color:#FBF8F4;border:none;border-radius:14px;padding:14px;font-size:15px;font-weight:600;cursor:pointer;min-height:48px">Читать сферу ↑</button></div>
+</sc-if>
+<sc-if value="{{ next.done }}" hint-placeholder-val="{{ false }}">
+<div style="background:#2A211D;color:#FBF8F4;border-radius:22px;padding:24px 20px;display:flex;flex-direction:column;gap:12px"><span style="font-size:10px;letter-spacing:.22em;color:#E2AE63;font-weight:700">ВСЯ ЗВЕЗДА РАСКРЫТА</span><span style="font-family:'Cormorant Garamond',serif;font-size:30px;font-weight:500">Миссия души</span><span style="font-size:15px;color:#E6DCD2;line-height:1.55">Все пять сфер открыты. Центр звезды теперь доступен для чтения.</span><button onClick="{{ openMission }}" style="background:#E2AE63;color:#2A211D;border:none;border-radius:14px;padding:15px;font-size:15px;font-weight:700;cursor:pointer;min-height:48px">Открыть Миссию души</button></div>
+</sc-if>
+</div>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ panelOpen }}" hint-placeholder-val="{{ false }}">
+<div onClick="{{ close }}" style="{{ overlayStyle }}">
+<div onClick="{{ stop }}" style="{{ sheetStyle }}">
+<sc-if value="{{ isMobile }}"><div style="width:40px;height:4px;border-radius:2px;background:rgba(80,60,45,.2);align-self:center"></div></sc-if>
+<div style="display:flex;align-items:center;justify-content:space-between;gap:12px"><span style="font-size:11px;letter-spacing:.2em;color:#B9813F;font-weight:700">{{ pv.eyebrow }}</span><button onClick="{{ close }}" aria-label="Закрыть" style="width:44px;height:44px;border-radius:50%;border:1px solid rgba(80,60,45,.15);background:#F5F0EA;color:#5E534C;font-size:20px;cursor:pointer;flex-shrink:0">×</button></div>
+
+<sc-if value="{{ pv.isPoint }}">
+<div style="display:flex;align-items:center;gap:16px"><span style="width:56px;height:56px;border-radius:50%;border:1.5px solid #E2AE63;color:#8E5F2A;display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:700;flex-shrink:0;box-sizing:border-box">{{ pv.v }}</span><span style="font-family:'Cormorant Garamond',serif;font-size:38px;line-height:1;font-weight:500">{{ pv.type }}</span></div>
+<div style="display:flex;gap:6px;background:#F1EBE4;border-radius:12px;padding:4px"><sc-for list="{{ pv.tabs }}" as="tb" hint-placeholder-count="2"><button onClick="{{ tb.onClick }}" style="{{ tb.style }}">{{ tb.name }}<sc-if value="{{ tb.lockd }}"><svg width="11" height="11" viewBox="0 0 12 12"><rect x="2" y="5.5" width="8" height="5.5" rx="1.4" fill="currentColor"></rect><path d="M4 5.5V4a2 2 0 0 1 4 0v1.5" stroke="currentColor" stroke-width="1.3" fill="none"></path></svg></sc-if></button></sc-for></div>
+<div style="font-size:17px;font-weight:600;line-height:1.45">{{ pv.lead }}</div>
+<sc-for list="{{ pv.paras }}" as="pp" hint-placeholder-count="3"><div style="font-size:16px;line-height:1.75;color:#5E534C;text-wrap:pretty">{{ pp }}</div></sc-for>
+<div style="font-size:13px;line-height:1.55;color:#8E8178;background:#F5F0EA;border-radius:12px;padding:12px 14px">{{ pv.note }}</div>
+</sc-if>
+
+<sc-if value="{{ pv.isOffer }}">
+<div style="display:flex;align-items:center;gap:14px">{{ pv.icon }}<div style="display:flex;flex-direction:column;gap:6px;align-items:flex-start"><span style="font-family:'Cormorant Garamond',serif;font-size:38px;line-height:1;font-weight:500">{{ pv.name }}</span><span style="background:#FBF1E2;color:#8E5F2A;border:1px solid #E2AE63;font-size:12px;font-weight:600;padding:4px 10px;border-radius:999px">Доступна сейчас</span></div></div>
+<div style="display:flex;flex-direction:column;gap:6px"><span style="font-size:13px;font-weight:600">Зачем эта сфера</span><span style="font-size:15px;line-height:1.6;color:#5E534C">{{ pv.purpose }}</span></div>
+<div style="display:flex;flex-wrap:wrap;gap:6px"><sc-for list="{{ seq }}" as="sq" hint-placeholder-count="5"><span style="{{ sq.style }}">{{ sq.label }}</span></sc-for></div>
+<div style="display:flex;align-items:baseline;justify-content:space-between;border-top:1px solid rgba(80,60,45,.10);padding-top:16px"><span style="font-size:14px;color:#5E534C">Стоимость сферы</span><span style="font-size:24px;font-weight:700;color:#8E5F2A">490 ₽</span></div>
+<button onClick="{{ buy }}" style="background:#2A211D;color:#FBF8F4;border:none;border-radius:14px;padding:16px;font-size:15px;font-weight:600;cursor:pointer;min-height:50px">Открыть сферу — 490 ₽</button>
+<button onClick="{{ close }}" style="background:none;border:none;color:#5E534C;font-size:14px;cursor:pointer;min-height:44px">Не сейчас</button>
+</sc-if>
+
+<sc-if value="{{ pv.isBlocked }}">
+<div style="display:flex;align-items:center;gap:14px">{{ pv.icon }}<div style="display:flex;flex-direction:column;gap:6px;align-items:flex-start"><span style="font-family:'Cormorant Garamond',serif;font-size:38px;line-height:1;font-weight:500">{{ pv.name }}</span><span style="background:#F1EBE4;color:#5E534C;font-size:12px;font-weight:600;padding:4px 10px;border-radius:999px">Пока недоступна</span></div></div>
+<div style="background:#F5F0EA;border-radius:16px;padding:18px;display:flex;flex-direction:column;gap:8px">
+<span style="font-size:17px;font-weight:600;line-height:1.35">{{ pv.blockTitle }}</span>
+<span style="font-size:14px;line-height:1.55;color:#5E534C">{{ pv.blockText }}</span>
+<button onClick="{{ toggleWhy }}" style="align-self:flex-start;background:none;border:none;padding:4px 0;color:#B9813F;font-size:14px;font-weight:600;text-decoration:underline;text-underline-offset:4px;cursor:pointer;min-height:32px">Почему?</button>
+<sc-if value="{{ why }}"><span style="font-size:14px;line-height:1.6;color:#5E534C;border-top:1px solid rgba(80,60,45,.10);padding-top:10px">Порядок сфер задан методикой: каждая следующая сфера раскрывается на основе предыдущей. Поэтому сферы открываются по очереди, и пропустить сферу нельзя.</span></sc-if>
+</div>
+<div style="display:flex;flex-direction:column;gap:6px"><span style="font-size:13px;font-weight:600">Зачем эта сфера</span><span style="font-size:15px;line-height:1.6;color:#5E534C">{{ pv.purpose }}</span></div>
+<div style="display:flex;flex-wrap:wrap;gap:6px"><sc-for list="{{ seq }}" as="sq" hint-placeholder-count="5"><span style="{{ sq.style }}">{{ sq.label }}</span></sc-for></div>
+<button onClick="{{ toNeeded }}" style="background:#2A211D;color:#FBF8F4;border:none;border-radius:14px;padding:16px;font-size:15px;font-weight:600;cursor:pointer;min-height:50px">{{ pv.needBtn }}</button>
+</sc-if>
+
+<sc-if value="{{ pv.isMission }}">
+<div style="display:flex;align-items:center;gap:14px">{{ pv.icon }}<span style="font-family:'Cormorant Garamond',serif;font-size:38px;line-height:1;font-weight:500">Миссия души</span></div>
+<sc-for list="{{ pv.paras }}" as="pp" hint-placeholder-count="2"><div style="font-size:16px;line-height:1.7;color:#5E534C">{{ pp }}</div></sc-for>
+<div style="display:flex;flex-wrap:wrap;gap:6px"><sc-for list="{{ seq }}" as="sq" hint-placeholder-count="5"><span style="{{ sq.style }}">{{ sq.label }}</span></sc-for></div>
+</sc-if>
+</div>
+</div>
+</sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;device&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;auto&quot;,&quot;desktop&quot;,&quot;mobile&quot;],&quot;default&quot;:&quot;auto&quot;,&quot;tsType&quot;:&quot;'auto'|'desktop'|'mobile'&quot;,&quot;section&quot;:&quot;Просмотр&quot;},&quot;stage&quot;:{&quot;editor&quot;:&quot;int&quot;,&quot;min&quot;:1,&quot;max&quot;:5,&quot;default&quot;:1,&quot;tsType&quot;:&quot;number&quot;,&quot;section&quot;:&quot;Сценарий&quot;},&quot;showFullStar&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Сценарий&quot;},&quot;lockStyle&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;blur&quot;,&quot;redacted&quot;],&quot;default&quot;:&quot;blur&quot;,&quot;tsType&quot;:&quot;'blur'|'redacted'&quot;,&quot;section&quot;:&quot;Сценарий&quot;}}">
+class Component extends DCLogic {
+  state = { n: null, active: null, hoverPt: null, hoverZone: null, panel: null, why: false, w: typeof window !== 'undefined' ? window.innerWidth : 1440 };
+  S = [
+    { zone: 4, name: 'Личность', gen: 'личности', part: 'Левая часть звезды', purpose: 'Разбор этой сферы раскрывает значения, связанные с личностью и проявлением человека.' },
+    { zone: 0, name: 'Духовность', gen: 'духовности', part: 'Верхняя часть звезды', purpose: 'Разбор сферы духовности и соответствующих значений вашей звезды.' },
+    { zone: 1, name: 'Реализация', gen: 'реализации', part: 'Правая часть звезды', purpose: 'Разбор значений, относящихся к сфере реализации.', structured: true },
+    { zone: 2, name: 'Отношения', gen: 'отношений', part: 'Нижняя правая часть звезды', purpose: 'Разбор значений сферы отношений.' },
+    { zone: 3, name: 'Здоровье', gen: 'здоровья', part: 'Нижняя левая часть звезды', purpose: 'Разбор значений сферы здоровья.' }
+  ];
+  Z2S = [1, 2, 3, 4, 0];
+  OV = [3, 21, 11, 4, 5];
+  IV = [6, 5, 15, 9, 8];
+  SM = [[11, 9, 14], [9, 8, 11], [16, 8, 20], [19, 13, 6], [14, 13, 17]];
+  componentDidMount() {
+    this.onR = () => this.setState({ w: window.innerWidth });
+    this.onK = e => { if (e.key === 'Escape') this.close(); };
+    window.addEventListener('resize', this.onR); window.addEventListener('keydown', this.onK);
+  }
+  componentWillUnmount() { window.removeEventListener('resize', this.onR); window.removeEventListener('keydown', this.onK); }
+  getN() { return this.state.n ?? Math.max(1, Math.min(5, this.props.stage ?? 1)); }
+  getActive() { const n = this.getN(); return Math.min(this.state.active ?? n - 1, n - 1); }
+  isMob() { const d = this.props.device ?? 'auto'; return d === 'mobile' || (d === 'auto' && this.state.w < 1080); }
+  ptType(j) { return j === 2 ? 'Роковая ошибка' : 'Родовая программа'; }
+  ptCtx(j) {
+    const n = this.getN(), a = this.getActive(), ks = [this.Z2S[j], this.Z2S[(j + 1) % 5]].sort((x, y) => x - y);
+    const op = ks.filter(k => k < n);
+    return { ks, ctx: ks.includes(a) ? a : (op[0] ?? null), open: op.length > 0 };
+  }
+  close = () => this.setState({ panel: null, why: false });
+  scrollTo(id) {
+    const el = document.getElementById(id); if (!el) return;
+    window.scrollTo({ top: el.getBoundingClientRect().top + window.scrollY - (id === 'decode' ? 8 : 90), behavior: 'smooth' });
+  }
+  onSphere(k) {
+    const n = this.getN();
+    if (k < n) this.setState({ active: k, panel: null });
+    else this.setState({ panel: { type: k === n ? 'offer' : 'blocked', k }, why: false, hoverPt: null });
+  }
+  onPoint(j) {
+    const c = this.ptCtx(j);
+    if (!c.open) return this.onSphere(c.ks[0]);
+    this.setState({ panel: { type: 'point', j, ctx: c.ctx }, hoverPt: null });
+  }
+  buy = () => { const n = this.getN(); if (n >= 5) return; this.setState({ n: n + 1, active: n, panel: null }); window.scrollTo({ top: 0, behavior: 'smooth' }); };
+  buyAll = () => { const n = this.getN(); this.setState({ n: 5, active: n, panel: null }); window.scrollTo({ top: 0, behavior: 'smooth' }); };
+  theme() {
+    return { line: '#9C8B7E', outline: '#A8968A', lockedFill: 'rgba(120,95,75,0.07)', centerFill: 'rgba(120,95,75,0.05)',
+      a1: '#F7DDB0', a2: '#E2A95E', aStroke: '#C78A3E', glow: '#F0B865', aText: '#3A2716', aNum: '#8E5F2A',
+      ink: '#2A211D', muted: '#8E8178', card: '#FBF8F4', lock: '#A89A8F', guide: 'rgba(120,95,75,0.14)' };
+  }
+  geo() {
+    const P = (a, r) => [r * Math.cos(a * Math.PI / 180), r * Math.sin(a * Math.PI / 180)];
+    const OA = [-90, -18, 54, 126, 198], IA = [-54, 18, 90, 162, 234];
+    return { P, OA, IA, O: OA.map(a => P(a, 100)), I: IA.map(a => P(a, 38.2)) };
+  }
+  lock(h, x, y, s, color, key) {
+    return h('g', { key, transform: `translate(${x},${y}) scale(${s})`, style: { pointerEvents: 'none' } },
+      h('rect', { x: -3.6, y: -0.8, width: 7.2, height: 5.6, rx: 1.3, fill: color }),
+      h('path', { d: 'M-2.1,-0.8 V-2.6 A2.1,2.1 0 0 1 2.1,-2.6 V-0.8', stroke: color, strokeWidth: 1.15, fill: 'none' }));
+  }
+  dm(x, y, r) { return `${x},${y - r} ${x + r},${y} ${x},${y + r} ${x - r},${y}`; }
+  star(mobile) {
+    const h = React.createElement, c = this.theme(), { O, I, IA, P } = this.geo(), n = this.getN(), a = this.getActive();
+    const id = 'st' + (mobile ? 'm' : 'd'), blur = (this.props.lockStyle ?? 'blur') === 'blur';
+    const labels = ['Духовность', 'Реализация', 'Отношения', 'Здоровье', 'Личность'];
+    const lpos = [[0, -118], [106, -4], [58.8, 101], [-58.8, 101], [-106, -4]];
+    const lerp = (p, q, k) => [p[0] + (q[0] - p[0]) * k, p[1] + (q[1] - p[1]) * k];
+    const pts = arr => arr.map(p => p.join(',')).join(' ');
+    const fs = mobile ? 1.22 : 1, el = [], top = [], kk = { n: 0 }, K = () => 'k' + (kk.n++);
+    const NP = { pointerEvents: 'none' }, ptr = { cursor: 'pointer' };
+    const zs = i => { const k = this.Z2S[i]; return k === a ? 'active' : k < n ? 'open' : k === n ? 'next' : 'locked'; };
+    const zEv = i => ({ onClick: () => this.onSphere(this.Z2S[i]), onMouseEnter: () => this.setState({ hoverZone: i }), onMouseLeave: () => this.setState({ hoverZone: null }), style: ptr });
+    const hidden = (x, y, val, size, key) => blur
+      ? h('text', { key, x, y, textAnchor: 'middle', dominantBaseline: 'central', fontSize: size, fill: c.muted, fontFamily: 'Manrope', fontWeight: 600, filter: `url(#${id}b)`, opacity: 0.55, style: NP }, val)
+      : h('rect', { key, x: x - size * 0.55, y: y - size * 0.22, width: size * 1.1, height: size * 0.44, rx: size * 0.22, fill: c.muted, opacity: 0.28, style: NP });
+    el.push(h('defs', { key: 'd' },
+      h('linearGradient', { id: id + 'g', x1: 0, y1: 0, x2: 1, y2: 1 }, h('stop', { offset: 0, stopColor: c.a1 }), h('stop', { offset: 1, stopColor: c.a2 })),
+      h('radialGradient', { id: id + 'n' }, h('stop', { offset: 0, stopColor: '#F7D9A4' }), h('stop', { offset: 1, stopColor: '#D9A055' })),
+      h('filter', { id: id + 'f', x: '-60%', y: '-60%', width: '220%', height: '220%' }, h('feGaussianBlur', { stdDeviation: 7 })),
+      h('filter', { id: id + 'b', x: '-50%', y: '-50%', width: '200%', height: '200%' }, h('feGaussianBlur', { stdDeviation: 1.5 }))));
+    el.push(h('circle', { key: K(), r: 124, fill: 'none', stroke: c.guide, strokeWidth: 0.6, style: NP }));
+    el.push(h('circle', { key: K(), r: 112, fill: 'none', stroke: c.guide, strokeWidth: 0.4, strokeDasharray: '1 3', style: NP }));
+    el.push(h('polygon', { key: K(), points: pts(I), fill: n === 5 ? 'rgba(226,174,99,.18)' : c.centerFill, style: NP }));
+    for (let i = 0; i < 5; i++) {
+      const A = O[i], C1 = I[(i + 4) % 5], C2 = I[i], st = zs(i), vis = st === 'active' || st === 'open', hov = this.state.hoverZone === i;
+      const S1 = lerp(A, C1, 0.7), S2 = lerp(A, C2, 0.7), M = lerp(C1, C2, 0.5);
+      const cen = [(A[0] + C1[0] + C2[0]) / 3, (A[1] + C1[1] + C2[1]) / 3];
+      if (st === 'active') el.push(h('polygon', { key: K(), points: pts([A, C1, C2]), fill: c.glow, opacity: 0.55, filter: `url(#${id}f)`, style: NP }));
+      const fill = st === 'active' ? `url(#${id}g)` : st === 'open' ? (hov ? 'rgba(226,174,99,.34)' : 'rgba(226,174,99,.22)') : st === 'next' ? (hov ? 'rgba(226,174,99,.18)' : 'rgba(226,174,99,.07)') : (hov ? 'rgba(120,95,75,.13)' : c.lockedFill);
+      el.push(h('polygon', { key: K(), points: pts([A, C1, C2]), fill, ...zEv(i) }));
+      const ls = vis ? c.aStroke : c.line, lo = vis ? 0.9 : 0.45, lw = vis ? 0.7 : 0.5;
+      [[A, M], [S1, S2], [S1, M], [S2, M]].forEach(([p, q]) => el.push(h('line', { key: K(), x1: p[0], y1: p[1], x2: q[0], y2: q[1], stroke: ls, strokeWidth: lw, opacity: lo, style: NP })));
+      [S1, S2, M].forEach((p, j) => {
+        const dx = p[0] - cen[0], dy = p[1] - cen[1], L = Math.hypot(dx, dy), off = j === 2 ? 7.5 : 8.5;
+        const x = p[0] + dx / L * off, y = p[1] + dy / L * off, v = this.SM[i][j], sz = 6.6 * fs;
+        top.push(h('circle', { key: K(), cx: p[0], cy: p[1], r: vis ? 1.9 : 1.4, fill: vis ? c.aStroke : c.line, opacity: vis ? 1 : 0.6, style: NP }));
+        top.push(vis ? h('text', { key: K(), x, y, textAnchor: 'middle', dominantBaseline: 'central', fontSize: sz, fill: c.ink, fontFamily: 'Manrope', fontWeight: 700, style: NP }, v) : hidden(x, y, v, sz, K()));
+      });
+    }
+    for (let i = 0; i < 5; i++) el.push(h('line', { key: K(), x1: O[i][0], y1: O[i][1], x2: O[(i + 2) % 5][0], y2: O[(i + 2) % 5][1], stroke: c.outline, strokeWidth: 0.9, opacity: 0.8, style: NP }));
+    for (let i = 0; i < 5; i++) {
+      const st = zs(i);
+      if (st === 'active') el.push(h('polygon', { key: K(), points: pts([O[i], I[(i + 4) % 5], I[i]]), fill: 'none', stroke: c.aStroke, strokeWidth: 1.5, strokeLinejoin: 'round', style: NP }));
+      if (st === 'next') el.push(h('polygon', { key: K(), points: pts([O[i], I[(i + 4) % 5], I[i]]), fill: 'none', stroke: c.aStroke, strokeWidth: 0.9, strokeDasharray: '3 2.5', strokeLinejoin: 'round', opacity: 0.85, style: NP }));
+    }
+    el.push(...top);
+    const sel = this.state.panel && this.state.panel.type === 'point' ? this.state.panel.j : null;
+    I.forEach((p, j) => {
+      const cx = this.ptCtx(j), inA = cx.ks.includes(a), hl = this.state.hoverPt === j || sel === j, fatal = j === 2;
+      const r = inA ? 4.4 : cx.open ? 3.2 : 1.8;
+      const fill = hl ? c.glow : inA ? c.card : cx.open ? c.aStroke : c.line;
+      const common = { key: K(), fill, stroke: inA || hl ? c.aStroke : 'none', strokeWidth: 1.3, style: NP };
+      el.push(fatal ? h('polygon', { ...common, points: this.dm(p[0], p[1], r * 1.25) }) : h('circle', { ...common, cx: p[0], cy: p[1], r }));
+      const q = P(IA[j], 50), sz = 8.4 * (mobile ? 1.12 : 1);
+      el.push(cx.open ? h('text', { key: K(), x: q[0], y: q[1], textAnchor: 'middle', dominantBaseline: 'central', fontSize: sz, fill: c.aNum, fontFamily: 'Manrope', fontWeight: 700, style: NP }, this.IV[j]) : hidden(q[0], q[1], this.IV[j], sz, K()));
+      el.push(h('circle', { key: K(), cx: p[0], cy: p[1], r: mobile ? 12 : 10, fill: 'transparent', style: ptr,
+        onClick: () => this.onPoint(j), onMouseEnter: () => this.setState({ hoverPt: j }), onMouseLeave: () => this.setState({ hoverPt: null }) }));
+    });
+    const mission = () => this.setState({ panel: { type: 'mission' } });
+    el.push(h('circle', { key: K(), r: 17, fill: c.card, stroke: n === 5 ? c.aStroke : c.line, strokeWidth: n === 5 ? 1 : 0.5, opacity: 0.95, style: ptr, onClick: mission }));
+    el.push(h('text', { key: K(), y: -6, textAnchor: 'middle', fontSize: 5.6 * fs, fill: c.ink, fontFamily: 'Cormorant Garamond', fontWeight: 600, style: NP }, 'Миссия'));
+    el.push(h('text', { key: K(), y: 0.5, textAnchor: 'middle', fontSize: 5.6 * fs, fill: c.ink, fontFamily: 'Cormorant Garamond', fontWeight: 600, style: NP }, 'души'));
+    if (n < 5) el.push(this.lock(h, 0, 7, 0.95, c.lock, K())); else el.push(h('circle', { key: K(), cy: 8.5, r: 2.2, fill: c.aStroke, style: NP }));
+    O.forEach((p, i) => {
+      const st = zs(i), ev = zEv(i);
+      if (st === 'active') {
+        el.push(h('circle', { key: K(), cx: p[0], cy: p[1], r: 19, fill: c.glow, opacity: 0.55, filter: `url(#${id}f)`, style: NP }));
+        el.push(h('circle', { key: K(), cx: p[0], cy: p[1], r: 16.5, fill: 'none', stroke: c.aStroke, strokeWidth: 0.6, opacity: 0.6, style: NP }));
+        el.push(h('circle', { key: K(), cx: p[0], cy: p[1], r: 12.5, fill: `url(#${id}n)`, stroke: '#FFF8EC', strokeWidth: 1.2, ...ev }));
+        el.push(h('text', { key: K(), x: p[0], y: p[1], textAnchor: 'middle', dominantBaseline: 'central', fontSize: 12, fill: c.aText, fontFamily: 'Manrope', fontWeight: 700, style: NP }, this.OV[i]));
+      } else if (st === 'open') {
+        el.push(h('circle', { key: K(), cx: p[0], cy: p[1], r: 10.5, fill: '#F6E6CC', stroke: c.aStroke, strokeWidth: 1, ...ev }));
+        el.push(h('text', { key: K(), x: p[0], y: p[1], textAnchor: 'middle', dominantBaseline: 'central', fontSize: 9.5, fill: c.aNum, fontFamily: 'Manrope', fontWeight: 700, style: NP }, this.OV[i]));
+      } else {
+        el.push(h('circle', { key: K(), cx: p[0], cy: p[1], r: 9.5, fill: c.card, stroke: st === 'next' ? c.aStroke : c.line, strokeWidth: st === 'next' ? 1 : 0.6, ...ev }));
+        el.push(this.lock(h, p[0], p[1] - 0.6, 1, st === 'next' ? c.aStroke : c.lock, K()));
+      }
+      const [lx, ly] = lpos[i], ls = 6.8 * fs;
+      const col = st === 'active' ? c.aNum : st === 'next' ? c.aNum : c.ink, op = st === 'locked' ? 0.6 : 1, fw = st === 'active' ? 700 : st === 'locked' ? 500 : 600;
+      el.push(h('text', { key: K(), x: lx, y: ly, textAnchor: 'middle', fontSize: ls, fill: col, opacity: op, fontFamily: 'Manrope', fontWeight: fw, ...ev }, labels[i]));
+    });
+    return h('svg', { viewBox: mobile ? '-140 -132 280 248' : '-138 -134 276 250', style: { width: '100%', display: 'block', overflow: 'visible' } }, el);
+  }
+  tri(w, k) {
+    const h = React.createElement, c = this.theme(), z = this.S[k].zone, id = 'tr' + w, jl = (z + 4) % 5, jr = z;
+    const A = [0, 0], Cl = [-45, 138], Cr = [45, 138], Sl = [-31.5, 96.6], Sr = [31.5, 96.6], M = [0, 138];
+    const pts = [A, Cl, Cr].map(p => p.join(',')).join(' '), NP = { pointerEvents: 'none' };
+    const L = (p, q, kk) => h('line', { key: kk, x1: p[0], y1: p[1], x2: q[0], y2: q[1], stroke: c.aStroke, strokeWidth: 0.9, opacity: 0.85, style: NP });
+    const T = (x, y, v, col, sz, kk) => h('text', { key: kk, x, y, textAnchor: 'middle', dominantBaseline: 'central', fontSize: sz, fill: col, fontFamily: 'Manrope', fontWeight: 700, style: NP }, v);
+    const D = (p, kk) => h('circle', { key: kk, cx: p[0], cy: p[1], r: 2.6, fill: c.aStroke, style: NP });
+    const corner = (p, j, kk) => {
+      const r = 5.5, o = { key: kk, fill: c.card, stroke: c.aStroke, strokeWidth: 1.6, style: NP };
+      return [j === 2 ? h('polygon', { ...o, points: this.dm(p[0], p[1], r * 1.25) }) : h('circle', { ...o, cx: p[0], cy: p[1], r }),
+        h('circle', { key: kk + 'h', cx: p[0], cy: p[1], r: 16, fill: 'transparent', style: { cursor: 'pointer' }, onClick: () => this.onPoint(j) })];
+    };
+    const s = this.SM[z];
+    return h('svg', { viewBox: '-72 -24 144 186', style: { width: w, display: 'block', overflow: 'visible', flexShrink: 0 } },
+      h('defs', { key: 'd' },
+        h('linearGradient', { id: id + 'g', x1: 0, y1: 0, x2: 0, y2: 1 }, h('stop', { offset: 0, stopColor: c.a1 }), h('stop', { offset: 1, stopColor: c.a2 })),
+        h('radialGradient', { id: id + 'n' }, h('stop', { offset: 0, stopColor: '#F7D9A4' }), h('stop', { offset: 1, stopColor: '#D9A055' })),
+        h('filter', { id: id + 'f', x: '-60%', y: '-60%', width: '220%', height: '220%' }, h('feGaussianBlur', { stdDeviation: 9 }))),
+      h('polygon', { key: 'gl', points: pts, fill: c.glow, opacity: 0.45, filter: `url(#${id}f)`, style: NP }),
+      h('polygon', { key: 'p', points: pts, fill: `url(#${id}g)`, stroke: c.aStroke, strokeWidth: 1.8, strokeLinejoin: 'round', style: NP }),
+      L(A, M, 'l1'), L(Sl, Sr, 'l2'), L(Sl, M, 'l3'), L(Sr, M, 'l4'),
+      D(Sl, 'd1'), D(Sr, 'd2'), D(M, 'd3'),
+      T(-44, 96.6, s[0], c.ink, 10, 't1'), T(44, 96.6, s[1], c.ink, 10, 't2'), T(0, 151, s[2], c.ink, 10, 't3'),
+      ...corner(Cl, jl, 'cl'), ...corner(Cr, jr, 'cr'),
+      T(-60, 150, this.IV[jl], c.aNum, 11, 't4'), T(60, 150, this.IV[jr], c.aNum, 11, 't5'),
+      h('circle', { key: 'ag', r: 18, fill: c.glow, opacity: 0.5, filter: `url(#${id}f)`, style: NP }),
+      h('circle', { key: 'ac', r: 13.5, fill: `url(#${id}n)`, stroke: '#FFF8EC', strokeWidth: 1.4, style: NP }),
+      T(0, 0, this.OV[z], c.aText, 13, 't0'));
+  }
+  mini(zones, opts = {}) {
+    const h = React.createElement, c = this.theme(), { O, I } = this.geo(), pts = arr => arr.map(p => p.join(',')).join(' ');
+    const fill = opts.onDark ? '#E2AE63' : '#E2AE63', stroke = opts.locked ? c.lock : (opts.onDark ? '#E2AE63' : '#C78A3E');
+    const el = [];
+    zones.forEach(i => el.push(h('polygon', { key: 'z' + i, points: pts([O[i], I[(i + 4) % 5], I[i]]), fill: opts.locked ? c.lock : fill, opacity: opts.locked ? 0.35 : 1 })));
+    if (opts.center) el.push(h('polygon', { key: 'c', points: pts(I), fill: opts.locked ? c.lock : fill, opacity: 0.45 }));
+    for (let i = 0; i < 5; i++) el.push(h('line', { key: 'l' + i, x1: O[i][0], y1: O[i][1], x2: O[(i + 2) % 5][0], y2: O[(i + 2) % 5][1], stroke, strokeWidth: 9, strokeLinejoin: 'round' }));
+    const s = opts.size || 30;
+    const svg = h('svg', { viewBox: '-112 -112 224 210', width: s, height: s * 210 / 224, style: { display: 'block', overflow: 'visible' } }, el);
+    const bg = opts.onDark ? 'rgba(226,174,99,.14)' : opts.locked ? '#F1EBE4' : '#F6E6CC';
+    return h('span', { style: { width: s + 14, height: s + 14, borderRadius: '50%', background: bg, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 } }, svg);
+  }
+  arcs(k) {
+    const sp = this.S[k], z = sp.zone, g = sp.gen, jl = (z + 4) % 5, jr = z;
+    const list = [
+      { v: this.OV[z], role: 'Основной аркан сферы' },
+      { v: this.IV[jl], role: this.ptType(jl) }, { v: this.IV[jr], role: this.ptType(jr) },
+      { v: this.SM[z][0], role: 'Аркан сферы' }, { v: this.SM[z][1], role: 'Аркан сферы' }, { v: this.SM[z][2], role: 'Аркан сферы' }
+    ];
+    const subs = [['✦', 'Талант'], ['+', 'Проявление в плюсе'], ['−', 'Проявление в минусе'], ['→', 'Рекомендации']];
+    return list.map((x, i) => {
+      const sid = 'arc-' + k + '-' + i;
+      return { ...x, id: sid, title: 'Аркан ' + x.v, roleUp: x.role.toUpperCase(), structured: !!sp.structured, plain: !sp.structured,
+        go: () => this.scrollTo(sid),
+        subs: subs.map(([mark, label]) => ({ mark, label, text: `Текст раздела «${label}» для аркана ${x.v} в сфере ${g}. Его предоставит автор методики; блок растягивается под текст любой длины.` })),
+        paras: [
+          `Здесь будет расшифровка аркана ${x.v} в сфере ${g}. Текст предоставит автор методики.`,
+          'Описание может занимать несколько абзацев: секция растягивается под объём текста, а ширина строки остаётся удобной для чтения.',
+          'Содержание слева помогает быстро перейти к нужному аркану и не потеряться в длинном разборе.'
+        ] };
+    });
+  }
+  seq(target) {
+    const n = this.getN(), base = { fontSize: 12, fontWeight: 600, padding: '6px 11px', borderRadius: 999, whiteSpace: 'nowrap' };
+    return this.S.map((s, k) => {
+      let st;
+      if (k < n) st = { background: '#E3EBDD', color: '#4B6B43', border: '1px solid #E3EBDD' };
+      else if (k === n) st = { background: '#FBF1E2', color: '#8E5F2A', border: '1px solid #E2AE63' };
+      else if (k === target) st = { background: 'transparent', color: '#2A211D', border: '1px dashed #8E8178' };
+      else st = { background: 'transparent', color: '#A89A8F', border: '1px solid rgba(80,60,45,.12)' };
+      return { label: (k < n ? '✓ ' : (k + 1) + '. ') + s.name, style: { ...base, ...st } };
+    });
+  }
+  renderVals() {
+    const n = this.getN(), a = this.getActive(), sp = this.S[a], mob = this.isMob(), pan = this.state.panel;
+    const z = sp.zone, jl = (z + 4) % 5, jr = z;
+    const chipList = (big) => {
+      const d = big ? 40 : 36;
+      const b = { width: d, height: d, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'Manrope, sans-serif', fontWeight: 600, boxSizing: 'border-box', padding: 0, cursor: 'default', fontSize: big ? 15 : 14 };
+      const main = { ...b, background: 'linear-gradient(160deg,#F3CF94,#D9A055)', color: '#3A2716', border: 'none', fontSize: big ? 16 : 15 };
+      const inner = { ...b, background: 'transparent', border: '1.5px solid #E2AE63', color: '#8E5F2A', cursor: 'pointer' };
+      const small = { ...b, background: 'transparent', border: '1px solid rgba(80,60,45,.15)', color: '#5E534C', fontSize: big ? 14 : 13 };
+      return [
+        { v: this.OV[z], style: main, title: 'Основной аркан сферы' },
+        { v: this.IV[jl], style: inner, title: this.ptType(jl), onClick: () => this.onPoint(jl) },
+        { v: this.IV[jr], style: inner, title: this.ptType(jr), onClick: () => this.onPoint(jr) },
+        ...this.SM[z].map(v => ({ v, style: small, title: 'Аркан сферы' }))
+      ];
+    };
+    const pills = this.S.map((s, k) => {
+      const st = k === a ? 'a' : k < n ? 'o' : k === n ? 'x' : 'l';
+      const base = { display: 'flex', alignItems: 'center', gap: 8, padding: mob ? '10px 16px' : '10px 18px', minHeight: mob ? 44 : 0, borderRadius: 999, fontSize: 14, cursor: 'pointer', whiteSpace: 'nowrap', flexShrink: 0, boxSizing: 'border-box' };
+      const v = { a: { background: '#2A211D', color: '#FBF8F4', border: '1px solid #2A211D', fontWeight: 600 },
+        o: { background: '#FBF8F4', color: '#2A211D', border: '1px solid rgba(80,60,45,.16)', fontWeight: 600 },
+        x: { background: 'transparent', color: '#8E5F2A', border: '1px dashed #E2AE63', fontWeight: 600 },
+        l: { background: 'transparent', color: '#8E8178', border: '1px solid rgba(80,60,45,.12)', fontWeight: 500 } }[st];
+      return { name: s.name, done: k < n, lockd: k >= n, style: { ...base, ...v }, onClick: () => this.onSphere(k) };
+    });
+    let next;
+    if (a + 1 < n) next = { read: true, name: this.S[a + 1].name, icon: this.mini([this.S[a + 1].zone], { size: 26 }) };
+    else if (n < 5) next = { offer: true, name: this.S[n].name, purpose: this.S[n].purpose, lead: `Вы прочитали сферу «${sp.name}». Теперь вам доступна следующая сфера звезды.`, icon: this.mini([this.S[n].zone], { size: 26, onDark: true }), showAll: n === 1 && (this.props.showFullStar ?? true) };
+    else next = { done: true };
+    let tip = false;
+    const hp = this.state.hoverPt;
+    if (!mob && hp != null && !pan) {
+      const { I } = this.geo(), p = I[hp], cx = this.ptCtx(hp);
+      tip = { type: this.ptType(hp).toUpperCase(), value: cx.open ? 'Аркан ' + this.IV[hp] : 'Значение скрыто',
+        hint: cx.open ? `Нажмите, чтобы прочитать значение в сфере ${this.S[cx.ctx].gen}` : `Откроется вместе со сферой «${this.S[cx.ks[0]].name}»`,
+        style: { position: 'absolute', left: ((p[0] + 138) / 276 * 100) + '%', top: ((p[1] + 134) / 250 * 100) + '%', transform: 'translate(-50%, calc(-100% - 18px))', pointerEvents: 'none', background: '#2A211D', color: '#FBF8F4', padding: '12px 14px', borderRadius: 12, width: 220, display: 'flex', flexDirection: 'column', gap: 4, boxShadow: '0 12px 30px rgba(42,33,29,.25)', zIndex: 3 } };
+    }
+    let pv = {}, seqT = null;
+    if (pan) {
+      if (pan.type === 'point') {
+        const j = pan.j, cx = this.ptCtx(j), ctx = pan.ctx, s = this.S[ctx], other = cx.ks.find(k => k !== ctx), os = this.S[other];
+        pv = { isPoint: true, eyebrow: 'ТОЧКА ЗВЕЗДЫ · АРКАН ' + this.IV[j], v: this.IV[j], type: this.ptType(j),
+          lead: `В сфере ${s.gen} это значение раскрывается так:`,
+          paras: [`Здесь будет расшифровка аркана ${this.IV[j]} как точки «${this.ptType(j)}» в сфере ${s.gen}. Текст предоставит автор методики.`,
+            'Описание может быть длинным: панель прокручивается, текст остаётся крупным и удобным для чтения.',
+            'Третий абзац показывает, как панель ведёт себя с объёмной расшифровкой.'],
+          note: other < n ? `Эта же точка входит в сферу «${os.name}». Переключите вкладку выше, чтобы прочитать её значение там.` : `Эта же точка входит в сферу «${os.name}». Там её значение раскрывается по-другому и откроется вместе с этой сферой.`,
+          tabs: cx.ks.map(k => ({ name: this.S[k].name, lockd: k >= n,
+            onClick: () => { if (k < n) this.setState({ panel: { ...pan, ctx: k } }); },
+            style: { flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, border: 'none', borderRadius: 9, padding: '10px 12px', minHeight: 40, fontSize: 14, fontWeight: 600, cursor: k < n ? 'pointer' : 'default',
+              background: k === ctx ? '#FBF8F4' : 'transparent', color: k === ctx ? '#2A211D' : k < n ? '#5E534C' : '#A89A8F', boxShadow: k === ctx ? '0 2px 8px rgba(80,60,45,.10)' : 'none' } })) };
+      } else if (pan.type === 'offer') {
+        const s = this.S[pan.k]; seqT = pan.k;
+        pv = { isOffer: true, eyebrow: 'СЛЕДУЮЩАЯ СФЕРА · ' + (pan.k + 1) + ' ИЗ 5', name: s.name, purpose: s.purpose, icon: this.mini([s.zone], { size: 30 }) };
+      } else if (pan.type === 'blocked') {
+        const s = this.S[pan.k], need = this.S[n]; seqT = pan.k;
+        pv = { isBlocked: true, eyebrow: 'СФЕРА ' + (pan.k + 1) + ' ИЗ 5', name: s.name, purpose: s.purpose, icon: this.mini([s.zone], { size: 30, locked: true }),
+          blockTitle: `Сначала раскройте сферу ${need.gen}`, blockText: `Невозможно перейти к сфере ${s.gen}, пока не раскрыта сфера ${need.gen}.`, needBtn: `Перейти к сфере ${need.gen}` };
+      } else if (pan.type === 'mission') {
+        pv = { isMission: true, eyebrow: 'ЦЕНТР ЗВЕЗДЫ', icon: this.mini([], { size: 30, center: true, locked: n < 5 }),
+          paras: n < 5 ? ['Миссия души находится в центре звезды и раскрывается последней, когда открыты все пять сфер.'] : ['Здесь будет расшифровка Миссии души. Текст предоставит автор методики.', 'Описание может занимать несколько абзацев; панель прокручивается под объём текста.'] };
+      }
+    }
+    const isPointD = pan && pan.type === 'point' && !mob;
+    const overlayStyle = { position: 'fixed', inset: 0, zIndex: 50, background: 'rgba(42,33,29,.38)', display: 'flex', alignItems: mob ? 'flex-end' : isPointD ? 'stretch' : 'center', justifyContent: mob ? 'center' : isPointD ? 'flex-end' : 'center' };
+    const sheetBase = { background: '#FBF8F4', color: '#2A211D', display: 'flex', flexDirection: 'column', gap: 18, boxSizing: 'border-box', overflowY: 'auto', boxShadow: '0 30px 80px rgba(42,33,29,.25)' };
+    const sheetStyle = mob ? { ...sheetBase, width: '100%', maxWidth: 430, maxHeight: '88vh', borderRadius: '24px 24px 0 0', padding: '10px 20px 28px' }
+      : isPointD ? { ...sheetBase, width: 540, height: '100vh', borderRadius: '24px 0 0 24px', padding: '32px 44px 48px', gap: 22 }
+      : { ...sheetBase, width: 500, maxHeight: '88vh', borderRadius: 24, padding: 32 };
+    return {
+      isDesktop: !mob, isMobile: mob,
+      progressText: n + ' из 5',
+      segs: [0, 1, 2, 3, 4].map(i => ({ style: { height: mob ? 5 : 6, borderRadius: 3, background: i < n ? '#E2AE63' : 'rgba(80,60,45,.12)' } })),
+      starD: mob ? null : this.star(false), starM: mob ? this.star(true) : null,
+      triD: mob ? null : this.tri(220, a), triM: mob ? this.tri(96, a) : null,
+      tip,
+      act: { name: sp.name, part: sp.part, purpose: sp.purpose, eyebrow: 'СФЕРА ' + (a + 1) + ' ИЗ 5 · ' + sp.part.toUpperCase(), icon: this.mini([z], { size: 26 }) },
+      chips: chipList(true), chipsM: chipList(false),
+      pills, arcs: this.arcs(a), next,
+      goDecode: () => this.scrollTo('decode'),
+      readNext: () => { this.setState({ active: a + 1 }); this.scrollTo('decode'); },
+      buy: this.buy, buyAll: this.buyAll,
+      openMission: () => this.setState({ panel: { type: 'mission' } }),
+      panelOpen: !!pan, pv, seq: this.seq(seqT), why: this.state.why,
+      toggleWhy: () => this.setState(s => ({ why: !s.why })),
+      toNeeded: () => this.setState({ panel: { type: 'offer', k: n }, why: false }),
+      close: this.close, stop: e => e.stopPropagation(),
+      overlayStyle, sheetStyle
+    };
+  }
+}
+</script>
+</body>
+</html>

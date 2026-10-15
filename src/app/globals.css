@@ -1,0 +1,36 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html,
+body {
+  background: #f5f0ea;
+  color: #2a211d;
+  -webkit-font-smoothing: antialiased;
+}
+
+html[dir="rtl"] body {
+  font-family: "IBM Plex Sans Arabic", Manrope, system-ui, sans-serif;
+}
+
+.star-ltr {
+  direction: ltr;
+}
+
+a {
+  color: #b9813f;
+}
+a:hover {
+  color: #8e5f2a;
+}
+
+button {
+  font-family: inherit;
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  scrollbar-width: none;
+}

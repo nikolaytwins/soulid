@@ -1,0 +1,35 @@
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: soul
+      POSTGRES_PASSWORD: soul
+      POSTGRES_DB: soulstar
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U soul -d soulstar"]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+    restart: unless-stopped
+
+  web:
+    build: .
+    ports:
+      - "3000:3000"
+    env_file:
+      - .env
+    environment:
+      APP_URL: ${APP_URL:-http://localhost:3000}
+      AUTH_URL: ${AUTH_URL:-http://localhost:3000}
+      DATABASE_URL: postgresql://soul:soul@db:5432/soulstar?schema=public
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: unless-stopped
+
+volumes:
+  pgdata:

@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="design_doc_mode" content="canvas">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>body{margin:0;background:#DCD3C9;-webkit-font-smoothing:antialiased}a{color:#B9813F}a:hover{color:#8E5F2A}</style>
+</helmet>
+<section style="padding:64px;display:flex;flex-direction:column;gap:40px;font-family:Manrope,sans-serif">
+<div style="display:flex;flex-direction:column;gap:6px">
+<div style="font-size:13px;letter-spacing:.18em;text-transform:uppercase;color:#7A6D63">Страница результата · Soul Star</div>
+<div style="font-family:'Cormorant Garamond',serif;font-size:44px;color:#2A211D">Персональная звезда — progressive unlock</div>
+<div style="font-size:15px;color:#5E534C;max-width:820px">Два направления на одной механике: <a href="#1a">1a</a> светлое, <a href="#1b">1b</a> тёмное. Состояния: активно (сфера, которую читаете) · открыто · закрыто. Вся геометрия звезды видна всегда, числа в закрытых сферах размыты.</div>
+</div>
+<div style="display:flex;flex-wrap:wrap;gap:64px;align-items:flex-start">
+
+<!-- ============ 1a LIGHT ============ -->
+<div id="1a" style="display:flex;flex-direction:column;gap:20px">
+<div style="display:flex;align-items:center;gap:12px"><span style="background:#2A211D;color:#F5F0EA;font-weight:700;font-size:14px;padding:6px 12px;border-radius:8px">1a</span><span style="font-size:16px;color:#2A211D;font-weight:600">Светлое · premium wellness</span></div>
+<div style="display:flex;gap:40px;align-items:flex-start">
+
+<div style="width:1440px;background:#F5F0EA;border-radius:28px;overflow:hidden;box-shadow:0 30px 80px rgba(60,40,25,.18);color:#2A211D;position:relative">
+<div style="position:absolute;left:50%;top:60px;width:980px;height:820px;transform:translateX(-50%);background:radial-gradient(closest-side,rgba(242,205,150,.45),rgba(245,240,234,0));pointer-events:none"></div>
+<div style="position:relative;display:flex;align-items:center;justify-content:space-between;padding:28px 56px">
+<div style="font-family:'Cormorant Garamond',serif;font-size:30px;font-weight:500">Soul Star</div>
+<div style="display:flex;gap:40px;font-size:14px;color:#5E534C">
+<span style="color:#2A211D;font-weight:600;border-bottom:1.5px solid #B9813F;padding-bottom:6px">Моя звезда</span><span>Расшифровки</span><span>Мои покупки</span><span>Профиль</span>
+</div>
+<div style="width:44px;height:44px;border-radius:50%;border:1px solid rgba(80,60,45,.2);display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:600;color:#5E534C">АК</div>
+</div>
+<div style="position:relative;display:grid;grid-template-columns:330px minmax(0,1fr) 390px;gap:24px;padding:16px 56px 56px;align-items:center">
+<div style="display:flex;flex-direction:column;gap:24px">
+<div style="font-size:11px;letter-spacing:.22em;color:#8E8178;font-weight:600">ВАША ПЕРСОНАЛЬНАЯ ЗВЕЗДА</div>
+<div style="font-family:'Cormorant Garamond',serif;font-size:56px;line-height:1;font-weight:500;text-wrap:balance">Карта вашей уникальной энергии</div>
+<div style="font-size:15px;line-height:1.6;color:#5E534C;text-wrap:pretty">Звезда показывает ваши ключевые энергии в пяти сферах жизни и миссию души в центре. Первая сфера уже открыта, остальные можно открыть поэтапно.</div>
+<div style="display:flex;align-items:center;gap:14px;background:#FBF8F4;border:1px solid rgba(80,60,45,.10);border-radius:16px;padding:14px 16px">
+<div style="width:40px;height:40px;border-radius:12px;background:#F1E7DA;display:flex;align-items:center;justify-content:center;color:#B9813F"><svg width="18" height="18" viewBox="0 0 18 18" fill="none"><rect x="2" y="3.5" width="14" height="12" rx="2.5" stroke="currentColor" stroke-width="1.4"></rect><path d="M2 7.5h14M6 2v3M12 2v3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"></path></svg></div>
+<div style="display:flex;flex-direction:column;gap:2px;flex:1"><span style="font-size:12px;color:#8E8178">Дата рождения</span><span style="font-size:16px;font-weight:600">05.03.1992</span></div>
+<div style="font-size:13px;color:#5E534C;border:1px solid rgba(80,60,45,.15);border-radius:999px;padding:8px 14px">Изменить</div>
+</div>
+<div style="display:flex;flex-direction:column;gap:10px">
+<div style="display:flex;justify-content:space-between;font-size:13px"><span style="color:#5E534C">Открыто сфер</span><span style="font-weight:700">1 из 6</span></div>
+<div style="display:grid;grid-template-columns:repeat(6,1fr);gap:5px"><span style="height:6px;border-radius:3px;background:#E2AE63"></span><span style="height:6px;border-radius:3px;background:rgba(80,60,45,.12)"></span><span style="height:6px;border-radius:3px;background:rgba(80,60,45,.12)"></span><span style="height:6px;border-radius:3px;background:rgba(80,60,45,.12)"></span><span style="height:6px;border-radius:3px;background:rgba(80,60,45,.12)"></span><span style="height:6px;border-radius:3px;background:rgba(80,60,45,.12)"></span></div>
+</div>
+<sc-if value="{{ showLegend }}" hint-placeholder-val="{{ true }}">
+<div style="display:flex;flex-direction:column;gap:12px;padding-top:4px;font-size:13px;color:#5E534C">
+<div style="display:flex;align-items:center;gap:12px"><span style="width:16px;height:16px;border-radius:50%;background:#E2AE63;box-shadow:0 0 0 4px rgba(226,174,99,.25)"></span><span><b style="color:#2A211D;font-weight:600">Активно</b> — сфера, которую вы читаете</span></div>
+<div style="display:flex;align-items:center;gap:12px"><span style="width:16px;height:16px;border-radius:50%;border:1.5px solid #E2AE63;box-sizing:border-box"></span><span><b style="color:#2A211D;font-weight:600">Открыто</b> — доступно в любой момент</span></div>
+<div style="display:flex;align-items:center;gap:12px;color:#8E8178"><span style="width:16px;height:16px;display:flex;align-items:center;justify-content:center"><svg width="13" height="13" viewBox="0 0 12 12"><rect x="2" y="5.5" width="8" height="5.5" rx="1.4" fill="currentColor"></rect><path d="M4 5.5V4a2 2 0 0 1 4 0v1.5" stroke="currentColor" stroke-width="1.3" fill="none"></path></svg></span><span><b style="color:#5E534C;font-weight:600">Закрыто</b> — числа скрыты, можно открыть</span></div>
+</div>
+</sc-if>
+</div>
+<div style="display:flex;justify-content:center">{{ starLD }}</div>
+<div style="background:rgba(251,248,244,.92);border:1px solid rgba(80,60,45,.10);border-radius:24px;padding:32px;display:flex;flex-direction:column;gap:20px;box-shadow:0 20px 50px rgba(120,85,50,.08)">
+<div style="display:flex;align-items:center;justify-content:space-between"><span style="font-size:11px;letter-spacing:.22em;color:#B9813F;font-weight:700">ОТКРЫТАЯ СФЕРА</span>{{ iconActiveL }}</div>
+<div style="display:flex;flex-direction:column;gap:14px;align-items:flex-start">
+<div style="font-family:'Cormorant Garamond',serif;font-size:42px;line-height:1;font-weight:500">Личность и таланты</div>
+<span style="display:flex;align-items:center;gap:6px;background:#E3EBDD;color:#4B6B43;font-size:13px;font-weight:600;padding:6px 12px;border-radius:999px"><svg width="12" height="12" viewBox="0 0 12 12"><path d="M2.5 6.2l2.3 2.3 4.7-5" stroke="currentColor" stroke-width="1.6" fill="none" stroke-linecap="round"></path></svg>Открыто</span>
+</div>
+<div style="font-size:15px;line-height:1.6;color:#5E534C;text-wrap:pretty">Эта сфера показывает вашу основную энергию, характер, внутренние ресурсы и таланты. Здесь заложен ваш уникальный способ проявляться в мире и влиять на других.</div>
+<div style="display:flex;flex-direction:column;gap:10px">
+<span style="font-size:13px;font-weight:600">Ваши числа в этой сфере</span>
+<div style="display:flex;gap:8px;flex-wrap:wrap">
+<span style="width:40px;height:40px;border-radius:50%;background:linear-gradient(160deg,#F3CF94,#D9A055);color:#3A2716;display:flex;align-items:center;justify-content:center;font-family:Manrope,sans-serif;font-size:16px;font-weight:600">5</span>
+<span style="width:40px;height:40px;border-radius:50%;border:1.5px solid #E2AE63;color:#8E5F2A;display:flex;align-items:center;justify-content:center;font-family:Manrope,sans-serif;font-size:15px;font-weight:600;box-sizing:border-box">8</span>
+<span style="width:40px;height:40px;border-radius:50%;border:1.5px solid #E2AE63;color:#8E5F2A;display:flex;align-items:center;justify-content:center;font-family:Manrope,sans-serif;font-size:15px;font-weight:600;box-sizing:border-box">9</span>
+<span style="width:40px;height:40px;border-radius:50%;border:1px solid rgba(80,60,45,.15);color:#5E534C;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:600;box-sizing:border-box">13</span>
+<span style="width:40px;height:40px;border-radius:50%;border:1px solid rgba(80,60,45,.15);color:#5E534C;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:600;box-sizing:border-box">14</span>
+<span style="width:40px;height:40px;border-radius:50%;border:1px solid rgba(80,60,45,.15);color:#5E534C;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:600;box-sizing:border-box">17</span>
+</div>
+</div>
+<div style="height:1px;background:rgba(80,60,45,.10)"></div>
+<div style="display:flex;flex-direction:column;gap:10px;font-size:14px;color:#5E534C">
+<span style="font-size:13px;font-weight:600;color:#2A211D">В полной расшифровке</span>
+<div style="display:flex;gap:10px;align-items:center"><span style="width:5px;height:5px;border-radius:50%;background:#E2AE63"></span>Сильные стороны и врождённые таланты</div>
+<div style="display:flex;gap:10px;align-items:center"><span style="width:5px;height:5px;border-radius:50%;background:#E2AE63"></span>Как вы проявляетесь в мире</div>
+<div style="display:flex;gap:10px;align-items:center"><span style="width:5px;height:5px;border-radius:50%;background:#E2AE63"></span>Что возвращает вас в ресурс</div>
+</div>
+<div style="display:flex;align-items:center;justify-content:center;gap:10px;background:#2A211D;color:#FBF8F4;font-size:15px;font-weight:600;padding:16px;border-radius:14px">Читать полную расшифровку <span>→</span></div>
+</div>
+</div>
+<div style="position:relative;padding:0 56px 56px;display:flex;flex-direction:column;gap:24px">
+<div style="display:flex;flex-direction:column;gap:6px">
+<div style="font-family:'Cormorant Garamond',serif;font-size:36px;font-weight:500">Продолжите своё исследование</div>
+<div style="font-size:15px;color:#5E534C">Откройте остальные сферы, чтобы увидеть полную карту и получить подробные расшифровки.</div>
+</div>
+<div style="display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:16px">
+<div style="background:#FBF1E2;border:1.5px solid #E2AE63;border-radius:20px;padding:22px;display:flex;flex-direction:column;gap:14px">
+<div style="display:flex;justify-content:space-between;align-items:flex-start">{{ iconActiveL }}<span style="font-size:11px;font-weight:700;letter-spacing:.1em;color:#B9813F">АКТИВНО</span></div>
+<div style="font-size:16px;font-weight:600;line-height:1.25">Личность и таланты</div>
+<span style="align-self:flex-start;display:flex;align-items:center;gap:6px;background:#E3EBDD;color:#4B6B43;font-size:12px;font-weight:600;padding:5px 10px;border-radius:999px">✓ Открыто</span>
+<div style="font-size:13px;line-height:1.5;color:#5E534C">Ваша основная энергия, характер и таланты.</div>
+</div>
+<sc-for list="{{ lockedL }}" as="s" hint-placeholder-count="4">
+<div style="background:#FBF8F4;border:1px solid rgba(80,60,45,.10);border-radius:20px;padding:22px;display:flex;flex-direction:column;gap:14px">
+<div style="display:flex;justify-content:space-between;align-items:flex-start">{{ s.icon }}<span style="color:#A89A8F"><svg width="14" height="14" viewBox="0 0 12 12"><rect x="2" y="5.5" width="8" height="5.5" rx="1.4" fill="currentColor"></rect><path d="M4 5.5V4a2 2 0 0 1 4 0v1.5" stroke="currentColor" stroke-width="1.3" fill="none"></path></svg></span></div>
+<div style="font-size:16px;font-weight:600;line-height:1.25">{{ s.name }}</div>
+<div style="font-size:15px;font-weight:700;color:#8E5F2A">490 ₽</div>
+<div style="font-size:13px;line-height:1.5;color:#5E534C;flex:1">{{ s.short }}</div>
+<div style="text-align:center;border:1px solid rgba(80,60,45,.18);border-radius:12px;padding:11px;font-size:14px;font-weight:600">Открыть</div>
+</div>
+</sc-for>
+<div style="background:#2A211D;color:#FBF8F4;border-radius:20px;padding:22px;display:flex;flex-direction:column;gap:14px">
+<div style="display:flex;justify-content:space-between;align-items:flex-start">{{ iconAllL }}<span style="font-size:11px;font-weight:700;background:#E2AE63;color:#2A211D;padding:4px 8px;border-radius:6px">−24%</span></div>
+<div style="font-size:16px;font-weight:600">Вся звезда</div>
+<div style="display:flex;gap:8px;align-items:baseline"><span style="font-size:15px;font-weight:700;color:#F3CF94">1 490 ₽</span><span style="font-size:13px;color:#A89A8F;text-decoration:line-through">1 960 ₽</span></div>
+<div style="font-size:13px;line-height:1.5;color:#CFC4BA;flex:1">Все пять сфер и Миссия души в центре — она открывается только с полной звездой.</div>
+<div style="text-align:center;background:#E2AE63;color:#2A211D;border-radius:12px;padding:11px;font-size:14px;font-weight:700">Открыть всё</div>
+</div>
+</div>
+</div>
+</div>
+
+<div style="width:390px;border-radius:52px;background:#1D1714;padding:10px;box-shadow:0 30px 80px rgba(60,40,25,.25);flex-shrink:0">
+<div style="background:#F5F0EA;border-radius:42px;overflow:hidden;color:#2A211D;position:relative">
+<div style="position:absolute;left:50%;top:180px;width:520px;height:520px;transform:translateX(-50%);background:radial-gradient(closest-side,rgba(242,205,150,.45),rgba(245,240,234,0));pointer-events:none"></div>
+<div style="position:relative;display:flex;justify-content:space-between;padding:16px 30px 0;font-size:15px;font-weight:600"><span>9:41</span><span style="width:26px;height:12px;border:1.5px solid #2A211D;border-radius:4px;box-sizing:border-box"></span></div>
+<div style="position:relative;display:flex;align-items:center;justify-content:space-between;padding:14px 20px"><span style="font-family:'Cormorant Garamond',serif;font-size:24px;font-weight:500">Soul Star</span><span style="width:36px;height:36px;border-radius:50%;border:1px solid rgba(80,60,45,.2);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;color:#5E534C">АК</span></div>
+<div style="position:relative;display:flex;flex-direction:column;align-items:center;gap:10px;padding:6px 20px 0;text-align:center">
+<span style="font-size:10px;letter-spacing:.22em;color:#8E8178;font-weight:600">ВАША ПЕРСОНАЛЬНАЯ ЗВЕЗДА</span>
+<span style="font-family:'Cormorant Garamond',serif;font-size:32px;line-height:1.05;font-weight:500">Карта вашей уникальной энергии</span>
+<div style="display:flex;align-items:center;gap:10px;font-size:14px"><span style="font-weight:600">05.03.1992</span><span style="color:#5E534C;border:1px solid rgba(80,60,45,.15);border-radius:999px;padding:5px 12px;font-size:12px">Изменить</span></div>
+</div>
+<div style="position:relative;padding:4px 6px 0">{{ starLM }}</div>
+<div style="position:relative;display:flex;flex-direction:column;gap:8px;padding:0 20px 16px">
+<div style="display:grid;grid-template-columns:repeat(6,1fr);gap:4px"><span style="height:5px;border-radius:3px;background:#E2AE63"></span><span style="height:5px;border-radius:3px;background:rgba(80,60,45,.12)"></span><span style="height:5px;border-radius:3px;background:rgba(80,60,45,.12)"></span><span style="height:5px;border-radius:3px;background:rgba(80,60,45,.12)"></span><span style="height:5px;border-radius:3px;background:rgba(80,60,45,.12)"></span><span style="height:5px;border-radius:3px;background:rgba(80,60,45,.12)"></span></div>
+<div style="display:flex;justify-content:space-between;font-size:12px;color:#5E534C"><span>Открыто 1 из 6 сфер</span><span style="display:flex;align-items:center;gap:5px;color:#8E8178"><svg width="10" height="10" viewBox="0 0 12 12"><rect x="2" y="5.5" width="8" height="5.5" rx="1.4" fill="currentColor"></rect><path d="M4 5.5V4a2 2 0 0 1 4 0v1.5" stroke="currentColor" stroke-width="1.3" fill="none"></path></svg>5 закрыто</span></div>
+</div>
+<div style="position:relative;margin:0 14px;background:#FBF8F4;border:1.5px solid #E2AE63;border-radius:22px;padding:20px;display:flex;flex-direction:column;gap:14px">
+<div style="display:flex;align-items:center;gap:10px">{{ iconActiveL }}<span style="font-size:16px;font-weight:600;flex:1">Личность и таланты</span><span style="background:#E3EBDD;color:#4B6B43;font-size:11px;font-weight:600;padding:4px 9px;border-radius:999px">✓ Открыто</span></div>
+<div style="font-size:14px;line-height:1.55;color:#5E534C">Эта сфера показывает вашу основную энергию, характер, внутренние ресурсы и таланты. Здесь заложен ваш уникальный способ проявляться в мире и влиять на других.</div>
+<div style="display:flex;gap:6px">
+<span style="width:34px;height:34px;border-radius:50%;background:linear-gradient(160deg,#F3CF94,#D9A055);color:#3A2716;display:flex;align-items:center;justify-content:center;font-family:Manrope,sans-serif;font-size:14px;font-weight:600">5</span>
+<span style="width:34px;height:34px;border-radius:50%;border:1.5px solid #E2AE63;color:#8E5F2A;display:flex;align-items:center;justify-content:center;font-family:Manrope,sans-serif;font-size:13px;font-weight:600;box-sizing:border-box">8</span>
+<span style="width:34px;height:34px;border-radius:50%;border:1.5px solid #E2AE63;color:#8E5F2A;display:flex;align-items:center;justify-content:center;font-family:Manrope,sans-serif;font-size:13px;font-weight:600;box-sizing:border-box">9</span>
+<span style="width:34px;height:34px;border-radius:50%;border:1px solid rgba(80,60,45,.15);color:#5E534C;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;box-sizing:border-box">13</span>
+<span style="width:34px;height:34px;border-radius:50%;border:1px solid rgba(80,60,45,.15);color:#5E534C;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;box-sizing:border-box">14</span>
+<span style="width:34px;height:34px;border-radius:50%;border:1px solid rgba(80,60,45,.15);color:#5E534C;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;box-sizing:border-box">17</span>
+</div>
+<div style="display:flex;align-items:center;justify-content:center;gap:8px;background:#2A211D;color:#FBF8F4;font-size:15px;font-weight:600;padding:14px;border-radius:14px">Читать расшифровку →</div>
+</div>
+<div style="position:relative;padding:24px 14px 0;display:flex;flex-direction:column;gap:10px">
+<span style="font-size:15px;font-weight:600;padding:0 6px">Остальные сферы звезды</span>
+<div style="background:#FBF8F4;border:1px solid rgba(80,60,45,.10);border-radius:20px;display:flex;flex-direction:column">
+<sc-for list="{{ lockedL }}" as="s" hint-placeholder-count="4">
+<div style="display:flex;align-items:center;gap:12px;padding:12px 16px;min-height:56px;box-sizing:border-box;border-bottom:1px solid rgba(80,60,45,.08)">{{ s.icon }}<span style="flex:1;font-size:14px;font-weight:500">{{ s.name }}</span><span style="color:#A89A8F;display:flex"><svg width="12" height="12" viewBox="0 0 12 12"><rect x="2" y="5.5" width="8" height="5.5" rx="1.4" fill="currentColor"></rect><path d="M4 5.5V4a2 2 0 0 1 4 0v1.5" stroke="currentColor" stroke-width="1.3" fill="none"></path></svg></span><span style="font-size:14px;font-weight:700;color:#8E5F2A">490 ₽</span><span style="color:#A89A8F">›</span></div>
+</sc-for>
+<div style="display:flex;align-items:center;gap:12px;padding:12px 16px;min-height:56px;box-sizing:border-box">{{ iconCenterL }}<span style="flex:1;font-size:14px;font-weight:500">Миссия души</span><span style="font-size:12px;color:#8E8178">в полной звезде</span></div>
+</div>
+</div>
+<div style="position:relative;padding:16px 14px 22px">
+<div style="display:flex;align-items:center;gap:10px;background:#2A211D;color:#FBF8F4;padding:16px 18px;border-radius:16px">{{ iconAllL }}<span style="flex:1;font-size:15px;font-weight:600">Открыть всю звезду</span><span style="font-size:15px;font-weight:700;color:#F3CF94">1 490 ₽</span><span style="font-size:12px;color:#A89A8F;text-decoration:line-through">1 960</span></div>
+<div style="width:120px;height:5px;border-radius:3px;background:#2A211D;margin:18px auto 0"></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+
+<!-- ============ 1b DARK ============ -->
+<div id="1b" style="display:flex;flex-direction:column;gap:20px">
+<div style="display:flex;align-items:center;gap:12px"><span style="background:#2A211D;color:#F5F0EA;font-weight:700;font-size:14px;padding:6px 12px;border-radius:8px">1b</span><span style="font-size:16px;color:#2A211D;font-weight:600">Тёмное · вечерний editorial</span></div>
+<div style="display:flex;gap:40px;align-items:flex-start">
+
+<div style="width:1440px;background:#1A121F;border-radius:28px;overflow:hidden;box-shadow:0 30px 80px rgba(20,10,25,.35);color:#F3E9DE;position:relative">
+<div style="position:absolute;left:50%;top:60px;width:980px;height:820px;transform:translateX(-50%);background:radial-gradient(closest-side,rgba(150,80,120,.28),rgba(26,18,31,0));pointer-events:none"></div>
+<div style="position:relative;display:flex;align-items:center;justify-content:space-between;padding:28px 56px">
+<div style="font-family:'Cormorant Garamond',serif;font-size:30px;font-weight:500;color:#F6D6AE">Soul Star</div>
+<div style="display:flex;gap:40px;font-size:14px;color:#C4B5C3">
+<span style="color:#F3E9DE;font-weight:600;border-bottom:1.5px solid #F0A85E;padding-bottom:6px">Моя звезда</span><span>Расшифровки</span><span>Мои покупки</span><span>Профиль</span>
+</div>
+<div style="width:44px;height:44px;border-radius:50%;border:1px solid rgba(240,200,170,.25);display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:600;color:#C4B5C3">АК</div>
+</div>
+<div style="position:relative;display:grid;grid-template-columns:330px minmax(0,1fr) 390px;gap:24px;padding:16px 56px 56px;align-items:center">
+<div style="display:flex;flex-direction:column;gap:24px">
+<div style="font-size:11px;letter-spacing:.22em;color:#F0A85E;font-weight:600">ВАША ПЕРСОНАЛЬНАЯ ЗВЕЗДА</div>
+<div style="font-family:'Cormorant Garamond',serif;font-size:56px;line-height:1;font-weight:500;text-wrap:balance">Карта вашей уникальной энергии</div>
+<div style="font-size:15px;line-height:1.6;color:#C4B5C3;text-wrap:pretty">Звезда показывает ваши ключевые энергии в пяти сферах жизни и миссию души в центре. Первая сфера уже открыта, остальные можно открыть поэтапно.</div>
+<div style="display:flex;align-items:center;gap:14px;background:#231929;border:1px solid rgba(240,200,170,.12);border-radius:16px;padding:14px 16px">
+<div style="width:40px;height:40px;border-radius:12px;background:rgba(240,168,94,.12);display:flex;align-items:center;justify-content:center;color:#F0A85E"><svg width="18" height="18" viewBox="0 0 18 18" fill="none"><rect x="2" y="3.5" width="14" height="12" rx="2.5" stroke="currentColor" stroke-width="1.4"></rect><path d="M2 7.5h14M6 2v3M12 2v3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"></path></svg></div>
+<div style="display:flex;flex-direction:column;gap:2px;flex:1"><span style="font-size:12px;color:#8F7F92">Дата рождения</span><span style="font-size:16px;font-weight:600">05.03.1992</span></div>
+<div style="font-size:13px;color:#C4B5C3;border:1px solid rgba(240,200,170,.2);border-radius:999px;padding:8px 14px">Изменить</div>
+</div>
+<div style="display:flex;flex-direction:column;gap:10px">
+<div style="display:flex;justify-content:space-between;font-size:13px"><span style="color:#C4B5C3">Открыто сфер</span><span style="font-weight:700">1 из 6</span></div>
+<div style="display:grid;grid-template-columns:repeat(6,1fr);gap:5px"><span style="height:6px;border-radius:3px;background:#F0A85E;box-shadow:0 0 12px rgba(240,168,94,.6)"></span><span style="height:6px;border-radius:3px;background:rgba(240,200,170,.12)"></span><span style="height:6px;border-radius:3px;background:rgba(240,200,170,.12)"></span><span style="height:6px;border-radius:3px;background:rgba(240,200,170,.12)"></span><span style="height:6px;border-radius:3px;background:rgba(240,200,170,.12)"></span><span style="height:6px;border-radius:3px;background:rgba(240,200,170,.12)"></span></div>
+</div>
+<sc-if value="{{ showLegend }}" hint-placeholder-val="{{ true }}">
+<div style="display:flex;flex-direction:column;gap:12px;padding-top:4px;font-size:13px;color:#C4B5C3">
+<div style="display:flex;align-items:center;gap:12px"><span style="width:16px;height:16px;border-radius:50%;background:#F0A85E;box-shadow:0 0 0 4px rgba(240,168,94,.22),0 0 14px rgba(240,168,94,.7)"></span><span><b style="color:#F3E9DE;font-weight:600">Активно</b> — сфера, которую вы читаете</span></div>
+<div style="display:flex;align-items:center;gap:12px"><span style="width:16px;height:16px;border-radius:50%;border:1.5px solid #F0A85E;box-sizing:border-box"></span><span><b style="color:#F3E9DE;font-weight:600">Открыто</b> — доступно в любой момент</span></div>
+<div style="display:flex;align-items:center;gap:12px;color:#8F7F92"><span style="width:16px;height:16px;display:flex;align-items:center;justify-content:center"><svg width="13" height="13" viewBox="0 0 12 12"><rect x="2" y="5.5" width="8" height="5.5" rx="1.4" fill="currentColor"></rect><path d="M4 5.5V4a2 2 0 0 1 4 0v1.5" stroke="currentColor" stroke-width="1.3" fill="none"></path></svg></span><span><b style="color:#C4B5C3;font-weight:600">Закрыто</b> — числа скрыты, можно открыть</span></div>
+</div>
+</sc-if>
+</div>
+<div style="display:flex;justify-content:center">{{ starDD }}</div>
+<div style="background:#231929;border:1px solid rgba(240,168,94,.28);border-radius:24px;padding:32px;display:flex;flex-direction:column;gap:20px;box-shadow:0 20px 60px rgba(0,0,0,.3)">
+<div style="display:flex;align-items:center;justify-content:space-between"><span style="font-size:11px;letter-spacing:.22em;color:#F0A85E;font-weight:700">ОТКРЫТАЯ СФЕРА</span>{{ iconActiveD }}</div>
+<div style="display:flex;flex-direction:column;gap:14px;align-items:flex-start">
+<div style="font-family:'Cormorant Garamond',serif;font-size:42px;line-height:1;font-weight:500">Личность и таланты</div>
+<span style="display:flex;align-items:center;gap:7px;background:rgba(120,190,130,.14);color:#9AD3A2;font-size:13px;font-weight:600;padding:6px 12px;border-radius:999px"><span style="width:7px;height:7px;border-radius:50%;background:#7CCB89"></span>Открыто</span>
+</div>
+<div style="font-size:15px;line-height:1.6;color:#C4B5C3;text-wrap:pretty">Эта сфера показывает вашу основную энергию, характер, внутренние ресурсы и таланты. Здесь заложен ваш уникальный способ проявляться в мире и влиять на других.</div>
+<div style="display:flex;flex-direction:column;gap:10px">
+<span style="font-size:13px;font-weight:600">Ваши числа в этой сфере</span>
+<div style="display:flex;gap:8px;flex-wrap:wrap">
+<span style="width:40px;height:40px;border-radius:50%;background:linear-gradient(160deg,#F7C27E,#E08A3C);color:#2A1508;display:flex;align-items:center;justify-content:center;font-family:Manrope,sans-serif;font-size:16px;font-weight:600;box-shadow:0 0 18px rgba(240,168,94,.5)">5</span>
+<span style="width:40px;height:40px;border-radius:50%;border:1.5px solid #F0A85E;color:#F6C690;display:flex;align-items:center;justify-content:center;font-family:Manrope,sans-serif;font-size:15px;font-weight:600;box-sizing:border-box">8</span>
+<span style="width:40px;height:40px;border-radius:50%;border:1.5px solid #F0A85E;color:#F6C690;display:flex;align-items:center;justify-content:center;font-family:Manrope,sans-serif;font-size:15px;font-weight:600;box-sizing:border-box">9</span>
+<span style="width:40px;height:40px;border-radius:50%;border:1px solid rgba(240,200,170,.18);color:#C4B5C3;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:600;box-sizing:border-box">13</span>
+<span style="width:40px;height:40px;border-radius:50%;border:1px solid rgba(240,200,170,.18);color:#C4B5C3;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:600;box-sizing:border-box">14</span>
+<span style="width:40px;height:40px;border-radius:50%;border:1px solid rgba(240,200,170,.18);color:#C4B5C3;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:600;box-sizing:border-box">17</span>
+</div>
+</div>
+<div style="height:1px;background:rgba(240,200,170,.12)"></div>
+<div style="display:flex;flex-direction:column;gap:10px;font-size:14px;color:#C4B5C3">
+<span style="font-size:13px;font-weight:600;color:#F3E9DE">В полной расшифровке</span>
+<div style="display:flex;gap:10px;align-items:center"><span style="width:5px;height:5px;border-radius:50%;background:#F0A85E"></span>Сильные стороны и врождённые таланты</div>
+<div style="display:flex;gap:10px;align-items:center"><span style="width:5px;height:5px;border-radius:50%;background:#F0A85E"></span>Как вы проявляетесь в мире</div>
+<div style="display:flex;gap:10px;align-items:center"><span style="width:5px;height:5px;border-radius:50%;background:#F0A85E"></span>Что возвращает вас в ресурс</div>
+</div>
+<div style="display:flex;align-items:center;justify-content:center;gap:10px;border:1.5px solid #F0A85E;color:#F3E9DE;font-size:15px;font-weight:600;padding:15px;border-radius:14px;box-shadow:0 0 24px rgba(240,168,94,.18)">Читать полную расшифровку <span>→</span></div>
+</div>
+</div>
+<div style="position:relative;padding:0 56px 56px;display:flex;flex-direction:column;gap:24px">
+<div style="display:flex;flex-direction:column;gap:6px">
+<div style="font-family:'Cormorant Garamond',serif;font-size:36px;font-weight:500">Продолжите своё исследование</div>
+<div style="font-size:15px;color:#C4B5C3">Откройте остальные сферы, чтобы увидеть полную карту и получить подробные расшифровки.</div>
+</div>
+<div style="display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:16px">
+<div style="background:linear-gradient(180deg,rgba(240,168,94,.14),rgba(240,168,94,.04));border:1.5px solid #F0A85E;border-radius:20px;padding:22px;display:flex;flex-direction:column;gap:14px;box-shadow:0 0 30px rgba(240,168,94,.15)">
+<div style="display:flex;justify-content:space-between;align-items:flex-start">{{ iconActiveD }}<span style="font-size:11px;font-weight:700;letter-spacing:.1em;color:#F0A85E">АКТИВНО</span></div>
+<div style="font-size:16px;font-weight:600;line-height:1.25">Личность и таланты</div>
+<span style="align-self:flex-start;display:flex;align-items:center;gap:6px;background:rgba(120,190,130,.14);color:#9AD3A2;font-size:12px;font-weight:600;padding:5px 10px;border-radius:999px"><span style="width:6px;height:6px;border-radius:50%;background:#7CCB89"></span>Открыто</span>
+<div style="font-size:13px;line-height:1.5;color:#C4B5C3">Ваша основная энергия, характер и таланты.</div>
+</div>
+<sc-for list="{{ lockedD }}" as="s" hint-placeholder-count="4">
+<div style="background:#231929;border:1px solid rgba(240,200,170,.12);border-radius:20px;padding:22px;display:flex;flex-direction:column;gap:14px">
+<div style="display:flex;justify-content:space-between;align-items:flex-start">{{ s.icon }}<span style="color:#8F7F92"><svg width="14" height="14" viewBox="0 0 12 12"><rect x="2" y="5.5" width="8" height="5.5" rx="1.4" fill="currentColor"></rect><path d="M4 5.5V4a2 2 0 0 1 4 0v1.5" stroke="currentColor" stroke-width="1.3" fill="none"></path></svg></span></div>
+<div style="font-size:16px;font-weight:600;line-height:1.25">{{ s.name }}</div>
+<div style="font-size:15px;font-weight:700;color:#F6C690">490 ₽</div>
+<div style="font-size:13px;line-height:1.5;color:#C4B5C3;flex:1">{{ s.short }}</div>
+<div style="text-align:center;border:1px solid rgba(240,168,94,.4);border-radius:12px;padding:11px;font-size:14px;font-weight:600">Открыть</div>
+</div>
+</sc-for>
+<div style="background:linear-gradient(160deg,#F7C27E,#E08A3C);color:#2A1508;border-radius:20px;padding:22px;display:flex;flex-direction:column;gap:14px">
+<div style="display:flex;justify-content:space-between;align-items:flex-start">{{ iconAllOnGold }}<span style="font-size:11px;font-weight:700;background:#2A1508;color:#F7C27E;padding:4px 8px;border-radius:6px">−24%</span></div>
+<div style="font-size:16px;font-weight:700">Вся звезда</div>
+<div style="display:flex;gap:8px;align-items:baseline"><span style="font-size:15px;font-weight:700">1 490 ₽</span><span style="font-size:13px;color:#6B3F1C;text-decoration:line-through">1 960 ₽</span></div>
+<div style="font-size:13px;line-height:1.5;color:#4A2810;flex:1">Все пять сфер и Миссия души в центре — она открывается только с полной звездой.</div>
+<div style="text-align:center;background:#1A121F;color:#F6D6AE;border-radius:12px;padding:11px;font-size:14px;font-weight:700">Открыть всё</div>
+</div>
+</div>
+</div>
+</div>
+
+<div style="width:390px;border-radius:52px;background:#0B070D;padding:10px;box-shadow:0 30px 80px rgba(20,10,25,.4);flex-shrink:0">
+<div style="background:#1A121F;border-radius:42px;overflow:hidden;color:#F3E9DE;position:relative">
+<div style="position:absolute;left:50%;top:180px;width:520px;height:520px;transform:translateX(-50%);background:radial-gradient(closest-side,rgba(150,80,120,.3),rgba(26,18,31,0));pointer-events:none"></div>
+<div style="position:relative;display:flex;justify-content:space-between;padding:16px 30px 0;font-size:15px;font-weight:600"><span>9:41</span><span style="width:26px;height:12px;border:1.5px solid #F3E9DE;border-radius:4px;box-sizing:border-box"></span></div>
+<div style="position:relative;display:flex;align-items:center;justify-content:space-between;padding:14px 20px"><span style="font-family:'Cormorant Garamond',serif;font-size:24px;font-weight:500;color:#F6D6AE">Soul Star</span><span style="width:36px;height:36px;border-radius:50%;border:1px solid rgba(240,200,170,.25);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;color:#C4B5C3">АК</span></div>
+<div style="position:relative;display:flex;flex-direction:column;align-items:center;gap:10px;padding:6px 20px 0;text-align:center">
+<span style="font-size:10px;letter-spacing:.22em;color:#F0A85E;font-weight:600">ВАША ПЕРСОНАЛЬНАЯ ЗВЕЗДА</span>
+<span style="font-family:'Cormorant Garamond',serif;font-size:32px;line-height:1.05;font-weight:500">Карта вашей уникальной энергии</span>
+<div style="display:flex;align-items:center;gap:10px;font-size:14px"><span style="font-weight:600">05.03.1992</span><span style="color:#C4B5C3;border:1px solid rgba(240,200,170,.2);border-radius:999px;padding:5px 12px;font-size:12px">Изменить</span></div>
+</div>
+<div style="position:relative;padding:4px 6px 0">{{ starDM }}</div>
+<div style="position:relative;display:flex;flex-direction:column;gap:8px;padding:0 20px 16px">
+<div style="display:grid;grid-template-columns:repeat(6,1fr);gap:4px"><span style="height:5px;border-radius:3px;background:#F0A85E;box-shadow:0 0 10px rgba(240,168,94,.6)"></span><span style="height:5px;border-radius:3px;background:rgba(240,200,170,.12)"></span><span style="height:5px;border-radius:3px;background:rgba(240,200,170,.12)"></span><span style="height:5px;border-radius:3px;background:rgba(240,200,170,.12)"></span><span style="height:5px;border-radius:3px;background:rgba(240,200,170,.12)"></span><span style="height:5px;border-radius:3px;background:rgba(240,200,170,.12)"></span></div>
+<div style="display:flex;justify-content:space-between;font-size:12px;color:#C4B5C3"><span>Открыто 1 из 6 сфер</span><span style="display:flex;align-items:center;gap:5px;color:#8F7F92"><svg width="10" height="10" viewBox="0 0 12 12"><rect x="2" y="5.5" width="8" height="5.5" rx="1.4" fill="currentColor"></rect><path d="M4 5.5V4a2 2 0 0 1 4 0v1.5" stroke="currentColor" stroke-width="1.3" fill="none"></path></svg>5 закрыто</span></div>
+</div>
+<div style="position:relative;margin:0 14px;background:#231929;border:1.5px solid rgba(240,168,94,.6);border-radius:22px;padding:20px;display:flex;flex-direction:column;gap:14px;box-shadow:0 0 30px rgba(240,168,94,.12)">
+<div style="display:flex;align-items:center;gap:10px">{{ iconActiveD }}<span style="font-size:16px;font-weight:600;flex:1">Личность и таланты</span><span style="display:flex;align-items:center;gap:5px;background:rgba(120,190,130,.14);color:#9AD3A2;font-size:11px;font-weight:600;padding:4px 9px;border-radius:999px"><span style="width:6px;height:6px;border-radius:50%;background:#7CCB89"></span>Открыто</span></div>
+<div style="font-size:14px;line-height:1.55;color:#C4B5C3">Эта сфера показывает вашу основную энергию, характер, внутренние ресурсы и таланты. Здесь заложен ваш уникальный способ проявляться в мире и влиять на других.</div>
+<div style="display:flex;gap:6px">
+<span style="width:34px;height:34px;border-radius:50%;background:linear-gradient(160deg,#F7C27E,#E08A3C);color:#2A1508;display:flex;align-items:center;justify-content:center;font-family:Manrope,sans-serif;font-size:14px;font-weight:600">5</span>
+<span style="width:34px;height:34px;border-radius:50%;border:1.5px solid #F0A85E;color:#F6C690;display:flex;align-items:center;justify-content:center;font-family:Manrope,sans-serif;font-size:13px;font-weight:600;box-sizing:border-box">8</span>
+<span style="width:34px;height:34px;border-radius:50%;border:1.5px solid #F0A85E;color:#F6C690;display:flex;align-items:center;justify-content:center;font-family:Manrope,sans-serif;font-size:13px;font-weight:600;box-sizing:border-box">9</span>
+<span style="width:34px;height:34px;border-radius:50%;border:1px solid rgba(240,200,170,.18);color:#C4B5C3;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;box-sizing:border-box">13</span>
+<span style="width:34px;height:34px;border-radius:50%;border:1px solid rgba(240,200,170,.18);color:#C4B5C3;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;box-sizing:border-box">14</span>
+<span style="width:34px;height:34px;border-radius:50%;border:1px solid rgba(240,200,170,.18);color:#C4B5C3;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;box-sizing:border-box">17</span>
+</div>
+<div style="display:flex;align-items:center;justify-content:center;gap:8px;border:1.5px solid #F0A85E;color:#F3E9DE;font-size:15px;font-weight:600;padding:13px;border-radius:14px">Читать расшифровку →</div>
+</div>
+<div style="position:relative;padding:24px 14px 0;display:flex;flex-direction:column;gap:10px">
+<span style="font-size:15px;font-weight:600;padding:0 6px">Остальные сферы звезды</span>
+<div style="background:#231929;border:1px solid rgba(240,200,170,.12);border-radius:20px;display:flex;flex-direction:column">
+<sc-for list="{{ lockedD }}" as="s" hint-placeholder-count="4">
+<div style="display:flex;align-items:center;gap:12px;padding:12px 16px;min-height:56px;box-sizing:border-box;border-bottom:1px solid rgba(240,200,170,.08)">{{ s.icon }}<span style="flex:1;font-size:14px;font-weight:500">{{ s.name }}</span><span style="color:#8F7F92;display:flex"><svg width="12" height="12" viewBox="0 0 12 12"><rect x="2" y="5.5" width="8" height="5.5" rx="1.4" fill="currentColor"></rect><path d="M4 5.5V4a2 2 0 0 1 4 0v1.5" stroke="currentColor" stroke-width="1.3" fill="none"></path></svg></span><span style="font-size:14px;font-weight:700;color:#F6C690">490 ₽</span><span style="color:#8F7F92">›</span></div>
+</sc-for>
+<div style="display:flex;align-items:center;gap:12px;padding:12px 16px;min-height:56px;box-sizing:border-box">{{ iconCenterD }}<span style="flex:1;font-size:14px;font-weight:500">Миссия души</span><span style="font-size:12px;color:#8F7F92">в полной звезде</span></div>
+</div>
+</div>
+<div style="position:relative;padding:16px 14px 22px">
+<div style="display:flex;align-items:center;gap:10px;background:linear-gradient(160deg,#F7C27E,#E08A3C);color:#2A1508;padding:16px 18px;border-radius:16px;box-shadow:0 10px 30px rgba(240,168,94,.25)">{{ iconAllOnGold }}<span style="flex:1;font-size:15px;font-weight:700">Открыть всю звезду</span><span style="font-size:15px;font-weight:700">1 490 ₽</span><span style="font-size:12px;color:#6B3F1C;text-decoration:line-through">1 960</span></div>
+<div style="width:120px;height:5px;border-radius:3px;background:#F3E9DE;margin:18px auto 0;opacity:.8"></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+
+</div>
+</section>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;lockStyle&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;blur&quot;,&quot;redacted&quot;],&quot;default&quot;:&quot;blur&quot;,&quot;tsType&quot;:&quot;'blur'|'redacted'&quot;,&quot;section&quot;:&quot;Locked-механика&quot;},&quot;showLegend&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Locked-механика&quot;}}">
+class Component extends DCLogic {
+  theme(t) {
+    return t === 'light' ? {
+      line: '#9C8B7E', outline: '#A8968A', lockedFill: 'rgba(120,95,75,0.07)', centerFill: 'rgba(120,95,75,0.05)',
+      a1: '#F7DDB0', a2: '#E2A95E', aStroke: '#C78A3E', glow: '#F0B865', aText: '#3A2716', aNum: '#8E5F2A',
+      ink: '#2A211D', muted: '#8E8178', card: '#FBF8F4', lock: '#A89A8F', guide: 'rgba(120,95,75,0.14)'
+    } : {
+      line: '#B8A2C4', outline: '#8E7A9C', lockedFill: 'rgba(240,220,235,0.045)', centerFill: 'rgba(240,220,235,0.03)',
+      a1: 'rgba(247,194,126,0.55)', a2: 'rgba(224,138,60,0.30)', aStroke: '#F2A65A', glow: '#F59E4A', aText: '#2A1508', aNum: '#F6C690',
+      ink: '#F3E9DE', muted: '#8F7F92', card: '#231929', lock: '#9C8AA8', guide: 'rgba(240,200,220,0.10)'
+    };
+  }
+  geo() {
+    const P = (a, r) => [r * Math.cos(a * Math.PI / 180), r * Math.sin(a * Math.PI / 180)];
+    const OA = [-90, -18, 54, 126, 198], IA = [-54, 18, 90, 162, 234];
+    return { P, OA, IA, O: OA.map(a => P(a, 100)), I: IA.map(a => P(a, 38.2)) };
+  }
+  lock(h, x, y, s, color, key) {
+    return h('g', { key, transform: `translate(${x},${y}) scale(${s})` },
+      h('rect', { x: -3.6, y: -0.8, width: 7.2, height: 5.6, rx: 1.3, fill: color }),
+      h('path', { d: 'M-2.1,-0.8 V-2.6 A2.1,2.1 0 0 1 2.1,-2.6 V-0.8', stroke: color, strokeWidth: 1.15, fill: 'none' }));
+  }
+  star(t, mobile) {
+    const h = React.createElement, c = this.theme(t), g = this.geo(), id = 'st' + t + (mobile ? 'm' : 'd');
+    const { O, I, IA, P } = g, ACTIVE = 4, blur = (this.props.lockStyle ?? 'blur') === 'blur';
+    const outerV = [3, 21, 11, 4, 5], innerV = [6, 5, 15, 9, 8];
+    const small = [[11, 9, 14], [9, 8, 11], [16, 8, 20], [19, 13, 6], [14, 13, 17]];
+    const labels = [['Духовность'], ['Деньги', 'Реализация'], ['Отношения'], ['Здоровье'], ['Личность', 'Таланты']];
+    const lpos = [[0, -118], [106, -4], [58.8, 101], [-58.8, 101], [-106, -4]];
+    const lerp = (a, b, k) => [a[0] + (b[0] - a[0]) * k, a[1] + (b[1] - a[1]) * k];
+    const pts = a => a.map(p => p.join(',')).join(' ');
+    const fs = mobile ? 1.22 : 1, el = [], top = [], k = { n: 0 }, K = () => 'k' + (k.n++);
+    const hidden = (x, y, val, size, key) => blur
+      ? h('text', { key, x, y, textAnchor: 'middle', dominantBaseline: 'central', fontSize: size, fill: c.muted, fontFamily: 'Manrope', fontWeight: 600, filter: `url(#${id}b)`, opacity: 0.55 }, val)
+      : h('rect', { key, x: x - size * 0.55, y: y - size * 0.22, width: size * 1.1, height: size * 0.44, rx: size * 0.22, fill: c.muted, opacity: 0.28 });
+    el.push(h('defs', { key: 'd' },
+      h('linearGradient', { id: id + 'g', x1: 0, y1: 0, x2: 1, y2: 1 }, h('stop', { offset: 0, stopColor: c.a1 }), h('stop', { offset: 1, stopColor: c.a2 })),
+      h('radialGradient', { id: id + 'n' }, h('stop', { offset: 0, stopColor: t === 'light' ? '#F7D9A4' : '#F9C887' }), h('stop', { offset: 1, stopColor: t === 'light' ? '#D9A055' : '#E0863A' })),
+      h('filter', { id: id + 'f', x: '-60%', y: '-60%', width: '220%', height: '220%' }, h('feGaussianBlur', { stdDeviation: 7 })),
+      h('filter', { id: id + 'b', x: '-50%', y: '-50%', width: '200%', height: '200%' }, h('feGaussianBlur', { stdDeviation: 1.5 }))));
+    el.push(h('circle', { key: K(), r: 124, fill: 'none', stroke: c.guide, strokeWidth: 0.6 }));
+    el.push(h('circle', { key: K(), r: 112, fill: 'none', stroke: c.guide, strokeWidth: 0.4, strokeDasharray: '1 3' }));
+    el.push(h('polygon', { key: K(), points: pts(I), fill: c.centerFill }));
+    for (let i = 0; i < 5; i++) {
+      const A = O[i], C1 = I[(i + 4) % 5], C2 = I[i], act = i === ACTIVE;
+      const S1 = lerp(A, C1, 0.7), S2 = lerp(A, C2, 0.7), M = lerp(C1, C2, 0.5);
+      const cen = [(A[0] + C1[0] + C2[0]) / 3, (A[1] + C1[1] + C2[1]) / 3];
+      if (act) el.push(h('polygon', { key: K(), points: pts([A, C1, C2]), fill: c.glow, opacity: t === 'light' ? 0.55 : 0.6, filter: `url(#${id}f)` }));
+      el.push(h('polygon', { key: K(), points: pts([A, C1, C2]), fill: act ? `url(#${id}g)` : c.lockedFill }));
+      const ls = act ? c.aStroke : c.line, lo = act ? 0.9 : 0.45, lw = act ? 0.7 : 0.5;
+      [[A, M], [S1, S2], [S1, M], [S2, M]].forEach(([p, q]) => el.push(h('line', { key: K(), x1: p[0], y1: p[1], x2: q[0], y2: q[1], stroke: ls, strokeWidth: lw, opacity: lo })));
+      [S1, S2, M].forEach((p, j) => {
+        let dx = p[0] - cen[0], dy = p[1] - cen[1]; const L = Math.hypot(dx, dy), off = j === 2 ? 7.5 : 8.5;
+        const x = p[0] + dx / L * off, y = p[1] + dy / L * off, v = small[i][j], sz = 6.6 * fs;
+        top.push(h('circle', { key: K(), cx: p[0], cy: p[1], r: act ? 1.9 : 1.4, fill: act ? c.aStroke : c.line, opacity: act ? 1 : 0.6 }));
+        top.push(act ? h('text', { key: K(), x, y, textAnchor: 'middle', dominantBaseline: 'central', fontSize: sz, fill: c.ink, fontFamily: 'Manrope', fontWeight: 700 }, v) : hidden(x, y, v, sz, K()));
+      });
+    }
+    for (let i = 0; i < 5; i++) el.push(h('line', { key: K(), x1: O[i][0], y1: O[i][1], x2: O[(i + 2) % 5][0], y2: O[(i + 2) % 5][1], stroke: c.outline, strokeWidth: 0.9, opacity: 0.8 }));
+    el.push(h('polygon', { key: K(), points: pts([O[ACTIVE], I[3], I[4]]), fill: 'none', stroke: c.aStroke, strokeWidth: 1.5, strokeLinejoin: 'round' }));
+    el.push(...top);
+    I.forEach((p, j) => {
+      const vis = j === 3 || j === 4, q = P(IA[j], 50), sz = 8.4 * (mobile ? 1.12 : 1);
+      el.push(h('circle', { key: K(), cx: p[0], cy: p[1], r: vis ? 2.3 : 1.6, fill: vis ? c.aStroke : c.line }));
+      el.push(vis ? h('text', { key: K(), x: q[0], y: q[1], textAnchor: 'middle', dominantBaseline: 'central', fontSize: sz, fill: c.aNum, fontFamily: 'Manrope', fontWeight: 700 }, innerV[j]) : hidden(q[0], q[1], innerV[j], sz, K()));
+    });
+    el.push(h('circle', { key: K(), r: 17, fill: c.card, stroke: c.line, strokeWidth: 0.5, opacity: 0.95 }));
+    el.push(h('text', { key: K(), y: -6, textAnchor: 'middle', fontSize: 5.6 * fs, fill: c.ink, fontFamily: 'Cormorant Garamond', fontWeight: 600 }, 'Миссия'));
+    el.push(h('text', { key: K(), y: 0.5, textAnchor: 'middle', fontSize: 5.6 * fs, fill: c.ink, fontFamily: 'Cormorant Garamond', fontWeight: 600 }, 'души'));
+    el.push(this.lock(h, 0, 7, 0.95, c.lock, K()));
+    O.forEach((p, i) => {
+      if (i === ACTIVE) {
+        el.push(h('circle', { key: K(), cx: p[0], cy: p[1], r: 19, fill: c.glow, opacity: 0.55, filter: `url(#${id}f)` }));
+        el.push(h('circle', { key: K(), cx: p[0], cy: p[1], r: 16.5, fill: 'none', stroke: c.aStroke, strokeWidth: 0.6, opacity: 0.6 }));
+        el.push(h('circle', { key: K(), cx: p[0], cy: p[1], r: 12.5, fill: `url(#${id}n)`, stroke: t === 'light' ? '#FFF8EC' : '#FBD9A8', strokeWidth: 1.2 }));
+        el.push(h('text', { key: K(), x: p[0], y: p[1], textAnchor: 'middle', dominantBaseline: 'central', fontSize: 12, fill: c.aText, fontFamily: 'Manrope', fontWeight: 700 }, outerV[i]));
+      } else {
+        el.push(h('circle', { key: K(), cx: p[0], cy: p[1], r: 9, fill: c.card, stroke: c.line, strokeWidth: 0.6 }));
+        el.push(this.lock(h, p[0], p[1] - 0.6, 1, c.lock, K()));
+      }
+      const [lx, ly] = lpos[i], act = i === ACTIVE, ls = 6.8 * fs;
+      labels[i].forEach((s, j) => el.push(h('text', { key: K(), x: lx, y: ly + j * ls * 1.2, textAnchor: 'middle', fontSize: ls, fill: act ? c.aNum : c.ink, opacity: act ? 1 : 0.78, fontFamily: 'Manrope', fontWeight: act ? 700 : 500 }, s)));
+    });
+    return h('svg', { viewBox: mobile ? '-140 -132 280 248' : '-138 -134 276 250', style: { width: '100%', maxWidth: mobile ? 'none' : 640, display: 'block', overflow: 'visible' } }, el);
+  }
+  mini(t, zones, opts = {}) {
+    const h = React.createElement, c = this.theme(t), { O, I } = this.geo(), pts = a => a.map(p => p.join(',')).join(' ');
+    const fill = opts.onGold ? '#2A1508' : (t === 'light' ? '#E2AE63' : '#F0A85E');
+    const stroke = opts.onGold ? '#2A1508' : (opts.locked ? c.lock : (t === 'light' ? '#C78A3E' : '#F2A65A'));
+    const el = [];
+    zones.forEach(i => el.push(h('polygon', { key: 'z' + i, points: pts([O[i], I[(i + 4) % 5], I[i]]), fill: opts.locked ? c.lock : fill, opacity: opts.locked ? 0.35 : (opts.onGold ? 0.85 : 1) })));
+    if (opts.center) el.push(h('polygon', { key: 'c', points: pts(I), fill: c.lock, opacity: 0.45 }));
+    for (let i = 0; i < 5; i++) el.push(h('line', { key: 'l' + i, x1: O[i][0], y1: O[i][1], x2: O[(i + 2) % 5][0], y2: O[(i + 2) % 5][1], stroke, strokeWidth: 9, strokeLinejoin: 'round', opacity: opts.locked ? 0.8 : 1 }));
+    const s = opts.size || 30;
+    const svg = h('svg', { viewBox: '-112 -112 224 210', width: s, height: s * 210 / 224, style: { display: 'block', overflow: 'visible' } }, el);
+    const bg = opts.onGold ? 'rgba(42,21,8,.10)' : (opts.locked ? (t === 'light' ? '#F1EBE4' : 'rgba(240,220,235,.05)') : (t === 'light' ? '#F6E6CC' : 'rgba(240,168,94,.14)'));
+    return h('span', { style: { width: s + 14, height: s + 14, borderRadius: '50%', background: bg, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 } }, svg);
+  }
+  renderVals() {
+    const sph = [
+      { zone: 0, name: 'Духовность', short: 'Духовный путь, внутренняя опора и связь с собой.' },
+      { zone: 1, name: 'Деньги и реализация', short: 'Финансовый потенциал, профессия и материальные возможности.' },
+      { zone: 2, name: 'Отношения', short: 'Отношения с собой и другими, партнёрство и семья.' },
+      { zone: 3, name: 'Здоровье', short: 'Энергия, ресурс, физическое и эмоциональное состояние.' }
+    ];
+    return {
+      showLegend: this.props.showLegend ?? true,
+      starLD: this.star('light', false), starLM: this.star('light', true),
+      starDD: this.star('dark', false), starDM: this.star('dark', true),
+      iconActiveL: this.mini('light', [4], { size: 26 }), iconActiveD: this.mini('dark', [4], { size: 26 }),
+      iconAllL: this.mini('light', [0, 1, 2, 3, 4], { size: 22 }), iconAllOnGold: this.mini('dark', [0, 1, 2, 3, 4], { size: 22, onGold: true }),
+      iconCenterL: this.mini('light', [], { size: 20, locked: true, center: true }), iconCenterD: this.mini('dark', [], { size: 20, locked: true, center: true }),
+      lockedL: sph.map(s => ({ ...s, icon: this.mini('light', [s.zone], { size: 22, locked: true }) })),
+      lockedD: sph.map(s => ({ ...s, icon: this.mini('dark', [s.zone], { size: 22, locked: true }) }))
+    };
+  }
+}
+</script>
+</body>
+</html>
