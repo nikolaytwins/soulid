@@ -3,7 +3,6 @@
 import { useEffect, useMemo, useRef, useState, useTransition } from "react";
 import { useTranslations } from "next-intl";
 import { Link, useRouter } from "@/i18n/routing";
-import { signOutAction } from "@/app/[locale]/auth-actions";
 import {
   createStarAction,
   deleteAccountAction,
@@ -13,7 +12,6 @@ import {
 } from "@/app/[locale]/account/actions";
 import { CabinetStar, type CabinetStarLabels } from "@/components/account/CabinetStar";
 import { LtrText } from "@/components/ui/LtrText";
-import { AdminModeSwitch } from "@/components/layout/AdminModeSwitch";
 import { STAR_RELATIONS, type StarRelation } from "@/lib/domain/relations";
 import type { SphereId } from "@/lib/engine";
 
@@ -93,24 +91,16 @@ export function Cabinet({
   const legal = useTranslations("legal");
   const router = useRouter();
   const [selectedId, setSelectedId] = useState<string | null>(initialStarId ?? stars[0]?.id ?? null);
-  const [menu, setMenu] = useState(false);
   const [sheet, setSheet] = useState<null | "create" | "edit" | "profile" | "purchases" | "support">(null);
   const [form, setForm] = useState({ name: "", date: "", rel: "partner" as StarRelation });
   const [profileName, setProfileName] = useState(user.name);
   const [deleteConfirm, setDeleteConfirm] = useState("");
   const [err, setErr] = useState("");
   const [toast, setToast] = useState<string | null>(paidToast);
-  const [notify, setNotify] = useState(true);
   const [pending, start] = useTransition();
-  const menuRef = useRef<HTMLDivElement>(null);
   const tt = useRef<number | null>(null);
 
   const cur = stars.find((s) => s.id === selectedId) ?? stars[0] ?? null;
-
-  useEffect(() => {
-    const v = localStorage.getItem("ss_notify");
-    if (v === "0") setNotify(false);
-  }, []);
 
   useEffect(() => {
     if (!toast) return;
@@ -120,14 +110,6 @@ export function Cabinet({
       if (tt.current) window.clearTimeout(tt.current);
     };
   }, [toast]);
-
-  useEffect(() => {
-    function onDoc(e: MouseEvent) {
-      if (!menuRef.current?.contains(e.target as Node)) setMenu(false);
-    }
-    document.addEventListener("mousedown", onDoc);
-    return () => document.removeEventListener("mousedown", onDoc);
-  }, []);
 
   const greeting = useMemo(() => {
     const h = new Date().getHours();
@@ -161,7 +143,6 @@ export function Cabinet({
   }
 
   function openCreate() {
-    setMenu(false);
     setErr("");
     setForm({ name: "", date: "", rel: "partner" });
     setSheet("create");
@@ -264,21 +245,14 @@ export function Cabinet({
     return { id, name: sphereNames[id], num: String(k + 1), st };
   });
 
-  const menuBtn: React.CSSProperties = {
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "space-between",
-    gap: 8,
+  const textBtn: React.CSSProperties = {
     background: "none",
     border: "none",
-    borderRadius: 10,
-    padding: 12,
+    padding: "8px 4px",
     fontSize: 14,
     fontWeight: 600,
-    color: "#2A211D",
-    cursor: "pointer",
-    textAlign: "left",
-    width: "100%"
+    color: "#5E534C",
+    cursor: "pointer"
   };
 
   return (
@@ -310,138 +284,6 @@ export function Cabinet({
           position: "relative",
           maxWidth: 1280,
           margin: "0 auto",
-          display: "flex",
-          alignItems: "center",
-          gap: 24,
-          padding: "24px clamp(20px,4vw,56px)",
-          boxSizing: "border-box"
-        }}
-      >
-        <Link
-          href="/"
-          className="no-underline"
-          style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 30, fontWeight: 500, flex: 1, color: "#2A211D" }}
-        >
-          Soul Star
-        </Link>
-        {user.role === "admin" ? <AdminModeSwitch mode="cabinet" /> : null}
-        <button
-          type="button"
-          onClick={openCreate}
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: 8,
-            background: "linear-gradient(160deg,#F3CF94,#D9A055)",
-            border: "none",
-            borderRadius: 999,
-            padding: "12px 22px",
-            fontSize: 15,
-            fontWeight: 700,
-            color: "#2A211D",
-            cursor: "pointer",
-            minHeight: 46,
-            boxShadow: "0 8px 24px rgba(217,160,85,.45),0 0 0 4px rgba(242,205,150,.35)"
-          }}
-        >
-          + {t("newStar")}
-        </button>
-        <div style={{ position: "relative" }} ref={menuRef}>
-          <button
-            type="button"
-            aria-label={t("profile")}
-            onClick={() => setMenu((v) => !v)}
-            style={{
-              width: 44,
-              height: 44,
-              borderRadius: "50%",
-              border: "1px solid rgba(80,60,45,.2)",
-              background: "#FBF8F4",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              fontSize: 14,
-              fontWeight: 600,
-              color: "#5E534C",
-              cursor: "pointer"
-            }}
-          >
-            {user.initials}
-          </button>
-          {menu ? (
-            <div
-              style={{
-                position: "absolute",
-                right: 0,
-                top: 54,
-                zIndex: 20,
-                width: 260,
-                background: "#FBF8F4",
-                border: "1px solid rgba(80,60,45,.10)",
-                borderRadius: 18,
-                boxShadow: "0 20px 50px rgba(42,33,29,.15)",
-                padding: 8,
-                display: "flex",
-                flexDirection: "column"
-              }}
-            >
-              <div
-                style={{
-                  display: "flex",
-                  flexDirection: "column",
-                  gap: 2,
-                  padding: "12px 12px 14px",
-                  borderBottom: "1px solid rgba(80,60,45,.10)",
-                  marginBottom: 6
-                }}
-              >
-                <span style={{ fontSize: 15, fontWeight: 600 }}>{user.name}</span>
-                <span style={{ fontSize: 13, color: "#8E8178" }}>{user.email}</span>
-              </div>
-              <button type="button" style={menuBtn} onClick={() => { setMenu(false); setProfileName(user.name); setErr(""); setSheet("profile"); }}>
-                {t("menuProfile")}
-              </button>
-              <button type="button" style={menuBtn} onClick={() => { setMenu(false); setSheet("purchases"); }}>
-                {t("menuPurchases")}
-                <span style={{ fontSize: 12, color: "#8E8178", fontWeight: 500 }}>{purchases.length || ""}</span>
-              </button>
-              <button
-                type="button"
-                style={menuBtn}
-                onClick={() => {
-                  const next = !notify;
-                  setNotify(next);
-                  localStorage.setItem("ss_notify", next ? "1" : "0");
-                  flash(next ? t("notifyOn") : t("notifyOff"));
-                }}
-              >
-                {t("menuNotify")}
-                <span style={{ fontSize: 12, color: "#8E8178", fontWeight: 500 }}>{notify ? t("notifyOnShort") : t("notifyOffShort")}</span>
-              </button>
-              <button type="button" style={menuBtn} onClick={() => { setMenu(false); setSheet("support"); }}>
-                {t("menuSupport")}
-              </button>
-              {user.role === "admin" ? (
-                <Link href="/admin" className="no-underline" style={menuBtn} onClick={() => setMenu(false)}>
-                  {t("menuAdmin")}
-                </Link>
-              ) : null}
-              <form action={signOutAction}>
-                <input type="hidden" name="locale" value={locale} />
-                <button type="submit" style={menuBtn}>
-                  {t("logout")}
-                </button>
-              </form>
-            </div>
-          ) : null}
-        </div>
-      </div>
-
-      <div
-        style={{
-          position: "relative",
-          maxWidth: 1280,
-          margin: "0 auto",
           padding: "8px clamp(20px,4vw,56px) 96px",
           boxSizing: "border-box",
           display: "flex",
@@ -449,18 +291,60 @@ export function Cabinet({
           gap: 48
         }}
       >
-        <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-          <span style={{ fontSize: 11, letterSpacing: ".22em", color: "#8E8178", fontWeight: 600 }}>{todayLabel}</span>
-          <span
-            style={{
-              fontFamily: "'Cormorant Garamond', serif",
-              fontSize: "clamp(36px,5vw,56px)",
-              lineHeight: 1,
-              fontWeight: 500
-            }}
-          >
-            {greeting}
-          </span>
+        <div
+          style={{
+            display: "flex",
+            flexWrap: "wrap",
+            alignItems: "flex-end",
+            justifyContent: "space-between",
+            gap: 16
+          }}
+        >
+          <div style={{ display: "flex", flexDirection: "column", gap: 8, minWidth: 0 }}>
+            <span style={{ fontSize: 11, letterSpacing: ".22em", color: "#8E8178", fontWeight: 600 }}>{todayLabel}</span>
+            <span
+              style={{
+                fontFamily: "'Cormorant Garamond', serif",
+                fontSize: "clamp(36px,5vw,56px)",
+                lineHeight: 1,
+                fontWeight: 500
+              }}
+            >
+              {greeting}
+            </span>
+          </div>
+          <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: 8 }}>
+            <button type="button" style={textBtn} onClick={() => { setProfileName(user.name); setErr(""); setSheet("profile"); }}>
+              {t("menuProfile")}
+            </button>
+            <button type="button" style={textBtn} onClick={() => setSheet("purchases")}>
+              {t("menuPurchases")}
+            </button>
+            <button type="button" style={textBtn} onClick={() => setSheet("support")}>
+              {t("menuSupport")}
+            </button>
+            <button
+              type="button"
+              onClick={openCreate}
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: 8,
+                background: "linear-gradient(160deg,#F3CF94,#D9A055)",
+                border: "none",
+                borderRadius: 999,
+                padding: "12px 22px",
+                fontSize: 15,
+                fontWeight: 700,
+                color: "#2A211D",
+                cursor: "pointer",
+                minHeight: 46,
+                boxShadow: "0 8px 24px rgba(217,160,85,.45),0 0 0 4px rgba(242,205,150,.35)"
+              }}
+            >
+              + {t("newStar")}
+            </button>
+          </div>
         </div>
 
         {cur ? (

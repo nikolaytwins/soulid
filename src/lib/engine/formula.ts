@@ -1,4 +1,5 @@
 import type { BirthDate } from "./types";
+import { reductionChain } from "./reduce";
 
 export const DATE_SOURCES = ["day", "month", "yearDigitSum", "year"] as const;
 export type DateSource = (typeof DATE_SOURCES)[number];
@@ -57,6 +58,41 @@ export function dateRaw(date: BirthDate, source: DateSource): { raw: number; not
   const digits = String(date.year).split("");
   const raw = digits.reduce((a, d) => a + Number(d), 0);
   return { raw, note: `цифры года ${date.year} → ${digits.join("+")} = ${raw}` };
+}
+
+export function datePartsExpr(date: BirthDate, source: DateSource): string {
+  if (source === "yearDigitSum") return String(date.year).split("").join(" + ");
+  if (source === "year") return String(date.year);
+  if (source === "month") return String(date.month);
+  return String(date.day);
+}
+
+export type WorkbookRow = {
+  id: FormulaPointId;
+  expr: string;
+  raw: number;
+  value: number;
+  reductions: ReturnType<typeof reductionChain>["steps"];
+};
+
+export function formulaWorkbook(date: BirthDate, formula: StarFormula = BOOK_FORMULA): WorkbookRow[] {
+  const values: Partial<Record<FormulaPointId, number>> = {};
+  return FORMULA_ORDER.map((id) => {
+    const spec = formula[id] ?? BOOK_FORMULA[id];
+    let expr: string;
+    let raw: number;
+    if (spec.type === "date") {
+      raw = dateRaw(date, spec.source).raw;
+      expr = datePartsExpr(date, spec.source);
+    } else {
+      const parts = spec.of.map((pid) => values[pid as FormulaPointId] ?? 0);
+      raw = parts.reduce((a, b) => a + b, 0);
+      expr = spec.of.length ? parts.join(" + ") : "0";
+    }
+    const reduced = reductionChain(raw);
+    values[id] = reduced.value;
+    return { id, expr, raw, value: reduced.value, reductions: reduced.steps };
+  });
 }
 
 export function formulaLabel(point: PointFormula, names: Record<string, string>): string {

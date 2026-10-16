@@ -29,7 +29,7 @@ export function StarsMenu({ stars }: { stars: NavStar[] }) {
         aria-expanded={open}
         aria-haspopup="menu"
         onClick={() => setOpen((v) => !v)}
-        className="flex h-9 items-center gap-1.5 rounded-full border border-[rgba(80,60,45,0.2)] bg-card px-3 text-xs font-semibold text-muted md:h-11 md:px-4 md:text-sm"
+        className="flex h-9 shrink-0 items-center gap-1 whitespace-nowrap rounded-full border border-[rgba(80,60,45,0.2)] bg-card px-2.5 text-xs font-semibold text-muted md:h-11 md:gap-1.5 md:px-4 md:text-sm"
       >
         {t("myStars")}
         <svg width="10" height="6" viewBox="0 0 10 6" aria-hidden className={open ? "rotate-180" : undefined}>

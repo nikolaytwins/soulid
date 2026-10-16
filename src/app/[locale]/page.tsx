@@ -5,9 +5,9 @@ import { MiniStar } from "@/components/star/TriangleSvg";
 export default async function LandingPage() {
   const t = await getTranslations();
   return (
-    <main className="relative mx-auto max-w-page px-5 pb-24 md:px-14">
+    <main className="relative mx-auto max-w-page overflow-x-clip px-5 pb-24 md:px-14">
       <div
-        className="pointer-events-none absolute left-1/2 top-4 h-[520px] w-[720px] -translate-x-1/2"
+        className="pointer-events-none absolute inset-x-0 top-4 h-[520px]"
         style={{ background: "radial-gradient(closest-side,rgba(242,205,150,.45),rgba(245,240,234,0))" }}
       />
       <div className="relative grid items-center gap-12 pt-6 md:grid-cols-[minmax(0,1fr)_420px] md:pt-10">

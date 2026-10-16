@@ -5,6 +5,12 @@ import { BRIDGE_ZONE_INDEX, ZONE_TO_SPHERE } from "@/lib/engine";
 
 export type ZoneState = "active" | "open" | "next" | "locked";
 
+export type HoverTip =
+  | { kind: "bridge"; j: number }
+  | { kind: "apex"; zone: number }
+  | { kind: "inner"; zone: number; slot: 0 | 1 | 2 }
+  | { kind: "mission" };
+
 type Props = {
   star: StarResult;
   mobile?: boolean;
@@ -15,12 +21,14 @@ type Props = {
   lockStyle?: "blur" | "redacted";
   hoverPt: number | null;
   hoverZone: number | null;
+  hoverTip: HoverTip | null;
   selectedPt: number | null;
   onSphere: (sphere: SphereId) => void;
   onPoint: (zoneIndex: number) => void;
   onMission: () => void;
   onHoverPt: (i: number | null) => void;
   onHoverZone: (i: number | null) => void;
+  onHoverTip: (tip: HoverTip | null) => void;
   labels: Record<SphereId, string>;
   missionLabel: [string, string];
 };
@@ -221,14 +229,18 @@ export function StarSvg(props: Props) {
       const y = p[1] + (dy / L) * off;
       const v = sm[j];
       const sz = 6.6 * fs;
+      const slot = j as 0 | 1 | 2;
+      const innerHov = props.hoverTip?.kind === "inner" && props.hoverTip.zone === i && props.hoverTip.slot === slot;
       top.push(
         h("circle", {
           key: K(),
           cx: p[0],
           cy: p[1],
-          r: vis ? 1.9 : 1.4,
-          fill: vis ? c.aStroke : c.line,
-          opacity: vis ? 1 : 0.6,
+          r: innerHov ? 3.2 : vis ? 1.9 : 1.4,
+          fill: innerHov ? c.glow : vis ? c.aStroke : c.line,
+          stroke: innerHov ? c.aStroke : "none",
+          strokeWidth: 1.1,
+          opacity: vis || innerHov ? 1 : 0.6,
           ...NP
         })
       );
@@ -243,7 +255,7 @@ export function StarSvg(props: Props) {
                 textAnchor: "middle",
                 dominantBaseline: "central",
                 fontSize: sz,
-                fill: c.ink,
+                fill: innerHov ? c.aNum : c.ink,
                 fontFamily: "Manrope, sans-serif",
                 fontWeight: 700,
                 ...NP
@@ -252,6 +264,15 @@ export function StarSvg(props: Props) {
             )
           : hidden(x, y, v, sz, K())
       );
+      const innerHit = {
+        fill: "transparent",
+        pointerEvents: "all" as const,
+        style: { cursor: "pointer" as const, pointerEvents: "all" as const },
+        onClick: () => props.onSphere(sphere),
+        onPointerEnter: () => props.onHoverTip({ kind: "inner", zone: i, slot }),
+        onPointerLeave: () => props.onHoverTip(null)
+      };
+      top.push(h("circle", { key: K(), cx: (p[0] + x) / 2, cy: (p[1] + y) / 2, r: mobile ? 13 : 11, ...innerHit }));
     });
   }
 
@@ -348,8 +369,14 @@ export function StarSvg(props: Props) {
       pointerEvents: "all" as const,
       style: { cursor: "pointer" as const, pointerEvents: "all" as const },
       onClick: () => props.onPoint(j),
-      onPointerEnter: () => props.onHoverPt(j),
-      onPointerLeave: () => props.onHoverPt(null)
+      onPointerEnter: () => {
+        props.onHoverPt(j);
+        props.onHoverTip({ kind: "bridge", j });
+      },
+      onPointerLeave: () => {
+        props.onHoverPt(null);
+        props.onHoverTip(null);
+      }
     };
     el.push(h("circle", { key: K(), cx: p[0], cy: p[1], r: mobile ? 16 : 14, ...hit }));
     el.push(h("circle", { key: K(), cx: q[0], cy: q[1], r: mobile ? 12 : 10, ...hit }));
@@ -363,11 +390,13 @@ export function StarSvg(props: Props) {
       key: K(),
       r: 17,
       fill: c.card,
-      stroke: props.missionActive || allOpen ? c.aStroke : c.line,
-      strokeWidth: props.missionActive || allOpen ? 1 : 0.5,
+      stroke: props.missionActive || allOpen || props.hoverTip?.kind === "mission" ? c.aStroke : c.line,
+      strokeWidth: props.missionActive || allOpen || props.hoverTip?.kind === "mission" ? 1 : 0.5,
       opacity: 0.95,
       style: { cursor: "pointer" },
-      onClick: props.onMission
+      onClick: props.onMission,
+      onPointerEnter: () => props.onHoverTip({ kind: "mission" }),
+      onPointerLeave: () => props.onHoverTip(null)
     })
   );
   el.push(
@@ -417,11 +446,24 @@ export function StarSvg(props: Props) {
       onMouseLeave: () => props.onHoverZone(null),
       style: { cursor: "pointer" as const }
     };
+    const apexEv = {
+      onClick: () => props.onSphere(sphere),
+      onPointerEnter: () => {
+        props.onHoverZone(i);
+        props.onHoverTip({ kind: "apex", zone: i });
+      },
+      onPointerLeave: () => {
+        props.onHoverZone(null);
+        props.onHoverTip(null);
+      },
+      style: { cursor: "pointer" as const }
+    };
+    const apexHov = props.hoverTip?.kind === "apex" && props.hoverTip.zone === i;
     if (st === "active") {
-      el.push(h("circle", { key: K(), cx: p[0], cy: p[1], r: 19, fill: c.glow, opacity: 0.55, filter: `url(#${id}f)`, ...NP }));
+      el.push(h("circle", { key: K(), cx: p[0], cy: p[1], r: 19, fill: c.glow, opacity: apexHov ? 0.8 : 0.55, filter: `url(#${id}f)`, ...NP }));
       el.push(h("circle", { key: K(), cx: p[0], cy: p[1], r: 16.5, fill: "none", stroke: c.aStroke, strokeWidth: 0.6, opacity: 0.6, ...NP }));
       el.push(
-        h("circle", { key: K(), cx: p[0], cy: p[1], r: 12.5, fill: `url(#${id}n)`, stroke: "#FFF8EC", strokeWidth: 1.2, ...ev })
+        h("circle", { key: K(), cx: p[0], cy: p[1], r: 12.5, fill: `url(#${id}n)`, stroke: "#FFF8EC", strokeWidth: 1.2, ...apexEv })
       );
       el.push(
         h(
@@ -442,7 +484,7 @@ export function StarSvg(props: Props) {
         )
       );
     } else if (st === "open") {
-      el.push(h("circle", { key: K(), cx: p[0], cy: p[1], r: 10.5, fill: "#F6E6CC", stroke: c.aStroke, strokeWidth: 1, ...ev }));
+      el.push(h("circle", { key: K(), cx: p[0], cy: p[1], r: apexHov ? 12 : 10.5, fill: "#F6E6CC", stroke: c.aStroke, strokeWidth: 1, ...apexEv }));
       el.push(
         h(
           "text",
@@ -471,7 +513,7 @@ export function StarSvg(props: Props) {
           fill: c.card,
           stroke: st === "next" ? c.aStroke : c.line,
           strokeWidth: st === "next" ? 1 : 0.6,
-          ...ev
+          ...apexEv
         })
       );
       el.push(h(Lock, { key: K(), x: p[0], y: p[1] - 0.6, s: 1, color: st === "next" ? c.aStroke : c.lock }));

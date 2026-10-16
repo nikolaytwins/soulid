@@ -11,6 +11,20 @@ export function sumDigits(n: number): number {
  * Reduce any positive integer to the 22-arcana system.
  * 1–22 stay as-is. Values > 22 are digit-summed until ≤ 22.
  */
+export type ReductionStep = { from: number; expr: string; to: number };
+
+export function reductionChain(raw: number): { value: number; steps: ReductionStep[] } {
+  let value = Math.trunc(raw);
+  if (value < 0) value = Math.abs(value);
+  const steps: ReductionStep[] = [];
+  while (value > 22) {
+    const to = sumDigits(value);
+    steps.push({ from: value, expr: String(value).split("").join(" + "), to });
+    value = to;
+  }
+  return { value, steps };
+}
+
 export function reduceToArcana(input: number): ArcanaValue {
   const steps: string[] = [];
   let value = Math.trunc(input);

@@ -6,9 +6,9 @@ import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/routing";
 import type { SphereId, StarResult } from "@/lib/engine";
 import { BRIDGE_KIND, ZONE_TO_SPHERE } from "@/lib/engine";
-import { StarSvg } from "./StarSvg";
+import { StarSvg, type HoverTip } from "./StarSvg";
 import { MiniStar, TriangleSvg } from "./TriangleSvg";
-import { starGeometry } from "./geometry";
+import { sphereInnerDots, starGeometry, starViewBox, type Pt } from "./geometry";
 import type { ArcReading, StarPageModel } from "@/lib/domain/star-page";
 import type { PatternReading } from "@/lib/domain/patterns";
 import { trackPixel } from "@/components/analytics/MetaPixel";
@@ -25,6 +25,7 @@ type Panel =
   | { type: "blocked"; k: SphereId };
 
 const BRIDGES = ["p23", "p34", "p45", "p51", "p12"] as const;
+const INNER_SLOTS = ["innerLeft", "innerRight", "innerBottom"] as const;
 
 export function StarExperience({
   model,
@@ -50,6 +51,7 @@ export function StarExperience({
   const [why, setWhy] = useState(false);
   const [hoverPt, setHoverPt] = useState<number | null>(null);
   const [hoverZone, setHoverZone] = useState<number | null>(null);
+  const [hoverTip, setHoverTip] = useState<HoverTip | null>(null);
   const [busy, setBusy] = useState(false);
   const [payError, setPayError] = useState("");
   const [payEmail, setPayEmail] = useState("");
@@ -113,6 +115,7 @@ export function StarExperience({
     }
     setWhy(false);
     setHoverPt(null);
+    setHoverTip(null);
   }
 
   function onMission() {
@@ -132,6 +135,7 @@ export function StarExperience({
     const ctx = active !== "soulMission" && ks.includes(active) ? active : open[0];
     setPanel({ type: "point", j, ctx });
     setHoverPt(null);
+    setHoverTip(null);
   }
 
   function scrollTo(id: string) {
@@ -325,34 +329,67 @@ export function StarExperience({
   const offerNext = Boolean(model.nextSphere && nOpen < 5 && (viewingMission || !nextOpen));
   const showMissionNext = !viewingMission && !nextId && missionOpen;
 
-  let tip: React.ReactNode = null;
-  if (hoverOk && hoverPt != null && !panel) {
-    const { I } = starGeometry();
-    const p = I[hoverPt];
-    const ks = ptSpheres(hoverPt);
-    const open = ks.some((s) => unlocked.has(s));
-    const ctx = active !== "soulMission" && ks.includes(active) ? active : ks.find((s) => unlocked.has(s));
-    const fatal = BRIDGE_KIND[BRIDGES[hoverPt]] === "fatal_error";
-    tip = (
+  function numberTip(mobile: boolean): React.ReactNode {
+    if (!hoverOk || !hoverTip || panel) return null;
+    const { O, I } = starGeometry();
+    let at: Pt = [0, 0];
+    let eyebrow = "";
+    let value = "";
+    let hint = "";
+    if (hoverTip.kind === "bridge") {
+      at = I[hoverTip.j];
+      const ks = ptSpheres(hoverTip.j);
+      const open = ks.some((s) => unlocked.has(s));
+      const ctx = active !== "soulMission" && ks.includes(active) ? active : ks.find((s) => unlocked.has(s));
+      const fatal = BRIDGE_KIND[BRIDGES[hoverTip.j]] === "fatal_error";
+      eyebrow = (fatal ? t("points.fatal") : t("points.ancestral")).toUpperCase();
+      value = open ? t("points.arcana", { arcana, value: model.star.bridges[BRIDGES[hoverTip.j]].value }) : t("points.hidden");
+      hint =
+        open && ctx
+          ? t("points.clickRead", { name: model.spheres[ctx].name })
+          : t("points.opensWith", { name: model.spheres[ks[0]].name });
+    } else if (hoverTip.kind === "apex") {
+      const sphere = ZONE_TO_SPHERE[hoverTip.zone];
+      const open = unlocked.has(sphere);
+      at = O[hoverTip.zone];
+      eyebrow = t("points.apex", { arcana }).toUpperCase();
+      value = open ? t("points.arcana", { arcana, value: model.star.spheres[sphere].apex.value }) : t("points.hidden");
+      hint = open
+        ? t("points.clickRead", { name: model.spheres[sphere].name })
+        : t("points.opensWith", { name: model.spheres[sphere].name });
+    } else if (hoverTip.kind === "inner") {
+      const sphere = ZONE_TO_SPHERE[hoverTip.zone];
+      const open = unlocked.has(sphere);
+      at = sphereInnerDots(hoverTip.zone)[hoverTip.slot];
+      const n = model.star.spheres[sphere][INNER_SLOTS[hoverTip.slot]].value;
+      eyebrow = t("points.inner", { arcana }).toUpperCase();
+      value = open ? t("points.arcana", { arcana, value: n }) : t("points.hidden");
+      hint = open
+        ? t("points.clickRead", { name: model.spheres[sphere].name })
+        : t("points.opensWith", { name: model.spheres[sphere].name });
+    } else {
+      at = [0, 0];
+      eyebrow = t("points.soul").toUpperCase();
+      value = missionOpen
+        ? t("points.arcana", { arcana, value: model.star.core.soulMission.value })
+        : t("points.hidden");
+      hint = missionOpen ? t("points.clickRead", { name: t("points.soul") }) : t("starPage.missionLocked");
+    }
+    const vb = starViewBox(mobile);
+    const topPct = ((at[1] - vb.y) / vb.h) * 100;
+    const above = topPct > 22;
+    return (
       <div
-        className="pointer-events-none absolute z-20 flex w-[220px] -translate-x-1/2 flex-col gap-1 rounded-xl bg-ink px-3.5 py-3 text-card shadow-[0_12px_30px_rgba(42,33,29,.25)]"
+        className="pointer-events-none absolute z-20 flex w-[220px] flex-col gap-1 rounded-xl bg-ink px-3.5 py-3 text-card shadow-[0_12px_30px_rgba(42,33,29,.25)]"
         style={{
-          left: `${((p[0] + 138) / 276) * 100}%`,
-          top: `${((p[1] + 134) / 250) * 100}%`,
-          transform: "translate(-50%, calc(-100% - 18px))"
+          left: `${((at[0] - vb.x) / vb.w) * 100}%`,
+          top: `${topPct}%`,
+          transform: above ? "translate(-50%, calc(-100% - 18px))" : "translate(-50%, 18px)"
         }}
       >
-        <span className="text-[11px] font-bold tracking-[0.14em] text-gold-pale">
-          {(fatal ? t("points.fatal") : t("points.ancestral")).toUpperCase()}
-        </span>
-        <span className="text-[15px] font-semibold">
-          {open ? t("points.arcana", { arcana, value: model.star.bridges[BRIDGES[hoverPt]].value }) : t("points.hidden")}
-        </span>
-        <span className="text-xs leading-snug text-[#CFC4BA]">
-          {open && ctx
-            ? t("points.clickRead", { name: model.spheres[ctx].name })
-            : t("points.opensWith", { name: model.spheres[ks[0]].name })}
-        </span>
+        <span className="text-[11px] font-bold tracking-[0.14em] text-gold-pale">{eyebrow}</span>
+        <span className="text-[15px] font-semibold">{value}</span>
+        <span className="text-xs leading-snug text-[#CFC4BA]">{hint}</span>
       </div>
     );
   }
@@ -384,9 +421,9 @@ export function StarExperience({
   }
 
   return (
-    <div className="relative min-h-screen bg-cream text-ink">
+    <div className="relative min-h-screen max-w-full overflow-x-clip bg-cream text-ink">
       <div
-        className="pointer-events-none absolute left-1/2 top-10 hidden h-[860px] w-[1000px] -translate-x-1/2 md:block"
+        className="pointer-events-none absolute inset-x-0 top-10 hidden h-[860px] md:block"
         style={{ background: "radial-gradient(closest-side,rgba(242,205,150,.45),rgba(245,240,234,0))" }}
       />
 
@@ -404,6 +441,7 @@ export function StarExperience({
                 next={model.nextSphere}
                 hoverPt={hoverPt}
                 hoverZone={hoverZone}
+                hoverTip={hoverTip}
                 selectedPt={panel?.type === "point" ? panel.j : null}
                 labels={labels}
                 missionLabel={missionLabel}
@@ -415,8 +453,9 @@ export function StarExperience({
                 }}
                 onHoverPt={setHoverPt}
                 onHoverZone={setHoverZone}
+                onHoverTip={setHoverTip}
               />
-              {tip}
+              {numberTip(false)}
             </div>
           </div>
           <ActiveCard
@@ -445,6 +484,7 @@ export function StarExperience({
           missionLabel={missionLabel}
           hoverPt={hoverPt}
           hoverZone={hoverZone}
+          hoverTip={hoverTip}
           selectedPt={panel?.type === "point" ? panel.j : null}
           onSphere={onSphere}
           onPoint={onPoint}
@@ -454,9 +494,10 @@ export function StarExperience({
           }}
           onHoverPt={setHoverPt}
           onHoverZone={setHoverZone}
+          onHoverTip={setHoverTip}
           onDecode={() => scrollTo("decode")}
           open={activeOpen}
-          tip={tip}
+          tip={numberTip(true)}
           onNewStar={() => setNewStar(true)}
         />
       </div>
@@ -542,12 +583,9 @@ export function StarExperience({
               </div>
               <p className="text-base leading-relaxed text-muted min-[1280px]:text-lg">{act.purpose}</p>
               {activeOpen && active !== "soulMission" ? (
-                <div className="flex w-full items-center gap-4 rounded-[20px] border border-line bg-card p-4 min-[1280px]:hidden">
-                  <TriangleSvg width={96} sphere={active} star={model.star} onPoint={onPoint} />
-                  <div className="flex flex-col gap-1.5">
-                    <span className="text-xs text-faint">{t("starPage.fragment")}</span>
-                    <span className="text-[13px] font-semibold">{t("starPage.tapTriangle")}</span>
-                  </div>
+                <div className="flex w-full flex-col items-center gap-3 rounded-[20px] border border-line bg-card px-3 py-5 min-[1280px]:hidden">
+                  <span className="text-xs text-faint">{t("starPage.fragment")}</span>
+                  <TriangleSvg width={248} sphere={active} star={model.star} onPoint={onPoint} />
                 </div>
               ) : null}
             </div>
@@ -633,18 +671,16 @@ export function StarExperience({
             ) : null}
 
             {offerNext && model.nextSphere ? (
-              <div className="mt-4 flex flex-col gap-5 rounded-3xl bg-ink p-9 text-card">
-                <span className="text-[11px] font-bold tracking-[0.22em] text-gold">{t("starPage.nextStep")}</span>
-                <div className="flex items-center gap-4">
+              <div className="mt-4 flex flex-col gap-5 rounded-3xl bg-ink p-6 text-card min-[1280px]:p-9">
+                <div className="flex items-center gap-3">
                   <MiniStar zones={[model.spheres[model.nextSphere].zone]} size={26} onDark />
-                  <div className="flex flex-col gap-1.5">
-                    <span className="font-serif text-[38px] font-medium leading-tight">
-                      {t("starPage.nextLevel", { name: model.spheres[model.nextSphere].name })}
-                    </span>
-                    <span className="text-sm text-[#CFC4BA]">
-                      {t("starPage.lead")}
-                    </span>
-                  </div>
+                  <span className="text-[11px] font-bold tracking-[0.22em] text-gold">{t("starPage.nextStep")}</span>
+                </div>
+                <div className="flex flex-col gap-1.5">
+                  <span className="font-serif text-[32px] font-medium leading-tight min-[1280px]:text-[38px]">
+                    {t("starPage.nextLevel", { name: model.spheres[model.nextSphere].name })}
+                  </span>
+                  <span className="text-sm text-[#CFC4BA]">{t("starPage.lead")}</span>
                 </div>
                 <p className="text-base leading-relaxed text-[#E6DCD2]">{model.spheres[model.nextSphere].purpose}</p>
                 <div className="flex flex-wrap items-center gap-5">
@@ -931,6 +967,7 @@ function StarBlock(props: {
   next: SphereId | null;
   hoverPt: number | null;
   hoverZone: number | null;
+  hoverTip: HoverTip | null;
   selectedPt: number | null;
   labels: Record<SphereId, string>;
   missionLabel: [string, string];
@@ -939,6 +976,7 @@ function StarBlock(props: {
   onMission: () => void;
   onHoverPt: (i: number | null) => void;
   onHoverZone: (i: number | null) => void;
+  onHoverTip: (tip: HoverTip | null) => void;
 }) {
   return (
     <div className="star-ltr" dir="ltr">
@@ -951,6 +989,7 @@ function StarBlock(props: {
         nextSphere={props.next}
         hoverPt={props.hoverPt}
         hoverZone={props.hoverZone}
+        hoverTip={props.hoverTip}
         selectedPt={props.selectedPt}
         labels={props.labels}
         missionLabel={props.missionLabel}
@@ -959,6 +998,7 @@ function StarBlock(props: {
         onMission={props.onMission}
         onHoverPt={props.onHoverPt}
         onHoverZone={props.onHoverZone}
+        onHoverTip={props.onHoverTip}
       />
     </div>
   );
@@ -1135,12 +1175,14 @@ function MobileHero(props: {
   missionLabel: [string, string];
   hoverPt: number | null;
   hoverZone: number | null;
+  hoverTip: HoverTip | null;
   selectedPt: number | null;
   onSphere: (s: SphereId) => void;
   onPoint: (j: number) => void;
   onMission: () => void;
   onHoverPt: (i: number | null) => void;
   onHoverZone: (i: number | null) => void;
+  onHoverTip: (tip: HoverTip | null) => void;
   onDecode: () => void;
   open: boolean;
   tip: React.ReactNode;
@@ -1148,9 +1190,9 @@ function MobileHero(props: {
 }) {
   const { model, t, open } = props;
   return (
-    <div className="relative mx-auto max-w-[430px] overflow-visible pb-10">
+    <div className="relative mx-auto max-w-[430px] overflow-x-clip pb-10">
       <div
-        className="pointer-events-none absolute left-1/2 top-[150px] h-[520px] w-[520px] -translate-x-1/2"
+        className="pointer-events-none absolute inset-x-0 top-[150px] h-[520px]"
         style={{ background: "radial-gradient(closest-side,rgba(242,205,150,.45),rgba(245,240,234,0))" }}
       />
       <div className="relative flex flex-col items-center gap-2.5 px-5 pt-1.5 text-center">
@@ -1179,6 +1221,7 @@ function MobileHero(props: {
             next={model.nextSphere}
             hoverPt={props.hoverPt}
             hoverZone={props.hoverZone}
+            hoverTip={props.hoverTip}
             selectedPt={props.selectedPt}
             labels={props.labels}
             missionLabel={props.missionLabel}
@@ -1187,6 +1230,7 @@ function MobileHero(props: {
             onMission={props.onMission}
             onHoverPt={props.onHoverPt}
             onHoverZone={props.onHoverZone}
+            onHoverTip={props.onHoverTip}
           />
           {props.tip}
         </div>

@@ -66,6 +66,7 @@ export default async function AdminAnalytics({
             <div className="font-sans text-4xl font-semibold">
               <LtrText>{value}</LtrText>
             </div>
+            <div className="mt-1 text-xs text-muted">{t("analyticsPeriod", { range: t(`analyticsRange_${range}`) })}</div>
           </div>
         ))}
       </div>

@@ -1,4 +1,4 @@
-export { reduceToArcana, sumDigits, isValidCalendarDate } from "./reduce";
+export { reduceToArcana, reductionChain, sumDigits, isValidCalendarDate } from "./reduce";
 export { calculateStar, calculateStarFromIso, bridgeIdAtZone } from "./calculate";
 export {
   BOOK_FORMULA,
@@ -6,10 +6,12 @@ export {
   DATE_SOURCES,
   FORMULA_ORDER,
   allowedSumParts,
+  datePartsExpr,
   formulaLabel,
+  formulaWorkbook,
   parseStarFormula
 } from "./formula";
-export type { DateSource, FormulaPointId, PointFormula, StarFormula } from "./formula";
+export type { DateSource, FormulaPointId, PointFormula, StarFormula, WorkbookRow } from "./formula";
 export * from "./types";
 export {
   canonicalMatchKey,

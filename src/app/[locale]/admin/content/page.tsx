@@ -6,6 +6,7 @@ import { productName } from "@/lib/domain/catalog";
 import { parseEditableBody } from "@/lib/domain/content";
 import { demoPointLabel } from "@/lib/domain/demo-content";
 import { saveInterpretationAction } from "../actions";
+import { ClearReadingButton } from "./clear-reading";
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 60;
@@ -220,7 +221,10 @@ export default async function AdminContent({
                   </label>
                 </>
               )}
-              <button className={`${saveBtn} mt-4`}>{t("save")}</button>
+              <div className="mt-4 flex items-center gap-4">
+                <button className={saveBtn}>{t("save")}</button>
+                <ClearReadingButton label={t("contentClear")} />
+              </div>
             </form>
           );
         })}

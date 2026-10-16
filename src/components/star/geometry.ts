@@ -49,6 +49,18 @@ export function starGeometry() {
   return { O, I };
 }
 
+export function sphereInnerDots(zone: number): [Pt, Pt, Pt] {
+  const { O, I } = starGeometry();
+  const A = O[zone];
+  const C1 = I[(zone + 4) % 5];
+  const C2 = I[zone];
+  return [lerp(A, C1, 0.7), lerp(A, C2, 0.7), lerp(C1, C2, 0.5)];
+}
+
+export function starViewBox(mobile: boolean) {
+  return mobile ? { x: -140, y: -132, w: 280, h: 248 } : { x: -138, y: -134, w: 276, h: 250 };
+}
+
 export function lerp(p: Pt, q: Pt, k: number): Pt {
   return [p[0] + (q[0] - p[0]) * k, p[1] + (q[1] - p[1]) * k];
 }

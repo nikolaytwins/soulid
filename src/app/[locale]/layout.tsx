@@ -10,7 +10,6 @@ import { AuthSessionProvider } from "@/components/layout/AuthSessionProvider";
 import { auth } from "@/lib/auth";
 import { claimGuestProfiles } from "@/lib/domain/claim-guest";
 import { Footer } from "@/components/layout/Footer";
-import { HideOnAccount } from "@/components/layout/HideOnAccount";
 import { listNavStars } from "@/lib/domain/nav-stars";
 
 export function generateStaticParams() {
@@ -44,7 +43,7 @@ export default async function LocaleLayout({
           rel="stylesheet"
         />
       </head>
-      <body className="min-h-screen bg-cream font-sans text-ink">
+      <body className="min-h-screen max-w-full overflow-x-clip bg-cream font-sans text-ink">
         <NextIntlClientProvider messages={messages}>
           <AuthSessionProvider>
           <ClientAnalytics />
@@ -63,9 +62,7 @@ export default async function LocaleLayout({
             }
           />
           {children}
-          <HideOnAccount>
-            <Footer />
-          </HideOnAccount>
+          <Footer />
           </AuthSessionProvider>
         </NextIntlClientProvider>
       </body>

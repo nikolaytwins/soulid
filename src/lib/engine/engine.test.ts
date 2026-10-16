@@ -1,7 +1,8 @@
 import { describe, expect, it } from "vitest";
 import { reduceToArcana, sumDigits } from "./reduce";
 import { calculateStar, calculateStarFromIso } from "./calculate";
-import { BOOK_FORMULA, parseStarFormula } from "./formula";
+import { BOOK_FORMULA, formulaWorkbook, parseStarFormula } from "./formula";
+import { reductionChain } from "./reduce";
 import { collectNumberLocations, countDistinctValues, matchPatternRules } from "./patterns";
 import { SPHERE_IDS, sphereSlotKind } from "./types";
 
@@ -119,6 +120,32 @@ describe("calculateStar — book example 05.03.1992", () => {
     const star = calculateStar({ year: 1992, month: 3, day: 5 }, { formula: custom });
     expect(star.core.personality.value).toBe(3);
     expect(calculateStar({ year: 1992, month: 3, day: 5 }).core.personality.value).toBe(5);
+  });
+});
+
+describe("formula workbook (book example 05.03.1992)", () => {
+  it("writes sums the way the book does", () => {
+    const rows = Object.fromEntries(
+      formulaWorkbook({ year: 1992, month: 3, day: 5 }).map((row) => [row.id, row])
+    );
+    expect(rows.personality).toMatchObject({ expr: "5", raw: 5, value: 5 });
+    expect(rows.spirituality).toMatchObject({ expr: "3", raw: 3, value: 3 });
+    expect(rows.money).toMatchObject({ expr: "1 + 9 + 9 + 2", raw: 21, value: 21 });
+    expect(rows.relationships).toMatchObject({ expr: "5 + 3 + 21", raw: 29, value: 11 });
+    expect(rows.health).toMatchObject({ expr: "5 + 3 + 21 + 11", raw: 40, value: 4 });
+    expect(rows.soulMission).toMatchObject({ expr: "5 + 3 + 21 + 11 + 4", raw: 44, value: 8 });
+    expect(rows.p12).toMatchObject({ expr: "5 + 3", raw: 8, value: 8 });
+    expect(rows.p23).toMatchObject({ expr: "3 + 21", raw: 24, value: 6 });
+    expect(rows.p34).toMatchObject({ expr: "21 + 11", raw: 32, value: 5 });
+    expect(rows.p45).toMatchObject({ expr: "11 + 4", raw: 15, value: 15 });
+    expect(rows.p51).toMatchObject({ expr: "4 + 5", raw: 9, value: 9 });
+  });
+
+  it("reduces 29 → 2+9=11 like the book", () => {
+    expect(reductionChain(29)).toEqual({
+      value: 11,
+      steps: [{ from: 29, expr: "2 + 9", to: 11 }]
+    });
   });
 });
 

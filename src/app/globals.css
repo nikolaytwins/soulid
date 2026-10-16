@@ -6,6 +6,8 @@ html,
 body {
   background: #f5f0ea;
   color: #2a211d;
+  max-width: 100%;
+  overflow-x: clip;
   -webkit-font-smoothing: antialiased;
 }
 
