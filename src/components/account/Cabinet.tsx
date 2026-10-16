@@ -6,6 +6,7 @@ import { Link, useRouter } from "@/i18n/routing";
 import { signOutAction } from "@/app/[locale]/auth-actions";
 import {
   createStarAction,
+  deleteAccountAction,
   deleteStarAction,
   saveProfileNameAction,
   updateStarAction
@@ -88,12 +89,14 @@ export function Cabinet({
   paidToast: string | null;
 }) {
   const t = useTranslations("account");
+  const legal = useTranslations("legal");
   const router = useRouter();
   const [selectedId, setSelectedId] = useState<string | null>(initialStarId ?? stars[0]?.id ?? null);
   const [menu, setMenu] = useState(false);
   const [sheet, setSheet] = useState<null | "create" | "edit" | "profile" | "purchases" | "support">(null);
   const [form, setForm] = useState({ name: "", date: "", rel: "partner" as StarRelation });
   const [profileName, setProfileName] = useState(user.name);
+  const [deleteConfirm, setDeleteConfirm] = useState("");
   const [err, setErr] = useState("");
   const [toast, setToast] = useState<string | null>(paidToast);
   const [notify, setNotify] = useState(true);
@@ -211,6 +214,19 @@ export function Cabinet({
       flash(t("toastDeleted", { name: cur.name }));
       setSelectedId(stars.find((s) => s.id !== cur.id)?.id ?? null);
       router.refresh();
+    });
+  }
+
+  function wipeAccount() {
+    const data = new FormData();
+    data.set("confirm", deleteConfirm);
+    start(async () => {
+      const res = await deleteAccountAction(data);
+      if (!res.ok) {
+        setErr(res.error === "confirm" ? t("deleteConfirmErr") : t("errGeneric"));
+        return;
+      }
+      window.location.href = "/";
     });
   }
 
@@ -588,6 +604,7 @@ export function Cabinet({
                   </span>
                 ) : null}
               </div>
+              <p style={{ margin: 0, fontSize: 11, lineHeight: 1.45, color: "#A8988C" }}>{legal("disclaimer")}</p>
             </div>
           </div>
         ) : null}
@@ -903,6 +920,24 @@ export function Cabinet({
                 <Link href="/forgot-password" className="text-center text-sm font-semibold">
                   {t("changePassword")}
                 </Link>
+                <a href="/api/me/export" className="text-center text-sm font-semibold">
+                  {t("exportData")}
+                </a>
+                <p style={{ fontSize: 13, color: "#8E8178", lineHeight: 1.5 }}>{t("deleteLead")}</p>
+                <input
+                  value={deleteConfirm}
+                  onChange={(e) => setDeleteConfirm(e.target.value)}
+                  placeholder={user.email}
+                  style={inputStyle}
+                />
+                <button
+                  type="button"
+                  onClick={wipeAccount}
+                  disabled={pending}
+                  style={{ background: "none", border: "none", color: "#A4472F", fontSize: 14, fontWeight: 600, cursor: "pointer", minHeight: 44 }}
+                >
+                  {t("deleteAccount")}
+                </button>
               </>
             ) : null}
 

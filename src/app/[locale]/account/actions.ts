@@ -98,6 +98,23 @@ export async function deleteStarAction(form: FormData) {
   return { ok: true as const };
 }
 
+export async function deleteAccountAction(form: FormData) {
+  const user = await requireUser();
+  if (!user) return { ok: false as const, error: "auth" };
+  const confirm = String(form.get("confirm") ?? "").trim().toLowerCase();
+  if (confirm !== user.email.toLowerCase()) return { ok: false as const, error: "confirm" };
+  const { deleteUserData } = await import("@/lib/privacy");
+  const res = await deleteUserData(user.id);
+  if (!res.ok) return { ok: false as const, error: res.error };
+  try {
+    const { signOut } = await import("@/lib/auth");
+    await signOut({ redirect: false });
+  } catch {
+    /* session cookie may already be invalid */
+  }
+  return { ok: true as const };
+}
+
 export async function saveProfileNameAction(form: FormData) {
   const user = await requireUser();
   if (!user) return { ok: false as const, error: "auth" };

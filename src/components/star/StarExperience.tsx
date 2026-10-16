@@ -12,6 +12,7 @@ import { starGeometry } from "./geometry";
 import type { ArcReading, StarPageModel } from "@/lib/domain/star-page";
 import type { PatternReading } from "@/lib/domain/patterns";
 import { trackPixel } from "@/components/analytics/MetaPixel";
+import { trackClient } from "@/components/analytics/ids";
 import { signIn } from "next-auth/react";
 import { LtrText } from "@/components/ui/LtrText";
 
@@ -70,11 +71,7 @@ export function StarExperience({
       }
     };
     window.addEventListener("keydown", onK);
-    fetch("/api/analytics", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name: "sphere_viewed", profileId: model.profileId, payload: { sphere: firstOpen } })
-    }).catch(() => undefined);
+    trackClient("sphere_viewed", { profileId: model.profileId, payload: { sphere: firstOpen } });
     return () => {
       mq.removeEventListener("change", apply);
       window.removeEventListener("keydown", onK);
@@ -99,20 +96,16 @@ export function StarExperience({
     if (unlocked.has(k)) {
       setActive(k);
       setPanel(null);
-      fetch("/api/analytics", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name: "sphere_viewed", profileId: model.profileId, payload: { sphere: k } })
-      }).catch(() => undefined);
+      trackClient("sphere_viewed", { profileId: model.profileId, payload: { sphere: k } });
       return;
     }
-    fetch("/api/analytics", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name: "locked_sphere_clicked", profileId: model.profileId, payload: { sphere: k } })
-    }).catch(() => undefined);
-    if (k === model.nextSphere) setPanel({ type: "offer", k });
-    else setPanel({ type: "blocked", k });
+    trackClient("locked_sphere_clicked", { profileId: model.profileId, payload: { sphere: k } });
+    if (k === model.nextSphere) {
+      trackClient("unlock_intent", { profileId: model.profileId, payload: { sphere: k } });
+      setPanel({ type: "offer", k });
+    } else {
+      setPanel({ type: "blocked", k });
+    }
     setWhy(false);
     setHoverPt(null);
   }
@@ -120,11 +113,7 @@ export function StarExperience({
   function onMission() {
     setActive("soulMission");
     setPanel(null);
-    fetch("/api/analytics", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name: "sphere_viewed", profileId: model.profileId, payload: { sphere: "soulMission" } })
-    }).catch(() => undefined);
+    trackClient("sphere_viewed", { profileId: model.profileId, payload: { sphere: "soulMission" } });
   }
 
   function ptSpheres(j: number): SphereId[] {
@@ -226,6 +215,12 @@ export function StarExperience({
   const viewingMission = active === "soulMission";
   const nOpen = model.unlocked.length;
   const missionOpen = nOpen >= 5;
+
+  function skuForSphere(k: SphereId): string | undefined {
+    const price = model.prices[k];
+    if (price?.soldSeparately) return price.sku;
+    return model.bundle?.sku;
+  }
   const act =
     active === "soulMission"
       ? {
@@ -380,11 +375,6 @@ export function StarExperience({
       return;
     }
     const actual = pendingSku ?? sku;
-    fetch("/api/analytics", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name: "checkout_started", profileId: model.profileId, payload: { sku: actual } })
-    }).catch(() => undefined);
     await buy(actual);
   }
 
@@ -517,6 +507,7 @@ export function StarExperience({
                 ) : null}
               </div>
               <div className="h-px bg-line" />
+              {activeOpen ? (
               <div className="flex flex-col gap-1">
                 <span className="pb-1.5 text-[11px] font-semibold tracking-[0.18em] text-faint">{t("starPage.contents")}</span>
                 {arcs.map((ar) => (
@@ -536,6 +527,7 @@ export function StarExperience({
                   </button>
                 ))}
               </div>
+              ) : null}
             </aside>
 
           <div className="flex max-w-[720px] flex-col gap-10 px-5 min-[1280px]:px-0">
@@ -663,26 +655,33 @@ export function StarExperience({
                 </div>
                 <p className="text-base leading-relaxed text-[#E6DCD2]">{model.spheres[model.nextSphere].purpose}</p>
                 <div className="flex flex-wrap items-center gap-5">
-                  <button
-                    type="button"
-                    disabled={busy}
-                    onClick={() => goCheckout(model.prices[model.nextSphere!].sku)}
-                    className="rounded-[14px] bg-gold px-6 py-4 text-[15px] font-bold text-ink"
-                  >
-                    {t("starPage.openSpherePrice", { price: model.prices[model.nextSphere].formatted })}
-                  </button>
+                  {model.prices[model.nextSphere]?.soldSeparately ? (
+                    <button
+                      type="button"
+                      disabled={busy}
+                      onClick={() => goCheckout(model.prices[model.nextSphere!].sku)}
+                      className="rounded-[14px] bg-gold px-6 py-4 text-[15px] font-bold text-ink"
+                    >
+                      {t("starPage.openSpherePrice", { price: model.prices[model.nextSphere].formatted })}
+                    </button>
+                  ) : null}
                   {model.showBundle && model.bundle && nOpen < 5 ? (
                     <button
                       type="button"
                       disabled={busy}
                       onClick={() => goCheckout(model.bundle!.sku)}
-                      className="bg-transparent p-2 text-sm text-[#CFC4BA] underline underline-offset-4"
+                      className={
+                        model.prices[model.nextSphere]?.soldSeparately
+                          ? "bg-transparent p-2 text-sm text-[#CFC4BA] underline underline-offset-4"
+                          : "rounded-[14px] bg-gold px-6 py-4 text-[15px] font-bold text-ink"
+                      }
                     >
                       {t("starPage.unlockAll", { price: model.bundle.formatted })}
                     </button>
                   ) : null}
                 </div>
                 {!model.loggedIn ? <p className="text-sm text-[#CFC4BA]">{t("offer.emailLead")}</p> : null}
+                <p className="text-[11px] leading-relaxed text-[#A8988C]">{t("legal.disclaimer")}</p>
                 {payError ? <p className="text-sm text-red-400">{payError}</p> : null}
               </div>
             ) : null}
@@ -837,24 +836,31 @@ export function StarExperience({
                     )}
                   </div>
                 ) : null}
-                <button
-                  type="button"
-                  disabled={busy}
-                  onClick={() => goCheckout(pendingSku ?? model.prices[panel.k].sku)}
-                  className="min-h-[50px] rounded-[14px] bg-ink py-4 text-[15px] font-semibold text-card"
-                >
-                  {t("starPage.openSpherePrice", { price: model.prices[panel.k].formatted })}
-                </button>
+                {model.prices[panel.k]?.soldSeparately ? (
+                  <button
+                    type="button"
+                    disabled={busy}
+                    onClick={() => goCheckout(pendingSku ?? skuForSphere(panel.k) ?? model.prices[panel.k].sku)}
+                    className="min-h-[50px] rounded-[14px] bg-ink py-4 text-[15px] font-semibold text-card"
+                  >
+                    {t("starPage.openSpherePrice", { price: model.prices[panel.k].formatted })}
+                  </button>
+                ) : null}
                 {model.showBundle && model.bundle && nOpen < 5 ? (
                   <button
                     type="button"
                     disabled={busy}
                     onClick={() => goCheckout(model.bundle!.sku)}
-                    className="min-h-11 bg-transparent text-sm text-gold-deep underline underline-offset-4"
+                    className={
+                      model.prices[panel.k]?.soldSeparately
+                        ? "min-h-11 bg-transparent text-sm text-gold-deep underline underline-offset-4"
+                        : "min-h-[50px] rounded-[14px] bg-ink py-4 text-[15px] font-semibold text-card"
+                    }
                   >
                     {t("starPage.unlockAll", { price: model.bundle.formatted })}
                   </button>
                 ) : null}
+                <p className="text-[11px] leading-relaxed text-faint">{t("legal.disclaimer")}</p>
                 {payError ? <p className="text-sm text-red-700">{payError}</p> : null}
                 <button type="button" onClick={close} className="min-h-11 bg-transparent text-sm text-muted">
                   {t("offer.notNow")}

@@ -239,6 +239,8 @@ model AnalyticsEvent {
   userId      String?
   user        User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
   profileId   String?
+  visitorId   String?
+  sessionId   String?
   name        String
   eventId     String
   locale      String?
@@ -252,7 +254,34 @@ model AnalyticsEvent {
 
   @@index([name, createdAt])
   @@index([eventId])
+  @@index([visitorId, createdAt])
+  @@index([sessionId])
   @@map("analytics_events")
+}
+
+model LedgerEvent {
+  id                String   @id @default(cuid())
+  kind              String
+  actorType         String
+  actorId           String?
+  userId            String?
+  profileId         String?
+  purchaseId        String?
+  sku               String?
+  amount            Int?
+  currency          String?
+  provider          String?
+  providerPaymentId String?
+  spheresJson       String   @default("[]")
+  summary           String
+  payload           String   @default("{}")
+  createdAt         DateTime @default(now())
+
+  @@index([createdAt])
+  @@index([kind, createdAt])
+  @@index([purchaseId, createdAt])
+  @@index([userId, createdAt])
+  @@map("ledger_events")
 }
 
 model SiteSetting {

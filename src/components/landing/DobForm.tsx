@@ -99,6 +99,7 @@ export function DobForm({
       >
         {pending ? "…" : t("cta")}
       </button>
+      <p className="text-[11px] leading-relaxed text-faint">{months("legal.disclaimer")}</p>
     </form>
   );
 }

@@ -6,7 +6,8 @@ export const dynamic = "force-dynamic";
 
 export default async function AdminHome() {
   const t = await getTranslations("admin");
-  const [users, purchases, profiles, paid, recent] = await Promise.all([
+  const week = new Date(Date.now() - 7 * 86_400_000);
+  const [users, purchases, profiles, paid, recent, visits] = await Promise.all([
     prisma.user.count(),
     prisma.purchase.count(),
     prisma.birthProfile.count(),
@@ -15,9 +16,15 @@ export default async function AdminHome() {
       orderBy: { createdAt: "desc" },
       take: 8,
       include: { _count: { select: { profiles: true } } }
+    }),
+    prisma.analyticsEvent.findMany({
+      where: { createdAt: { gte: week }, sessionId: { not: null } },
+      distinct: ["sessionId"],
+      select: { sessionId: true }
     })
   ]);
   const cards = [
+    [t("analyticsVisits"), visits.length, "/admin/analytics"],
     [t("users"), users, "/admin/users"],
     [t("profiles"), profiles, "/admin/users"],
     [t("purchases"), purchases, "/admin/purchases"],

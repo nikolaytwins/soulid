@@ -2,6 +2,13 @@ import { prisma } from "@/lib/db";
 
 export function formatMoney(amountMinor: number, currency: string, locale: string): string {
   const major = amountMinor / 100;
+  if (currency === "USD") {
+    return new Intl.NumberFormat("en-US", {
+      style: "currency",
+      currency: "USD",
+      maximumFractionDigits: 0
+    }).format(major);
+  }
   if (currency === "RUB") {
     const formatted = new Intl.NumberFormat(locale === "en" ? "en-US" : locale === "ar" ? "ar" : "ru-RU", {
       maximumFractionDigits: 0
@@ -17,6 +24,15 @@ export function formatMoney(amountMinor: number, currency: string, locale: strin
   } catch {
     return `${major} ${currency}`;
   }
+}
+
+export function isIndividuallySold(product: {
+  kind: string;
+  isFree: boolean;
+  isActive: boolean;
+  priceAmount: number;
+}): boolean {
+  return product.kind === "sphere" && product.isActive && !product.isFree && product.priceAmount > 0;
 }
 
 export async function getProductBySku(sku: string) {

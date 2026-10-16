@@ -1,8 +1,52 @@
 import { prisma } from "@/lib/db";
+import { cookies } from "next/headers";
 import { createHash, randomUUID } from "node:crypto";
+import { readUtmCookie, SESSION_COOKIE, VISITOR_COOKIE } from "@/lib/utm";
 
 export function newEventId(): string {
   return randomUUID();
+}
+
+export type AnalyticsContext = {
+  visitorId?: string;
+  sessionId?: string;
+  utmSource?: string | null;
+  utmMedium?: string | null;
+  utmCampaign?: string | null;
+  referrer?: string | null;
+  path?: string;
+};
+
+export async function analyticsFromCookies(): Promise<AnalyticsContext> {
+  const jar = await cookies();
+  const utm = readUtmCookie(jar.get("ss_utm")?.value);
+  return {
+    visitorId: jar.get(VISITOR_COOKIE)?.value,
+    sessionId: jar.get(SESSION_COOKIE)?.value,
+    utmSource: utm.utmSource,
+    utmMedium: utm.utmMedium,
+    utmCampaign: utm.utmCampaign,
+    referrer: utm.referrer,
+    path: utm.landingPage
+  };
+}
+
+export async function visitorForUser(userId: string | null | undefined): Promise<AnalyticsContext> {
+  if (!userId) return {};
+  const last = await prisma.analyticsEvent.findFirst({
+    where: { userId, visitorId: { not: null } },
+    orderBy: { createdAt: "desc" },
+    select: { visitorId: true, sessionId: true, utmSource: true, utmMedium: true, utmCampaign: true, referrer: true }
+  });
+  if (!last) return {};
+  return {
+    visitorId: last.visitorId ?? undefined,
+    sessionId: last.sessionId ?? undefined,
+    utmSource: last.utmSource,
+    utmMedium: last.utmMedium,
+    utmCampaign: last.utmCampaign,
+    referrer: last.referrer
+  };
 }
 
 export async function trackEvent(params: {
@@ -10,6 +54,8 @@ export async function trackEvent(params: {
   eventId?: string;
   userId?: string | null;
   profileId?: string | null;
+  visitorId?: string | null;
+  sessionId?: string | null;
   locale?: string;
   path?: string;
   utmSource?: string | null;
@@ -23,15 +69,17 @@ export async function trackEvent(params: {
     data: {
       name: params.name,
       eventId,
-      userId: params.userId ?? undefined,
-      profileId: params.profileId ?? undefined,
-      locale: params.locale,
-      path: params.path,
-      utmSource: params.utmSource ?? undefined,
-      utmMedium: params.utmMedium ?? undefined,
-      utmCampaign: params.utmCampaign ?? undefined,
-      referrer: params.referrer ?? undefined,
-      payload: JSON.stringify(params.payload ?? {})
+      payload: JSON.stringify(params.payload ?? {}),
+      ...(params.userId ? { userId: params.userId } : {}),
+      ...(params.profileId ? { profileId: params.profileId } : {}),
+      ...(params.visitorId ? { visitorId: params.visitorId } : {}),
+      ...(params.sessionId ? { sessionId: params.sessionId } : {}),
+      ...(params.locale ? { locale: params.locale } : {}),
+      ...(params.path ? { path: params.path } : {}),
+      ...(params.utmSource ? { utmSource: params.utmSource } : {}),
+      ...(params.utmMedium ? { utmMedium: params.utmMedium } : {}),
+      ...(params.utmCampaign ? { utmCampaign: params.utmCampaign } : {}),
+      ...(params.referrer ? { referrer: params.referrer } : {})
     }
   });
   return eventId;

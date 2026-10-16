@@ -7,6 +7,7 @@ import { createAuthTicket, userHasPassword } from "@/lib/auth-ticket";
 import { isBlocked } from "@/lib/auth-password";
 import { ensureFreeEntitlements } from "@/lib/domain/access";
 import { rateLimit, clientIp } from "@/lib/rate-limit";
+import { analyticsFromCookies, trackEvent } from "@/lib/analytics";
 
 const schema = z.object({
   email: z.string().email(),
@@ -77,6 +78,15 @@ export async function POST(req: Request) {
     });
   }
   await ensureFreeEntitlements({ userId: user.id, profileId: profile.id });
+
+  const analytics = await analyticsFromCookies();
+  await trackEvent({
+    name: "email_captured",
+    userId: user.id,
+    profileId: profile.id,
+    ...analytics,
+    payload: { newUser: !userHasPassword(user.passwordHash) }
+  }).catch((err) => console.error("identify analytics failed", err));
 
   return NextResponse.json({
     status: "ticket" as const,

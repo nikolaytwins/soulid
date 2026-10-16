@@ -5,7 +5,7 @@ import { routing, isRtl, type AppLocale } from "@/i18n/routing";
 import "../globals.css";
 import { Header } from "@/components/layout/Header";
 import { MetaPixel } from "@/components/analytics/MetaPixel";
-import { UtmCapture } from "@/components/analytics/UtmCapture";
+import { ClientAnalytics } from "@/components/analytics/ClientAnalytics";
 import { AuthSessionProvider } from "@/components/layout/AuthSessionProvider";
 import { auth } from "@/lib/auth";
 import { claimGuestProfiles } from "@/lib/domain/claim-guest";
@@ -45,7 +45,7 @@ export default async function LocaleLayout({
       <body className="min-h-screen bg-cream font-sans text-ink">
         <NextIntlClientProvider messages={messages}>
           <AuthSessionProvider>
-          <UtmCapture />
+          <ClientAnalytics />
           <MetaPixel />
           <Header
             locale={locale}

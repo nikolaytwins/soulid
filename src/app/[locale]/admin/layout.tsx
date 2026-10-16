@@ -27,6 +27,7 @@ export default async function AdminLayout({
   const t = await getTranslations("admin");
   const items = [
     { href: "/admin", label: t("overview") },
+    { href: "/admin/analytics", label: t("analytics") },
     { href: "/admin/users", label: t("users") },
     { href: "/admin/purchases", label: t("purchases") },
     { href: "/admin/content", label: t("content") },

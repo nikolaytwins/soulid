@@ -16,11 +16,11 @@ export async function saveProductPriceAction(form: FormData) {
   if (!admin) return;
   const id = String(form.get("id"));
   const isFree = form.get("isFree") === "1" || form.get("isFree") === "on";
-  const rubles = Number(String(form.get("rubles") ?? "").replace(",", "."));
-  const priceAmount = Number.isFinite(rubles) ? Math.max(0, Math.round(rubles * 100)) : 0;
+  const major = Number(String(form.get("amount") ?? form.get("rubles") ?? "").replace(",", "."));
+  const priceAmount = Number.isFinite(major) ? Math.max(0, Math.round(major * 100)) : 0;
   await prisma.product.update({
     where: { id },
-    data: isFree ? { isFree: true } : { isFree: false, priceAmount }
+    data: isFree ? { isFree: true, priceAmount: 0 } : { isFree: false, priceAmount, currency: "USD" }
   });
   revalidateCatalog();
 }

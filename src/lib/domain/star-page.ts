@@ -1,7 +1,7 @@
 import { prisma } from "@/lib/db";
 import { calculateStarFromIso, SPHERE_IDS, sphereSlotKind, type SphereId, type StarResult } from "@/lib/engine";
 import { ensureFreeEntitlements, getUnlockOrder, getUnlockedSpheres, nextPurchasable } from "@/lib/domain/access";
-import { formatMoney, productName } from "@/lib/domain/catalog";
+import { formatMoney, isIndividuallySold, productName } from "@/lib/domain/catalog";
 import { getInterpretation, type ContentBlock } from "@/lib/domain/content";
 import { formatDob } from "@/lib/domain/dob";
 
@@ -33,7 +33,7 @@ export type StarPageModel = {
   unlocked: SphereId[];
   nextSphere: SphereId | null;
   spheres: Record<SphereId, SphereCopy>;
-  prices: Record<SphereId, { sku: string; amount: number; formatted: string; isFree: boolean }>;
+  prices: Record<SphereId, { sku: string; amount: number; formatted: string; isFree: boolean; soldSeparately: boolean }>;
   bundle: { sku: string; amount: number; formatted: string } | null;
   showBundle: boolean;
   loggedIn: boolean;
@@ -63,6 +63,16 @@ function loc<T extends { ru: string; en: string; ar: string }>(obj: T, locale: s
 export async function loadStarPage(profileId: string, locale: string, userId: string | null): Promise<StarPageModel | null> {
   const profile = await prisma.birthProfile.findUnique({ where: { id: profileId } });
   if (!profile) return null;
+  if (userId) {
+    const viewer = await prisma.user.findUnique({
+      where: { id: userId },
+      select: { role: true, blockedAt: true }
+    });
+    if (!viewer || viewer.blockedAt) {
+      if (profile.userId) return null;
+      userId = null;
+    }
+  }
   if (profile.userId) {
     if (!userId) return null;
     if (profile.userId !== userId) {
@@ -108,7 +118,8 @@ export async function loadStarPage(profileId: string, locale: string, userId: st
         sku: product.sku,
         amount: product.priceAmount,
         formatted: formatMoney(product.priceAmount, product.currency, locale),
-        isFree: product.isFree
+        isFree: product.isFree,
+        soldSeparately: isIndividuallySold(product)
       };
     }
   }

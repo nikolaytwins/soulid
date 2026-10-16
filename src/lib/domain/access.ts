@@ -1,6 +1,10 @@
 import { prisma } from "@/lib/db";
 import type { SphereId } from "@/lib/engine";
 import { SPHERE_IDS } from "@/lib/engine";
+import { entitlementIsReadable } from "@/lib/domain/access-gate";
+import { appendLedger } from "@/lib/ledger";
+
+export { entitlementIsReadable } from "@/lib/domain/access-gate";
 
 export type AccessState = "open" | "next" | "locked";
 
@@ -11,8 +15,20 @@ export async function getUnlockOrder(): Promise<SphereId[]> {
 }
 
 export async function getUnlockedSpheres(profileId: string): Promise<Set<SphereId>> {
-  const rows = await prisma.entitlement.findMany({ where: { profileId } });
-  return new Set(rows.map((r) => r.sphere as SphereId));
+  const [rows, free] = await Promise.all([
+    prisma.entitlement.findMany({
+      where: { profileId },
+      include: { purchase: { select: { status: true, paidAt: true } } }
+    }),
+    prisma.product.findMany({
+      where: { isFree: true, kind: "sphere", isActive: true, sphere: { not: null } },
+      select: { sphere: true }
+    })
+  ]);
+  const freeSpheres = new Set(free.map((p) => p.sphere).filter((s): s is string => Boolean(s)));
+  return new Set(
+    rows.filter((row) => entitlementIsReadable(row, freeSpheres)).map((row) => row.sphere as SphereId)
+  );
 }
 
 export async function ensureFreeEntitlements(params: {
@@ -73,15 +89,48 @@ export async function grantSpheres(params: {
       }
     });
   }
+  if (params.spheres.length) {
+    await appendLedger({
+      kind: params.source === ADMIN_ENTITLEMENT_SOURCE ? "entitlement.admin_grant" : "entitlement.granted",
+      actorType: params.source === ADMIN_ENTITLEMENT_SOURCE ? "admin" : "system",
+      userId: params.userId,
+      profileId: params.profileId,
+      purchaseId: params.purchaseId,
+      spheres: params.spheres,
+      summary:
+        params.source === ADMIN_ENTITLEMENT_SOURCE
+          ? `Admin granted ${params.spheres.join(", ")}`
+          : `Granted ${params.spheres.join(", ")} via ${params.source}`
+    });
+  }
 }
 
 export async function revokeSpheres(params: { profileId: string; spheres?: SphereId[] }): Promise<void> {
+  const profile = await prisma.birthProfile.findUnique({
+    where: { id: params.profileId },
+    select: { userId: true }
+  });
   if (!params.spheres || params.spheres.length === 0) {
     await prisma.entitlement.deleteMany({ where: { profileId: params.profileId } });
+    await appendLedger({
+      kind: "entitlement.revoked",
+      actorType: "admin",
+      userId: profile?.userId,
+      profileId: params.profileId,
+      summary: "All spheres reset"
+    });
     return;
   }
   await prisma.entitlement.deleteMany({
     where: { profileId: params.profileId, sphere: { in: params.spheres } }
+  });
+  await appendLedger({
+    kind: "entitlement.revoked",
+    actorType: "admin",
+    userId: profile?.userId,
+    profileId: params.profileId,
+    spheres: params.spheres,
+    summary: `Revoked ${params.spheres.join(", ")}`
   });
 }
 

@@ -11,9 +11,10 @@ import {
 } from "@/lib/domain/access";
 import { randomUUID } from "node:crypto";
 import { z } from "zod";
-import { productName } from "@/lib/domain/catalog";
+import { isIndividuallySold, productName } from "@/lib/domain/catalog";
 import { rateLimit, clientIp } from "@/lib/rate-limit";
-import { trackEvent, newEventId } from "@/lib/analytics";
+import { analyticsFromCookies, trackEvent, newEventId } from "@/lib/analytics";
+import { appendLedger } from "@/lib/ledger";
 
 const schema = z.object({
   profileId: z.string().min(1),
@@ -55,6 +56,9 @@ export async function POST(req: Request) {
   const order = await getUnlockOrder();
   const unlocked = await getUnlockedSpheres(profile.id);
   if (product.kind === "sphere" && product.sphere) {
+    if (!isIndividuallySold(product)) {
+      return NextResponse.json({ error: "Sphere is only available in the complete package" }, { status: 400 });
+    }
     const next = nextPurchasable(order, unlocked);
     if (next !== product.sphere) {
       return NextResponse.json({ error: "Sphere is not the next available purchase" }, { status: 400 });
@@ -90,6 +94,19 @@ export async function POST(req: Request) {
         eventId,
         metadataJson: JSON.stringify({ sku: product.sku, sphere: product.sphere })
       }
+    });
+    await appendLedger({
+      kind: "checkout.created",
+      actorType: "user",
+      actorId: session.user.id,
+      userId: session.user.id,
+      profileId: profile.id,
+      purchaseId: purchase.id,
+      sku: product.sku,
+      amount: 0,
+      currency: product.currency,
+      provider: "free",
+      summary: `Checkout ${product.sku}`
     });
     const { fulfillPaidPurchase } = await import("@/lib/payments/fulfill");
     await fulfillPaidPurchase(purchase.id);
@@ -138,12 +155,28 @@ export async function POST(req: Request) {
     where: { id: purchase.id },
     data: { providerPaymentId: checkout.id, provider: checkout.provider }
   });
+  await appendLedger({
+    kind: "checkout.created",
+    actorType: "user",
+    actorId: session.user.id,
+    userId: session.user.id,
+    profileId: profile.id,
+    purchaseId: purchase.id,
+    sku: product.sku,
+    amount: product.priceAmount,
+    currency: product.currency,
+    provider: checkout.provider,
+    providerPaymentId: checkout.id,
+    summary: `Checkout ${product.sku}`
+  });
 
+  const analytics = await analyticsFromCookies();
   await trackEvent({
     name: "checkout_started",
     eventId,
     userId: session.user.id,
     profileId: profile.id,
+    ...analytics,
     payload: { sku: product.sku }
   });
 

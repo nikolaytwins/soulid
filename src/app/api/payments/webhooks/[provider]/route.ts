@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { fulfillPaidPurchase } from "@/lib/payments/fulfill";
 import { providerByName } from "@/lib/payments/provider";
+import { appendLedger } from "@/lib/ledger";
 
 async function handle(providerName: string, req: Request) {
   const raw = await req.text();
@@ -36,6 +37,19 @@ async function handle(providerName: string, req: Request) {
     await prisma.purchase.update({
       where: { id: purchaseId },
       data: { status: parsed.status, providerPaymentId: parsed.providerPaymentId }
+    });
+    await appendLedger({
+      kind: parsed.status === "canceled" ? "payment.canceled" : "payment.failed",
+      actorType: "webhook",
+      userId: purchase.userId,
+      profileId: purchase.profileId,
+      purchaseId: purchase.id,
+      sku: undefined,
+      amount: purchase.amount,
+      currency: purchase.currency,
+      provider: providerName,
+      providerPaymentId: parsed.providerPaymentId,
+      summary: `Payment ${parsed.status}`
     });
   }
 

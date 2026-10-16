@@ -12,13 +12,13 @@ const SPHERES = [
     id: "personality",
     sku: "sphere_personality",
     sort: 0,
-    free: true,
-    price: 0,
-    names: { ru: "Личность", en: "Personality", ar: "الشخصية" },
+    free: false,
+    price: 2500,
+    names: { ru: "Таланты", en: "Talents", ar: "المواهب" },
     desc: {
-      ru: "Разбор этой сферы раскрывает значения, связанные с личностью и проявлением человека.",
-      en: "This sphere reveals the numbers connected to personality and how a person shows up in the world.",
-      ar: "يكشف هذا المجال القيم المرتبطة بالشخصية وكيفية ظهور الإنسان في العالم."
+      ru: "Способности и сильные стороны",
+      en: "Abilities and strengths",
+      ar: "القدرات ونقاط القوة"
     },
     part: { ru: "Левая часть звезды", en: "Left point of the star", ar: "الرأس الأيسر للنجمة" }
   },
@@ -27,12 +27,12 @@ const SPHERES = [
     sku: "sphere_spirituality",
     sort: 1,
     free: false,
-    price: 49000,
+    price: 2500,
     names: { ru: "Духовность", en: "Spirituality", ar: "الروحانية" },
     desc: {
-      ru: "Разбор сферы духовности и соответствующих значений вашей звезды.",
-      en: "A reading of the spirituality sphere and the numbers that belong to it.",
-      ar: "قراءة مجال الروحانية والقيم المرتبطة بها في نجمتك."
+      ru: "Внутренние установки и смыслы",
+      en: "Inner attitudes and meanings",
+      ar: "التوجهات الداخلية والمعاني"
     },
     part: { ru: "Верхняя часть звезды", en: "Top point of the star", ar: "الرأس العلوي للنجمة" }
   },
@@ -41,12 +41,12 @@ const SPHERES = [
     sku: "sphere_money",
     sort: 2,
     free: false,
-    price: 49000,
-    names: { ru: "Реализация", en: "Realization", ar: "المال وتحقيق الذات" },
+    price: 2500,
+    names: { ru: "Реализация и деньги", en: "Realization & Money", ar: "المال وتحقيق الذات" },
     desc: {
-      ru: "Разбор значений, относящихся к сфере реализации.",
-      en: "A reading of the numbers that belong to realization and money.",
-      ar: "قراءة القيم المرتبطة بمجال المال وتحقيق الذات."
+      ru: "Реализация и деньги",
+      en: "Realization and money",
+      ar: "المال وتحقيق الذات"
     },
     part: { ru: "Правая часть звезды", en: "Right point of the star", ar: "الرأس الأيمن للنجمة" }
   },
@@ -55,12 +55,12 @@ const SPHERES = [
     sku: "sphere_relationships",
     sort: 3,
     free: false,
-    price: 49000,
+    price: 2500,
     names: { ru: "Отношения", en: "Relationships", ar: "العلاقات" },
     desc: {
-      ru: "Разбор значений сферы отношений.",
-      en: "A reading of the relationship sphere.",
-      ar: "قراءة مجال العلاقات."
+      ru: "Отношения и сценарии",
+      en: "Relationships and scenarios",
+      ar: "العلاقات والسيناريوهات"
     },
     part: { ru: "Нижняя правая часть звезды", en: "Lower-right point of the star", ar: "الرأس الأيمن السفلي" }
   },
@@ -69,12 +69,12 @@ const SPHERES = [
     sku: "sphere_health",
     sort: 4,
     free: false,
-    price: 49000,
+    price: 0,
     names: { ru: "Здоровье", en: "Health", ar: "الصحة" },
     desc: {
-      ru: "Разбор значений сферы здоровья.",
-      en: "A reading of the health sphere.",
-      ar: "قراءة مجال الصحة."
+      ru: "В подарок с полным Soul ID",
+      en: "A gift with Complete Soul ID",
+      ar: "هدية مع Soul ID الكامل"
     },
     part: { ru: "Нижняя левая часть звезды", en: "Lower-left point of the star", ar: "الرأس الأيسر السفلي" }
   }
@@ -131,7 +131,7 @@ async function main() {
         kind: "sphere",
         sortOrder: s.sort,
         priceAmount: s.price,
-        currency: "RUB",
+        currency: "USD",
         isFree: s.free,
         isActive: true
       }
@@ -154,16 +154,16 @@ async function main() {
       sphere: null,
       kind: "bundle",
       sortOrder: 99,
-      priceAmount: 149000,
-      currency: "RUB",
+      priceAmount: 6900,
+      currency: "USD",
       isFree: false
     }
   });
   await prisma.productTranslation.createMany({
     data: [
-      { productId: bundle.id, locale: "ru", name: "Открыть всю звезду", description: "Пакет Unlock Everything — все оставшиеся сферы сразу." },
-      { productId: bundle.id, locale: "en", name: "Unlock everything", description: "Unlock remaining spheres at once." },
-      { productId: bundle.id, locale: "ar", name: "فتح النجمة كاملة", description: "فتح كل المجالات المتبقية دفعة واحدة." }
+      { productId: bundle.id, locale: "ru", name: "Полный Soul ID", description: "Все четыре раздела + Здоровье в подарок" },
+      { productId: bundle.id, locale: "en", name: "Complete Soul ID", description: "All four sections + Health as a gift" },
+      { productId: bundle.id, locale: "ar", name: "Soul ID الكامل", description: "الأقسام الأربعة كلها + الصحة هدية" }
     ]
   });
 
@@ -337,7 +337,7 @@ async function main() {
           userId,
           profileId: profile.id,
           sphere,
-          source: sphere === "personality" ? "free" : "admin"
+          source: "admin"
         }
       });
     }

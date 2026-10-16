@@ -22,7 +22,7 @@ export async function GET(req: Request) {
     <h1 style="font-family:'Cormorant Garamond',Georgia,serif;font-size:36px;margin:0;font-weight:500">${name}</h1>
     <p style="color:#5E534C;line-height:1.5">Тестовый платёж. В production здесь Stripe или ЮKassa / СБП.</p>
     <div style="display:flex;justify-content:space-between;align-items:baseline;border-top:1px solid rgba(80,60,45,.1);padding-top:12px">
-      <span>Сумма</span><b>${escapeHtml(String(Math.round(Number(amount) / 100)))} ${escapeHtml(currency)}</b>
+      <span>Сумма</span><b>${escapeHtml(currency === "USD" ? `$${Math.round(Number(amount) / 100)}` : `${Math.round(Number(amount) / 100)} ${currency}`)}</b>
     </div>
     <input type="hidden" name="session" value="${escapeHtml(session)}"/>
     <input type="hidden" name="return" value="${escapeHtml(ret)}"/>
@@ -31,6 +31,7 @@ export async function GET(req: Request) {
     <input type="hidden" name="amount" value="${escapeHtml(amount)}"/>
     <input type="hidden" name="currency" value="${escapeHtml(currency)}"/>
     <button name="result" value="paid" style="background:#2A211D;color:#FBF8F4;border:none;border-radius:14px;padding:16px;font-weight:600;cursor:pointer">Оплатить</button>
+    <p style="margin:0;font-size:11px;line-height:1.45;color:#8E8178">Soul ID носит ознакомительный характер: не ставит медицинских диагнозов, не заменяет врача и не гарантирует жизненных результатов.</p>
     <button name="result" value="failed" style="background:transparent;border:none;color:#5E534C;padding:12px;cursor:pointer">Отклонить платёж</button>
   </form>
 </body>

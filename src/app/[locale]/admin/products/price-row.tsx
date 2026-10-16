@@ -7,13 +7,13 @@ export function PriceRow({
   id,
   name,
   hint,
-  rubles,
+  amount,
   isFree
 }: {
   id: string;
   name: string;
   hint?: string;
-  rubles: number;
+  amount: number;
   isFree: boolean;
 }) {
   const formRef = useRef<HTMLFormElement>(null);
@@ -50,16 +50,16 @@ export function PriceRow({
         Бесплатно
       </label>
       <label className="flex items-center gap-1.5 text-sm">
+        <span className="text-muted">$</span>
         <input
-          name="rubles"
+          name="amount"
           type="number"
           min={0}
           step={1}
-          defaultValue={rubles}
+          defaultValue={amount}
           onBlur={submit}
           className="w-24 rounded-xl border border-line bg-cream px-3 py-2 text-right"
         />
-        <span className="text-muted">₽</span>
       </label>
     </form>
   );

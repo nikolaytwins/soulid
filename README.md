@@ -65,9 +65,31 @@ Debug расчёта: `/ru/admin/debug`
 
 ## Покупки
 
-Сферы открываются **только по порядку** (настраивается в админке). Первая сфера бесплатна. Цена следующей показывается, когда она стала следующей. Пакет Unlock Everything — 1 490 ₽ в seed (1 490_00 копеек).
+Сферы открываются **только по порядку** (настраивается в админке). Расчёт и схема звезды бесплатны. Четыре раздела — $25, полный пакет — $69, здоровье в подарок с пакетом.
 
-Оплата **никогда** не открывает контент с клиента: checkout → провайдер → webhook (идемпотентный) → entitlement → email → analytics/Meta.
+Оплата **никогда** не открывает контент с клиента: checkout → провайдер → webhook (идемпотентный) → запись в журнале транзакций (`ledger_events`) → entitlement только при `purchase.status=paid` и `paidAt` → email → analytics/Meta.
+
+Платная расшифровка не уходит в HTML, пока сервер не подтвердил оплату (или служебное открытие админом). Статусы pending / failed / canceled доступ не дают.
+
+Журнал: `/ru/admin/purchases` — оплаты и неизменяемая лента событий.
+
+## Резервные копии
+
+Ежедневный `pg_dump` на VPS:
+
+```bash
+cp deploy/soul-star-backup.service deploy/soul-star-backup.timer /etc/systemd/system/
+systemctl daemon-reload
+systemctl enable --now soul-star-backup.timer
+```
+
+Каталог `/var/backups/soul-star`, сжатие gzip, права 600, хранение 14 дней (`BACKUP_KEEP_DAYS`). Опционально шифрование: `BACKUP_GPG_RECIPIENT` в `/etc/soul-star.env`. Восстановление: `bash scripts/restore-db.sh /var/backups/soul-star/soulstar-….sql.gz`.
+
+Локально: `BACKUP_DIR=./backups bash scripts/backup-db.sh`.
+
+## Персональные данные
+
+Политика: `/legal/privacy`. В кабинете: выгрузка JSON (`/api/me/export`) и удаление ПДн (имя, почта, даты, расчёты). Журнал оплат сохраняется для учёта. Пароль — только хеш. Cookie: сессия, гость, посетитель, UTM.
 
 Mock-оплата: страница «Оплатить / Отклонить». Для живых платежей заполните ключи и поставьте `PAYMENT_PROVIDER=stripe` или `yookassa`.
 
@@ -89,14 +111,12 @@ Mock-оплата: страница «Оплатить / Отклонить». �
 
 ## GitHub
 
-Репозиторий готов к вашему GitHub. Когда появится пустой remote:
+Код: [github.com/nikolaytwins/soulid](https://github.com/nikolaytwins/soulid).
 
 ```bash
-git remote add origin git@github.com:nikolaytwins/soul-star.git
+git remote add origin git@github.com:nikolaytwins/soulid.git
 git push -u origin main
 ```
-
-Или одной командой: `gh repo create soul-star --private --source=. --remote=origin --push`
 
 ## Деплой на VPS (test.twinlabs.ru)
 

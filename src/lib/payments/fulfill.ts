@@ -3,8 +3,9 @@ import { grantSpheres, remainingSpheres, getUnlockOrder } from "@/lib/domain/acc
 import type { SphereId } from "@/lib/engine";
 import { SPHERE_IDS } from "@/lib/engine";
 import { sendTransactionalEmail, sphereUnlockedEmail } from "@/lib/email";
-import { sendMetaCapi, trackEvent } from "@/lib/analytics";
+import { sendMetaCapi, trackEvent, visitorForUser } from "@/lib/analytics";
 import { productName } from "@/lib/domain/catalog";
+import { appendLedger } from "@/lib/ledger";
 
 export async function fulfillPaidPurchase(purchaseId: string): Promise<void> {
   const purchase = await prisma.purchase.findUnique({
@@ -41,6 +42,20 @@ export async function fulfillPaidPurchase(purchaseId: string): Promise<void> {
     purchaseId: purchase.id,
     source: purchase.product.kind === "bundle" ? "bundle" : "purchase"
   });
+  await appendLedger({
+    kind: "payment.paid",
+    actorType: "system",
+    userId: purchase.userId,
+    profileId: purchase.profileId,
+    purchaseId: purchase.id,
+    sku: purchase.product.sku,
+    amount: purchase.amount,
+    currency: purchase.currency,
+    provider: purchase.provider,
+    providerPaymentId: purchase.providerPaymentId,
+    spheres,
+    summary: `Paid ${purchase.product.sku}`
+  });
 
   const locale = purchase.user.locale || "ru";
   const name = productName(purchase.product, locale)?.name ?? purchase.product.sku;
@@ -72,12 +87,14 @@ export async function fulfillPaidPurchase(purchaseId: string): Promise<void> {
   }
 
   try {
+    const visitor = await visitorForUser(purchase.userId);
     await trackEvent({
       name: "purchase",
       eventId: purchase.eventId,
       userId: purchase.userId,
       profileId: purchase.profileId,
       locale,
+      ...visitor,
       payload: { sku: purchase.product.sku, amount: purchase.amount, spheres }
     });
     await trackEvent({
@@ -85,6 +102,7 @@ export async function fulfillPaidPurchase(purchaseId: string): Promise<void> {
       userId: purchase.userId,
       profileId: purchase.profileId,
       locale,
+      ...visitor,
       payload: { spheres }
     });
     await sendMetaCapi({

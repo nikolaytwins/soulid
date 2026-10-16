@@ -50,8 +50,9 @@ export default async function AdminProducts({ params }: { params: Promise<{ loca
               key={`${p.id}-${p.isFree}-${p.priceAmount}`}
               id={p.id}
               name={label(p)}
-              rubles={Math.round(p.priceAmount / 100)}
+              amount={Math.round(p.priceAmount / 100)}
               isFree={p.isFree}
+              hint={p.sphere === "health" ? t("healthGiftHint") : undefined}
             />
           ))}
           {bundles.map((p) => (
@@ -60,7 +61,7 @@ export default async function AdminProducts({ params }: { params: Promise<{ loca
               id={p.id}
               name={label(p)}
               hint={t("bundleHint")}
-              rubles={Math.round(p.priceAmount / 100)}
+              amount={Math.round(p.priceAmount / 100)}
               isFree={p.isFree}
             />
           ))}

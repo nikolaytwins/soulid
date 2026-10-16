@@ -3,7 +3,7 @@ import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { getTranslations } from "next-intl/server";
 import { formatDob } from "@/lib/domain/star-page";
-import { formatMoney, productName } from "@/lib/domain/catalog";
+import { formatMoney, isIndividuallySold, productName } from "@/lib/domain/catalog";
 import { ensureFreeEntitlements, getUnlockOrder, nextPurchasable } from "@/lib/domain/access";
 import { parseRelation } from "@/lib/domain/relations";
 import { SPHERE_IDS, type SphereId, type StarResult } from "@/lib/engine";
@@ -95,6 +95,8 @@ export default async function AccountPage({
     const unlocked = new Set(p.entitlements.map((e) => e.sphere as SphereId));
     const next = nextPurchasable(order, unlocked);
     const nextProduct = next ? sphereProducts.find((x) => x.sphere === next) : null;
+    const bundle = products.find((x) => x.kind === "bundle");
+    const buyProduct = nextProduct && isIndividuallySold(nextProduct) ? nextProduct : bundle;
     const relation = parseRelation(p.relation);
     const name = (p.displayName ?? "").trim() || (relation === "self" ? fallbackName : t("unnamed"));
     return {
@@ -110,9 +112,9 @@ export default async function AccountPage({
         relationships: star?.core.relationships.value ?? 0,
         health: star?.core.health.value ?? 0
       },
-      nextSku: nextProduct && !nextProduct.isFree ? nextProduct.sku : nextProduct?.sku ?? null,
-      nextName: next ? sphereNames[next] : "",
-      nextPrice: nextProduct ? formatMoney(nextProduct.priceAmount, nextProduct.currency, locale) : "",
+      nextSku: buyProduct && !buyProduct.isFree ? buyProduct.sku : buyProduct?.sku ?? null,
+      nextName: nextProduct && isIndividuallySold(nextProduct) ? (next ? sphereNames[next] : "") : productName(bundle ?? { translations: [] }, locale)?.name ?? "",
+      nextPrice: buyProduct ? formatMoney(buyProduct.priceAmount, buyProduct.currency, locale) : "",
       canDelete: relation !== "self" && refreshed.length > 1
     };
   });

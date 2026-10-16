@@ -6,7 +6,7 @@ import { prisma } from "@/lib/db";
 import { auth } from "@/lib/auth";
 import { ensureFreeEntitlements } from "@/lib/domain/access";
 import { rateLimit, clientIp } from "@/lib/rate-limit";
-import { trackEvent } from "@/lib/analytics";
+import { analyticsFromCookies, trackEvent } from "@/lib/analytics";
 import { readUtmCookie } from "@/lib/utm";
 import { cookies } from "next/headers";
 import { randomBytes } from "node:crypto";
@@ -34,6 +34,7 @@ export async function POST(req: Request) {
     const result = calculateStar(parsed.data, { formula: await loadStarFormula() });
     const jar = await cookies();
     const utm = readUtmCookie(jar.get("ss_utm")?.value);
+    const analytics = await analyticsFromCookies();
     const existingUser = session?.user?.id
       ? await prisma.user.findUnique({ where: { id: session.user.id }, select: { id: true, locale: true } })
       : null;
@@ -72,6 +73,13 @@ export async function POST(req: Request) {
       name: "calculation_completed",
       userId,
       profileId: profile.id,
+      visitorId: analytics.visitorId,
+      sessionId: analytics.sessionId,
+      utmSource: utm.utmSource,
+      utmMedium: utm.utmMedium,
+      utmCampaign: utm.utmCampaign,
+      referrer: utm.referrer,
+      path: analytics.path,
       payload: { date: result.isoDate }
     }).catch((err) => console.error("calculation analytics failed", err));
 
