@@ -39,7 +39,7 @@ export type StarPageModel = {
   loggedIn: boolean;
   locale: string;
   canEdit: boolean;
-  siblingStars: { id: string; displayDate: string; unlocked: number; total: number }[];
+  siblingStars: { id: string; displayDate: string; name: string; unlocked: number; total: number }[];
   unlockCopy: Record<
     string,
     { blockedTitle: string; blockedBody: string; whyTitle: string; whyBody: string }
@@ -152,6 +152,7 @@ export async function loadStarPage(profileId: string, locale: string, userId: st
       siblingStars.push({
         id: sibling.id,
         displayDate: formatDob(sibling.dateOfBirth, locale),
+        name: (sibling.displayName ?? "").trim(),
         unlocked: sibling.entitlements.length,
         total: order.length
       });

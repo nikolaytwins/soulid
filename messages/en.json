@@ -12,7 +12,11 @@
     "login": "Log in",
     "logout": "Log out",
     "admin": "Admin",
-    "calculate": "Calculate"
+    "calculate": "Calculate",
+    "myStars": "My stars",
+    "newStar": "New star",
+    "allStars": "All stars",
+    "noStars": "No stars saved yet"
   },
   "landing": {
     "eyebrow": "YOUR PERSONAL FIVE-POINTED STAR",
@@ -100,7 +104,7 @@
     "missionLocked": "The Soul mission sits at the centre and opens last, once all five spheres are unlocked.",
     "goToNeeded": "Unlock «{name}»",
     "emailTitle": "Where should we save the reading",
-    "emailLead": "Leave your email — we attach this star to an account and send access after payment. No password needed now.",
+    "emailLead": "Leave your email — we attach this star to an account and send access after payment.",
     "emailPlaceholder": "Email",
     "emailRequired": "Enter an email to unlock the sphere.",
     "hasAccount": "I already have an account",
@@ -269,6 +273,8 @@
   },
   "admin": {
     "title": "Admin",
+    "modeAdmin": "Admin",
+    "modeCabinet": "Cabinet",
     "overview": "Overview",
     "analytics": "Analytics",
     "analyticsLead": "Where people came from, how many visits, and where they dropped off — first-party data the service records itself.",

@@ -11,6 +11,7 @@ import { auth } from "@/lib/auth";
 import { claimGuestProfiles } from "@/lib/domain/claim-guest";
 import { Footer } from "@/components/layout/Footer";
 import { HideOnAccount } from "@/components/layout/HideOnAccount";
+import { listNavStars } from "@/lib/domain/nav-stars";
 
 export function generateStaticParams() {
   return routing.locales.map((locale) => ({ locale }));
@@ -30,6 +31,7 @@ export default async function LocaleLayout({
   if (session?.user?.id) {
     await claimGuestProfiles(session.user.id);
   }
+  const stars = session?.user?.id ? await listNavStars(session.user.id, locale) : [];
   const dir = isRtl(locale) ? "rtl" : "ltr";
 
   return (
@@ -49,6 +51,7 @@ export default async function LocaleLayout({
           <MetaPixel />
           <Header
             locale={locale}
+            stars={stars}
             user={
               session?.user
                 ? {

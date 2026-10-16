@@ -3,6 +3,8 @@
 import { useTranslations } from "next-intl";
 import { Link, usePathname } from "@/i18n/routing";
 import { signOutAction } from "@/app/[locale]/auth-actions";
+import { StarsMenu } from "./StarsMenu";
+import type { NavStar } from "@/lib/domain/nav-stars";
 
 const LOCALES = [
   { id: "ru", label: "RU" },
@@ -12,10 +14,12 @@ const LOCALES = [
 
 export function Header({
   locale,
-  user
+  user,
+  stars = []
 }: {
   locale: string;
   user: { name?: string | null; email?: string | null; role?: string } | null;
+  stars?: NavStar[];
 }) {
   const t = useTranslations();
   const pathname = usePathname();
@@ -54,6 +58,7 @@ export function Header({
                 {t("nav.admin")}
               </Link>
             ) : null}
+            <StarsMenu stars={stars} />
             <Link href="/account" className="no-underline" title={user.email ?? ""}>
               <span className="flex h-9 w-9 items-center justify-center rounded-full border border-[rgba(80,60,45,0.2)] text-xs font-semibold text-muted md:h-11 md:w-11 md:text-sm">
                 {initials}

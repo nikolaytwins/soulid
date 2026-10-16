@@ -343,19 +343,16 @@ export function StarSvg(props: Props) {
           )
         : hidden(q[0], q[1], innerValues[j], sz, K())
     );
-    el.push(
-      h("circle", {
-        key: K(),
-        cx: p[0],
-        cy: p[1],
-        r: mobile ? 12 : 10,
-        fill: "transparent",
-        style: { cursor: "pointer" },
-        onClick: () => props.onPoint(j),
-        onMouseEnter: () => props.onHoverPt(j),
-        onMouseLeave: () => props.onHoverPt(null)
-      })
-    );
+    const hit = {
+      fill: "transparent",
+      pointerEvents: "all" as const,
+      style: { cursor: "pointer" as const, pointerEvents: "all" as const },
+      onClick: () => props.onPoint(j),
+      onPointerEnter: () => props.onHoverPt(j),
+      onPointerLeave: () => props.onHoverPt(null)
+    };
+    el.push(h("circle", { key: K(), cx: p[0], cy: p[1], r: mobile ? 16 : 14, ...hit }));
+    el.push(h("circle", { key: K(), cx: q[0], cy: q[1], r: mobile ? 12 : 10, ...hit }));
   });
 
   if (props.missionActive) {

@@ -15,6 +15,7 @@ import { trackPixel } from "@/components/analytics/MetaPixel";
 import { trackClient } from "@/components/analytics/ids";
 import { signIn } from "next-auth/react";
 import { LtrText } from "@/components/ui/LtrText";
+import { NewStarDialog } from "@/components/layout/NewStarDialog";
 
 type ViewId = SphereId | "soulMission";
 
@@ -57,13 +58,18 @@ export function StarExperience({
   const [pendingSku, setPendingSku] = useState<string | null>(null);
   const [mounted, setMounted] = useState(false);
   const [hoverOk, setHoverOk] = useState(false);
+  const [newStar, setNewStar] = useState(false);
 
   useEffect(() => {
-    setMounted(true);
-    const mq = window.matchMedia("(min-width: 1280px) and (hover: hover)");
+    const mq = window.matchMedia("(hover: hover)");
     const apply = () => setHoverOk(mq.matches);
     apply();
     mq.addEventListener("change", apply);
+    return () => mq.removeEventListener("change", apply);
+  }, []);
+
+  useEffect(() => {
+    setMounted(true);
     const onK = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
         setPanel(null);
@@ -73,7 +79,6 @@ export function StarExperience({
     window.addEventListener("keydown", onK);
     trackClient("sphere_viewed", { profileId: model.profileId, payload: { sphere: firstOpen } });
     return () => {
-      mq.removeEventListener("change", apply);
       window.removeEventListener("keydown", onK);
     };
   }, [firstOpen, model.profileId]);
@@ -330,7 +335,7 @@ export function StarExperience({
     const fatal = BRIDGE_KIND[BRIDGES[hoverPt]] === "fatal_error";
     tip = (
       <div
-        className="pointer-events-none absolute z-[3] flex w-[220px] -translate-x-1/2 flex-col gap-1 rounded-xl bg-ink px-3.5 py-3 text-card shadow-tip"
+        className="pointer-events-none absolute z-20 flex w-[220px] -translate-x-1/2 flex-col gap-1 rounded-xl bg-ink px-3.5 py-3 text-card shadow-[0_12px_30px_rgba(42,33,29,.25)]"
         style={{
           left: `${((p[0] + 138) / 276) * 100}%`,
           top: `${((p[1] + 134) / 250) * 100}%`,
@@ -378,22 +383,8 @@ export function StarExperience({
     await buy(actual);
   }
 
-  const saveNext = `/${model.locale}/star/${model.profileId}`;
-
   return (
     <div className="relative min-h-screen bg-cream text-ink">
-      {!model.loggedIn ? (
-        <div className="relative z-[6] border-b border-gold bg-[#FBF1E2] px-5 py-3 text-center text-sm text-ink min-[1280px]:px-14">
-          {t("starPage.saveBanner")}{" "}
-          <a href={`/${model.locale}/register?next=${encodeURIComponent(saveNext)}`} className="font-semibold text-gold-deep">
-            {t("starPage.saveRegister")}
-          </a>
-          {" · "}
-          <a href={`/${model.locale}/login?next=${encodeURIComponent(saveNext)}`} className="font-semibold text-gold-deep">
-            {t("starPage.saveLogin")}
-          </a>
-        </div>
-      ) : null}
       <div
         className="pointer-events-none absolute left-1/2 top-10 hidden h-[860px] w-[1000px] -translate-x-1/2 md:block"
         style={{ background: "radial-gradient(closest-side,rgba(242,205,150,.45),rgba(245,240,234,0))" }}
@@ -401,7 +392,7 @@ export function StarExperience({
 
       <div className="hidden min-[1280px]:block">
         <div className="relative mx-auto grid max-w-page grid-cols-[240px_minmax(0,1fr)_300px] items-center gap-5 px-6 pb-[72px] pt-2 xl:grid-cols-[320px_minmax(0,1fr)_380px] xl:gap-6 xl:px-14">
-          <HeroCopy model={model} t={t} nOpen={nOpen} progressText={progressText} />
+          <HeroCopy model={model} t={t} nOpen={nOpen} progressText={progressText} onNewStar={() => setNewStar(true)} />
           <div className="flex justify-center">
             <div className="relative w-full max-w-[640px]">
               <StarBlock
@@ -465,6 +456,8 @@ export function StarExperience({
           onHoverZone={setHoverZone}
           onDecode={() => scrollTo("decode")}
           open={activeOpen}
+          tip={tip}
+          onNewStar={() => setNewStar(true)}
         />
       </div>
 
@@ -915,6 +908,7 @@ export function StarExperience({
             document.body
           )
         : null}
+      <NewStarDialog open={newStar} onClose={() => setNewStar(false)} />
     </div>
   );
 }
@@ -970,45 +964,70 @@ function StarBlock(props: {
   );
 }
 
+function StarSwitcher({
+  model,
+  t,
+  onNewStar,
+  compact
+}: {
+  model: StarPageModel;
+  t: ReturnType<typeof useTranslations>;
+  onNewStar: () => void;
+  compact?: boolean;
+}) {
+  const stars = model.siblingStars;
+  const chip = compact ? "rounded-full px-2.5 py-1 text-[12px] no-underline" : "rounded-full px-3 py-1.5 text-[13px] no-underline";
+  return (
+    <div className={`flex flex-col gap-2 ${compact ? "items-center" : ""}`}>
+      {stars.length > 1 ? (
+        <span className="text-[11px] font-bold tracking-[0.18em] text-faint">{t("starPage.yourStars")}</span>
+      ) : null}
+      <div className={`flex flex-wrap gap-1.5 ${compact ? "max-w-full justify-center" : ""}`}>
+        {stars.map((s) => (
+          <Link
+            key={s.id}
+            href={`/star/${s.id}`}
+            className={`${chip} ${
+              s.id === model.profileId ? "bg-ink font-semibold text-card" : "border border-line bg-card text-ink"
+            }`}
+          >
+            <LtrText>{s.name || s.displayDate}</LtrText>
+            <LtrText className="ms-1 text-[11px] opacity-70">
+              {s.unlocked}/{s.total}
+            </LtrText>
+          </Link>
+        ))}
+        <button
+          type="button"
+          onClick={onNewStar}
+          className={`${chip} border border-dashed border-gold font-semibold text-gold-text`}
+        >
+          + {t("nav.newStar")}
+        </button>
+      </div>
+    </div>
+  );
+}
+
 function HeroCopy({
   model,
   t,
   nOpen,
-  progressText
+  progressText,
+  onNewStar
 }: {
   model: StarPageModel;
   t: ReturnType<typeof useTranslations>;
   nOpen: number;
   progressText: string;
+  onNewStar: () => void;
 }) {
   return (
     <div className="flex flex-col gap-6">
       <div className="text-[11px] font-semibold tracking-[0.22em] text-faint">{t("starPage.eyebrow")}</div>
       <h1 className="text-balance font-serif text-[56px] font-medium leading-none">{t("starPage.title")}</h1>
       <p className="text-pretty text-[15px] leading-relaxed text-muted">{t("starPage.lead")}</p>
-      {model.siblingStars.length > 1 ? (
-        <div className="flex flex-col gap-2">
-          <span className="text-[11px] font-bold tracking-[0.18em] text-faint">{t("starPage.yourStars")}</span>
-          <div className="flex flex-wrap gap-1.5">
-            {model.siblingStars.map((s) => (
-              <Link
-                key={s.id}
-                href={`/star/${s.id}`}
-                className={`rounded-full px-3 py-1.5 text-[13px] no-underline ${
-                  s.id === model.profileId
-                    ? "bg-ink font-semibold text-card"
-                    : "border border-line bg-card text-ink"
-                }`}
-              >
-                <LtrText>{s.displayDate}</LtrText>
-                <LtrText className="ms-1 text-[11px] opacity-70">
-                  {s.unlocked}/{s.total}
-                </LtrText>
-              </Link>
-            ))}
-          </div>
-        </div>
-      ) : null}
+      <StarSwitcher model={model} t={t} onNewStar={onNewStar} />
       <div className="flex items-center gap-3.5 rounded-2xl border border-line bg-card px-4 py-3.5">
         <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-sand text-gold-deep">
           <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
@@ -1124,10 +1143,12 @@ function MobileHero(props: {
   onHoverZone: (i: number | null) => void;
   onDecode: () => void;
   open: boolean;
+  tip: React.ReactNode;
+  onNewStar: () => void;
 }) {
   const { model, t, open } = props;
   return (
-    <div className="relative mx-auto max-w-[430px] overflow-clip pb-10">
+    <div className="relative mx-auto max-w-[430px] overflow-visible pb-10">
       <div
         className="pointer-events-none absolute left-1/2 top-[150px] h-[520px] w-[520px] -translate-x-1/2"
         style={{ background: "radial-gradient(closest-side,rgba(242,205,150,.45),rgba(245,240,234,0))" }}
@@ -1143,44 +1164,32 @@ function MobileHero(props: {
             {t("starPage.change")}
           </Link>
         </div>
-        {(model.siblingStars ?? []).length > 1 ? (
-          <div className="flex max-w-full flex-wrap justify-center gap-1.5 pt-1">
-            {model.siblingStars.map((s) => (
-              <Link
-                key={s.id}
-                href={`/star/${s.id}`}
-                className={`rounded-full px-2.5 py-1 text-[12px] no-underline ${
-                  s.id === model.profileId ? "bg-ink font-semibold text-card" : "border border-line bg-card text-ink"
-                }`}
-              >
-                <LtrText>{s.displayDate}</LtrText>{" "}
-                <LtrText>
-                  {s.unlocked}/{s.total}
-                </LtrText>
-              </Link>
-            ))}
-          </div>
-        ) : null}
+        <div className="pt-1">
+          <StarSwitcher model={model} t={t} onNewStar={props.onNewStar} compact />
+        </div>
       </div>
-      <div className="relative px-1.5 pt-1">
-        <StarBlock
-          star={model.star}
-          mobile
-          active={props.active}
-          missionActive={props.missionActive}
-          unlocked={model.unlocked}
-          next={model.nextSphere}
-          hoverPt={props.hoverPt}
-          hoverZone={props.hoverZone}
-          selectedPt={props.selectedPt}
-          labels={props.labels}
-          missionLabel={props.missionLabel}
-          onSphere={props.onSphere}
-          onPoint={props.onPoint}
-          onMission={props.onMission}
-          onHoverPt={props.onHoverPt}
-          onHoverZone={props.onHoverZone}
-        />
+      <div className="px-1.5 pt-1">
+        <div className="relative">
+          <StarBlock
+            star={model.star}
+            mobile
+            active={props.active}
+            missionActive={props.missionActive}
+            unlocked={model.unlocked}
+            next={model.nextSphere}
+            hoverPt={props.hoverPt}
+            hoverZone={props.hoverZone}
+            selectedPt={props.selectedPt}
+            labels={props.labels}
+            missionLabel={props.missionLabel}
+            onSphere={props.onSphere}
+            onPoint={props.onPoint}
+            onMission={props.onMission}
+            onHoverPt={props.onHoverPt}
+            onHoverZone={props.onHoverZone}
+          />
+          {props.tip}
+        </div>
       </div>
       <div className="relative flex flex-col gap-2 px-5 pb-4">
         <div className="grid grid-cols-5 gap-1">

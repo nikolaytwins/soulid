@@ -3,7 +3,7 @@
 import { Suspense, useState } from "react";
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/routing";
-import { signIn } from "next-auth/react";
+import { getSession, signIn } from "next-auth/react";
 import { useParams, useSearchParams } from "next/navigation";
 import { safeNextPath } from "@/lib/safe-url";
 
@@ -26,7 +26,13 @@ function LoginForm() {
     if (res?.error) {
       const code = (res as { code?: string }).code ?? res.error;
       setError(code === "blocked" ? t("blocked") : t("invalid"));
-    } else window.location.href = next;
+      return;
+    }
+    const session = await getSession();
+    const account = `/${locale}/account`;
+    const toAdmin =
+      session?.user?.role === "admin" && (next === account || next === `${account}/`);
+    window.location.href = toAdmin ? `/${locale}/admin` : next;
   }
 
   const field = "w-full rounded-xl border border-line bg-card px-4 py-3 text-sm";

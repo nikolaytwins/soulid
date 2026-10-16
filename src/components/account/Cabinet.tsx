@@ -13,6 +13,7 @@ import {
 } from "@/app/[locale]/account/actions";
 import { CabinetStar, type CabinetStarLabels } from "@/components/account/CabinetStar";
 import { LtrText } from "@/components/ui/LtrText";
+import { AdminModeSwitch } from "@/components/layout/AdminModeSwitch";
 import { STAR_RELATIONS, type StarRelation } from "@/lib/domain/relations";
 import type { SphereId } from "@/lib/engine";
 
@@ -323,6 +324,7 @@ export function Cabinet({
         >
           Soul Star
         </Link>
+        {user.role === "admin" ? <AdminModeSwitch mode="cabinet" /> : null}
         <button
           type="button"
           onClick={openCreate}
@@ -840,22 +842,24 @@ export function Cabinet({
                     })}
                   </div>
                 </div>
-                <div
-                  style={{
-                    display: "flex",
-                    gap: 10,
-                    alignItems: "flex-start",
-                    fontSize: 13,
-                    lineHeight: 1.5,
-                    color: "#5E534C",
-                    background: "#F5F0EA",
-                    borderRadius: 12,
-                    padding: "12px 14px"
-                  }}
-                >
-                  <span style={{ width: 8, height: 8, marginTop: 5, borderRadius: "50%", border: "1.5px solid #C78A3E", flexShrink: 0 }} />
-                  <span>{sheet === "edit" ? t("noteEdit") : t("noteCreate")}</span>
-                </div>
+                {sheet === "edit" ? (
+                  <div
+                    style={{
+                      display: "flex",
+                      gap: 10,
+                      alignItems: "flex-start",
+                      fontSize: 13,
+                      lineHeight: 1.5,
+                      color: "#5E534C",
+                      background: "#F5F0EA",
+                      borderRadius: 12,
+                      padding: "12px 14px"
+                    }}
+                  >
+                    <span style={{ width: 8, height: 8, marginTop: 5, borderRadius: "50%", border: "1.5px solid #C78A3E", flexShrink: 0 }} />
+                    <span>{t("noteEdit")}</span>
+                  </div>
+                ) : null}
                 {err ? <span style={{ fontSize: 14, fontWeight: 600, color: "#A4472F" }}>{err}</span> : null}
                 <button
                   type="button"

@@ -10,10 +10,12 @@ function daysInMonth(year: number, month: number) {
 
 export function DobForm({
   defaultDate,
-  compact
+  compact,
+  hideDisclaimer
 }: {
   defaultDate?: { day: number; month: number; year: number };
   compact?: boolean;
+  hideDisclaimer?: boolean;
 }) {
   const t = useTranslations("landing");
   const months = useTranslations();
@@ -99,7 +101,7 @@ export function DobForm({
       >
         {pending ? "…" : t("cta")}
       </button>
-      <p className="text-[11px] leading-relaxed text-faint">{months("legal.disclaimer")}</p>
+      {hideDisclaimer ? null : <p className="text-[11px] leading-relaxed text-faint">{months("legal.disclaimer")}</p>}
     </form>
   );
 }

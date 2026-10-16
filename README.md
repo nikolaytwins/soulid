@@ -111,24 +111,20 @@ Mock-оплата: страница «Оплатить / Отклонить». �
 
 ## GitHub
 
-Код: [github.com/nikolaytwins/soulid](https://github.com/nikolaytwins/soulid).
+Код: [github.com/nikolaytwins/soulid](https://github.com/nikolaytwins/soulid). Remote: `origin` → `git@github.com:nikolaytwins/soulid.git`.
 
 ```bash
-git remote add origin git@github.com:nikolaytwins/soulid.git
-git push -u origin main
+git push origin main
 ```
+
+Пуш в `main` сам выкатывает сборку на VPS (GitHub Actions → SSH). Вручную то же самое: `bash scripts/deploy.sh`.
 
 ## Деплой на VPS (test.twinlabs.ru)
 
+Сайт: https://test.twinlabs.ru  
 Сервер: `root@178.72.168.156`, каталог `/root/soul-star`, systemd `soul-star`, env `/etc/soul-star.env`.
 
-После `git pull` на сервере:
-
-```bash
-bash /root/soul-star/scripts/vps-build.sh
-```
-
-Nginx проксирует на `127.0.0.1:3010`. Webhook-пути:
+Сервер забирает код с GitHub (`git fetch origin && git reset --hard origin/main`) и собирает через `scripts/vps-build.sh`. Nginx проксирует на `127.0.0.1:3010`. Webhook-пути:
 
 - `/api/payments/webhooks/stripe`
 - `/api/payments/webhooks/yookassa`
