@@ -37,7 +37,7 @@ export function NewStarDialog({ open, onClose }: { open: boolean; onClose: () =>
             {t("close")}
           </button>
         </div>
-        <DobForm compact hideDisclaimer />
+        <DobForm compact />
       </div>
     </div>,
     document.body

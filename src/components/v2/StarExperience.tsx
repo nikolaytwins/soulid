@@ -1,0 +1,1237 @@
+"use client";
+
+import { useEffect, useMemo, useState } from "react";
+import { createPortal } from "react-dom";
+import { useTranslations } from "next-intl";
+import { Link } from "@/i18n/routing";
+import type { SphereId } from "@/lib/engine";
+import { BRIDGE_KIND, ZONE_TO_SPHERE } from "@/lib/engine";
+import { V2StarSvg, type HoverTip } from "./StarSvg";
+import { V2LockIcon, V2MiniStar, V2TriangleSvg } from "./TriangleSvg";
+import { SphereArt } from "./SphereArt";
+import { V2Logo } from "./Logo";
+import { V2UserCluster } from "./UserCluster";
+import { sphereInnerDots, starGeometry, starViewBox, type Pt } from "@/components/star/geometry";
+import type { ArcReading, StarPageModel } from "@/lib/domain/star-page";
+import type { PatternReading } from "@/lib/domain/patterns";
+import type { NavStar } from "@/lib/domain/nav-stars";
+import { trackPixel } from "@/components/analytics/MetaPixel";
+import { trackClient } from "@/components/analytics/ids";
+import { signIn } from "next-auth/react";
+import { LtrText } from "@/components/ui/LtrText";
+import { SPHERE_TINT, V2_GOLD, V2_INK, v2Href } from "@/lib/v2";
+import { PayHint } from "@/components/pay/PayHint";
+import { V2PersonalBlocks } from "@/components/v2/PersonalBlocks";
+
+type Panel =
+  | { type: "point"; j: number; ctx: SphereId }
+  | { type: "offer"; k: SphereId }
+  | { type: "blocked"; k: SphereId }
+  | { type: "mission" };
+
+const BRIDGES = ["p23", "p34", "p45", "p51", "p12"] as const;
+const INNER_SLOTS = ["innerLeft", "innerRight", "innerBottom"] as const;
+
+export function V2StarExperience({
+  model,
+  readings,
+  missionReading,
+  patterns = [],
+  focusLatest,
+  user,
+  stars = []
+}: {
+  model: StarPageModel;
+  readings: Record<SphereId, ArcReading[]>;
+  missionReading: ArcReading | null;
+  patterns?: PatternReading[];
+  focusLatest?: boolean;
+  user: { name?: string | null; email?: string | null; role?: string } | null;
+  stars?: NavStar[];
+}) {
+  const t = useTranslations();
+  const arcana = t("terms.arcana");
+  const unlocked = useMemo(() => new Set(model.unlocked), [model.unlocked]);
+  const firstOpen =
+    (focusLatest ? [...model.order].reverse().find((s) => unlocked.has(s)) : model.order.find((s) => unlocked.has(s))) ??
+    model.order[0];
+  const [active, setActive] = useState<SphereId>(firstOpen);
+  const [panel, setPanel] = useState<Panel | null>(null);
+  const [why, setWhy] = useState(false);
+  const [hoverPt, setHoverPt] = useState<number | null>(null);
+  const [hoverZone, setHoverZone] = useState<number | null>(null);
+  const [hoverTip, setHoverTip] = useState<HoverTip | null>(null);
+  const [busy, setBusy] = useState(false);
+  const [payError, setPayError] = useState("");
+  const [payEmail, setPayEmail] = useState("");
+  const [payPassword, setPayPassword] = useState("");
+  const [needsPassword, setNeedsPassword] = useState(false);
+  const [pendingSku, setPendingSku] = useState<string | null>(null);
+  const [mounted, setMounted] = useState(false);
+  const [hoverOk, setHoverOk] = useState(false);
+  const [width, setWidth] = useState(1440);
+
+  useEffect(() => {
+    const mq = window.matchMedia("(hover: hover)");
+    const apply = () => setHoverOk(mq.matches);
+    apply();
+    mq.addEventListener("change", apply);
+    const onR = () => setWidth(window.innerWidth);
+    onR();
+    window.addEventListener("resize", onR);
+    return () => {
+      mq.removeEventListener("change", apply);
+      window.removeEventListener("resize", onR);
+    };
+  }, []);
+
+  useEffect(() => {
+    setMounted(true);
+    const onK = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        setPanel(null);
+        setWhy(false);
+      }
+    };
+    window.addEventListener("keydown", onK);
+    trackClient("sphere_viewed", { profileId: model.profileId, payload: { sphere: firstOpen } });
+    return () => window.removeEventListener("keydown", onK);
+  }, [firstOpen, model.profileId]);
+
+  useEffect(() => {
+    if (!panel) return;
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = prev;
+    };
+  }, [panel]);
+
+  const isMob = width < 900;
+  const close = () => {
+    setPanel(null);
+    setWhy(false);
+  };
+
+  function onSphere(k: SphereId) {
+    if (unlocked.has(k)) {
+      setActive(k);
+      setPanel(null);
+      trackClient("sphere_viewed", { profileId: model.profileId, payload: { sphere: k } });
+      return;
+    }
+    trackClient("locked_sphere_clicked", { profileId: model.profileId, payload: { sphere: k } });
+    if (k === model.nextSphere) {
+      trackClient("unlock_intent", { profileId: model.profileId, payload: { sphere: k } });
+      setPanel({ type: "offer", k });
+    } else {
+      setPanel({ type: "blocked", k });
+    }
+    setWhy(false);
+    setHoverPt(null);
+    setHoverTip(null);
+  }
+
+  function onMission() {
+    setPanel({ type: "mission" });
+    setWhy(false);
+    trackClient("sphere_viewed", { profileId: model.profileId, payload: { sphere: "soulMission" } });
+  }
+
+  function ptSpheres(j: number): SphereId[] {
+    return model.star.bridges[BRIDGES[j]].spheres;
+  }
+
+  function onPoint(j: number) {
+    const ks = ptSpheres(j);
+    const open = ks.filter((s) => unlocked.has(s));
+    if (!open.length) return onSphere(ks[0]);
+    const ctx = ks.includes(active) ? active : open[0];
+    setPanel({ type: "point", j, ctx });
+    setHoverPt(null);
+    setHoverTip(null);
+  }
+
+  function scrollTo(id: string) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    window.scrollTo({ top: el.getBoundingClientRect().top + window.scrollY - (id === "decode" ? 8 : 90), behavior: "smooth" });
+  }
+
+  async function buy(
+    sku: string,
+    useSavedMethod = true,
+    extra?: { recChannel?: "email" | "tg"; recContact?: string; email?: string }
+  ) {
+    setBusy(true);
+    setPayError("");
+    try {
+      if (!model.loggedIn) {
+        const email = extra?.email?.trim() || payEmail.trim();
+        if (!email) {
+          setPayError(t("offer.emailRequired"));
+          if (model.nextSphere && sku !== model.recommendation?.sku) setPanel({ type: "offer", k: model.nextSphere });
+          setBusy(false);
+          return;
+        }
+        const idRes = await fetch("/api/auth/identify", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email, profileId: model.profileId, locale: model.locale })
+        });
+        const identified = (await idRes.json()) as {
+          status?: "ready" | "ticket" | "needs_password";
+          ticket?: string;
+          email?: string;
+          error?: string;
+        };
+        if (identified.error === "blocked" || idRes.status === 403) {
+          setPayError(t("offer.blockedAccount"));
+          setBusy(false);
+          return;
+        }
+        if (identified.status === "needs_password") {
+          setNeedsPassword(true);
+          if (!payPassword) {
+            setPayError(t("offer.passwordRequired"));
+            setBusy(false);
+            return;
+          }
+          const login = await signIn("credentials", {
+            email,
+            password: payPassword,
+            redirect: false
+          });
+          if (login?.error) {
+            setPayError(t("auth.invalid"));
+            setBusy(false);
+            return;
+          }
+        } else if (identified.status === "ticket" && identified.ticket) {
+          const login = await signIn("credentials", {
+            email: identified.email ?? email,
+            ticket: identified.ticket,
+            redirect: false
+          });
+          if (login?.error) {
+            setPayError(t("starPage.checkoutError"));
+            setBusy(false);
+            return;
+          }
+        } else if (identified.status !== "ready") {
+          setPayError(t("starPage.checkoutError"));
+          setBusy(false);
+          return;
+        }
+      }
+      const res = await fetch("/api/checkout", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          profileId: model.profileId,
+          sku,
+          skin: "v2",
+          useSavedMethod,
+          recChannel: extra?.recChannel,
+          recContact: extra?.recContact
+        })
+      });
+      const json = (await res.json()) as { url?: string; error?: string; eventId?: string };
+      if (json.eventId) trackPixel("InitiateCheckout", { content_type: "product", content_ids: [sku] }, json.eventId);
+      if (json.url) window.location.href = json.url;
+      else setPayError(json.error === "blocked" ? t("offer.blockedAccount") : t("starPage.checkoutError"));
+    } catch {
+      setPayError(t("starPage.checkoutError"));
+    }
+    setBusy(false);
+  }
+
+  async function goCheckout(sku: string, useSavedMethod = true) {
+    if (busy || !sku) return;
+    if (!model.loggedIn && panel?.type !== "offer") {
+      setPendingSku(sku);
+      if (model.nextSphere) setPanel({ type: "offer", k: model.nextSphere });
+      return;
+    }
+    await buy(pendingSku ?? sku, useSavedMethod);
+  }
+
+  const labels = Object.fromEntries(model.order.map((id) => [id, model.spheres[id].name])) as Record<SphereId, string>;
+  const nOpen = model.unlocked.length;
+  const missionOpen = nOpen >= 5;
+  const act = model.spheres[active];
+  const col = SPHERE_TINT[active];
+  const arcs = readings[active] ?? [];
+  const progressText = t("starPage.progressCount", { n: nOpen, total: 5 });
+  const missionWords = t("starPage.soulMission").split(" ");
+  const missionLabel: [string, string] = [missionWords[0] ?? "Миссия", missionWords.slice(1).join(" ") || "души"];
+  const nextIdx = model.order.indexOf(active) + 1;
+  const nextId = nextIdx >= 0 ? model.order[nextIdx] : undefined;
+  const nextOpen = Boolean(nextId && unlocked.has(nextId));
+  const offerNext = Boolean(model.nextSphere && nOpen < 5 && !nextOpen);
+
+  function skuForSphere(k: SphereId): string | undefined {
+    const price = model.prices[k];
+    if (price?.soldSeparately) return price.sku;
+    return model.bundle?.sku;
+  }
+
+  function numberTip(): React.ReactNode {
+    if (!hoverOk || !hoverTip || panel) return null;
+    const { O, I } = starGeometry();
+    let at: Pt = [0, 0];
+    let eyebrow = "";
+    let value = "";
+    let hint = "";
+    if (hoverTip.kind === "bridge") {
+      at = I[hoverTip.j];
+      const ks = ptSpheres(hoverTip.j);
+      const open = ks.some((s) => unlocked.has(s));
+      const ctx = ks.includes(active) ? active : ks.find((s) => unlocked.has(s));
+      const fatal = BRIDGE_KIND[BRIDGES[hoverTip.j]] === "fatal_error";
+      eyebrow = (fatal ? t("points.fatal") : t("points.ancestral")).toUpperCase();
+      value = open ? t("points.arcana", { arcana, value: model.star.bridges[BRIDGES[hoverTip.j]].value }) : t("points.hidden");
+      hint =
+        open && ctx
+          ? t("points.clickRead", { name: model.spheres[ctx].name })
+          : t("points.opensWith", { name: model.spheres[ks[0]].name });
+    } else if (hoverTip.kind === "apex") {
+      const sphere = ZONE_TO_SPHERE[hoverTip.zone];
+      const open = unlocked.has(sphere);
+      at = O[hoverTip.zone];
+      eyebrow = t("points.apex", { arcana }).toUpperCase();
+      value = open ? t("points.arcana", { arcana, value: model.star.spheres[sphere].apex.value }) : t("points.hidden");
+      hint = open ? t("points.clickRead", { name: model.spheres[sphere].name }) : t("points.opensWith", { name: model.spheres[sphere].name });
+    } else if (hoverTip.kind === "inner") {
+      const sphere = ZONE_TO_SPHERE[hoverTip.zone];
+      const open = unlocked.has(sphere);
+      at = sphereInnerDots(hoverTip.zone)[hoverTip.slot];
+      const n = model.star.spheres[sphere][INNER_SLOTS[hoverTip.slot]].value;
+      eyebrow = t("points.inner", { arcana }).toUpperCase();
+      value = open ? t("points.arcana", { arcana, value: n }) : t("points.hidden");
+      hint = open ? t("points.clickRead", { name: model.spheres[sphere].name }) : t("points.opensWith", { name: model.spheres[sphere].name });
+    } else {
+      at = [0, 0];
+      eyebrow = t("points.soul").toUpperCase();
+      value = missionOpen ? t("points.arcana", { arcana, value: model.star.core.soulMission.value }) : t("points.hidden");
+      hint = missionOpen ? t("points.clickRead", { name: t("points.soul") }) : t("offer.missionLocked");
+    }
+    const vb = starViewBox(isMob);
+    return (
+      <div
+        className="pointer-events-none absolute z-[3] flex w-[220px] flex-col gap-1 rounded-2xl px-3.5 py-3 text-white shadow-[0_12px_30px_rgba(43,26,51,.25)]"
+        style={{
+          background: V2_INK,
+          left: `${((at[0] - vb.x) / vb.w) * 100}%`,
+          top: `${((at[1] - vb.y) / vb.h) * 100}%`,
+          transform: "translate(-50%, calc(-100% - 18px))"
+        }}
+      >
+        <span className="text-[11px] font-bold tracking-[0.14em] text-[#E9C27C]">{eyebrow}</span>
+        <span className="text-[15px] font-bold">{value}</span>
+        <span className="text-xs leading-snug text-[#C9C4D2]">{hint}</span>
+      </div>
+    );
+  }
+
+  const chipBase: React.CSSProperties = {
+    width: isMob ? 40 : 44,
+    height: isMob ? 40 : 44,
+    borderRadius: "50%",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    fontFamily: "Manrope, sans-serif",
+    fontWeight: 800,
+    boxSizing: "border-box",
+    padding: 0,
+    fontSize: 15,
+    border: "none"
+  };
+
+  const seq = (target: SphereId | null) =>
+    model.order.map((id, i) => {
+      const tint = SPHERE_TINT[id];
+      const base: React.CSSProperties = {
+        fontSize: 12,
+        fontWeight: 700,
+        padding: "6px 11px",
+        borderRadius: 999,
+        whiteSpace: "nowrap"
+      };
+      let st: React.CSSProperties;
+      if (unlocked.has(id)) st = { background: tint.t, color: tint.ink, border: "1px solid " + tint.t };
+      else if (id === model.nextSphere) st = { background: "#FFFFFF", color: tint.ink, border: "1.5px dashed " + tint.acc };
+      else if (id === target) st = { background: "transparent", color: V2_INK, border: "1px dashed #8A8494" };
+      else st = { background: "transparent", color: "#AFA8B8", border: "1px solid rgba(43,26,51,.10)" };
+      return (
+        <span key={id} style={{ ...base, ...st }}>
+          {unlocked.has(id) ? "✓ " : `${i + 1}. `}
+          {model.spheres[id].name}
+        </span>
+      );
+    });
+
+  const starBlock = (
+    <div className="star-ltr relative w-full max-w-[600px]" dir="ltr">
+      <V2StarSvg
+        star={model.star}
+        mobile={isMob}
+        activeSphere={active}
+        unlocked={model.unlocked}
+        nextSphere={model.nextSphere}
+        hoverPt={hoverPt}
+        hoverZone={hoverZone}
+        hoverTip={hoverTip}
+        selectedPt={panel?.type === "point" ? panel.j : null}
+        labels={labels}
+        missionLabel={missionLabel}
+        onSphere={onSphere}
+        onPoint={onPoint}
+        onMission={onMission}
+        onHoverPt={setHoverPt}
+        onHoverZone={setHoverZone}
+        onHoverTip={setHoverTip}
+      />
+      {numberTip()}
+    </div>
+  );
+
+  const nextTint = model.nextSphere ? SPHERE_TINT[model.nextSphere] : null;
+
+  return (
+    <div className="v2-root min-h-screen overflow-x-clip" style={{ background: "#F8F1E9", color: V2_INK, fontFamily: "Manrope, sans-serif" }}>
+      <div className="mx-auto flex max-w-[1360px] items-center gap-3 px-[clamp(16px,3vw,40px)] py-5">
+        <Link href={v2Href("/")} className="flex flex-1 items-center gap-2.5 no-underline">
+          <V2Logo />
+        </Link>
+        <Link
+          href={v2Href("/")}
+          className="hidden items-center gap-2.5 rounded-full bg-white py-1.5 pe-1.5 ps-4 text-sm no-underline md:flex"
+          style={{ color: V2_INK }}
+        >
+          <span className="text-[#8A8494]">{t("starPage.dob")}</span>
+          <b>
+            <LtrText>{model.displayDate}</LtrText>
+          </b>
+          <span className="rounded-full bg-[#F8F1E9] px-3 py-1.5 text-[13px] font-semibold">{t("starPage.change")}</span>
+        </Link>
+        <V2UserCluster locale={model.locale} user={user} stars={stars} />
+      </div>
+
+      <div className="mx-auto flex max-w-[1360px] flex-col gap-4 px-[clamp(16px,3vw,40px)] pb-24 pt-1">
+        <div className="flex flex-row-reverse flex-wrap gap-4">
+          <div className="relative flex min-w-0 flex-[1.3_1_520px] flex-col gap-3 overflow-hidden rounded-[36px] bg-white p-[clamp(20px,3vw,36px)]">
+            <div
+              className="pointer-events-none absolute inset-0"
+              style={{
+                backgroundImage: "radial-gradient(rgba(43,26,51,.11) 1.2px, transparent 1.7px)",
+                backgroundSize: "20px 20px",
+                WebkitMaskImage: "radial-gradient(circle at 50% 55%, #000 20%, transparent 75%)",
+                maskImage: "radial-gradient(circle at 50% 55%, #000 20%, transparent 75%)"
+              }}
+            />
+            <div className="relative flex flex-wrap items-start justify-end gap-4">
+              <div className="flex flex-wrap gap-1.5">
+                <LegendDot fill="linear-gradient(135deg,#F3D9A0,#D9A55C)" label={t("v2.openLegend")} />
+                <LegendDot dashed label={t("v2.nextLegend")} />
+                <LegendDot fill="#D9D4DE" muted label={t("v2.lockedLegend")} />
+              </div>
+            </div>
+            <div className="relative flex justify-center">
+              <div
+                className="pointer-events-none absolute left-1/2 top-1/2 aspect-square w-[90%] -translate-x-1/2 -translate-y-1/2 rounded-full"
+                style={{ background: "radial-gradient(closest-side,rgba(242,205,150,.55),rgba(255,255,255,0))" }}
+              />
+              {starBlock}
+            </div>
+          </div>
+
+          <div className="flex min-w-0 flex-[1_1_380px] flex-col gap-4">
+            <div className="flex flex-col gap-2.5 px-1 pt-2">
+              <span className="text-xs font-bold tracking-[0.16em] text-[#8A8494]">{t("starPage.eyebrow")}</span>
+              <span className="text-balance font-display text-[clamp(26px,3vw,38px)] font-medium leading-tight">{t("starPage.title")}</span>
+              <Link href={v2Href("/")} className="flex items-center gap-2 text-sm no-underline md:hidden" style={{ color: V2_INK }}>
+                <span className="text-[#8A8494]">{t("starPage.dob")}</span>
+                <b>
+                  <LtrText>{model.displayDate}</LtrText>
+                </b>
+              </Link>
+            </div>
+            <div className="relative flex flex-1 flex-col gap-5 overflow-hidden rounded-[36px] bg-white p-[clamp(20px,2.6vw,30px)]">
+              <div
+                className="pointer-events-none absolute -right-[90px] -top-[90px] h-[300px] w-[300px] rounded-full"
+                style={{ background: "repeating-radial-gradient(circle,rgba(217,165,92,.22) 0 1px,transparent 1.5px 18px)" }}
+              />
+              <div className="relative flex items-center justify-between gap-3">
+                <span
+                  className="rounded-full px-3 py-1.5 text-xs font-bold tracking-[0.06em]"
+                  style={{ background: col.t, color: col.ink }}
+                >
+                  {t("v2.sphereOf", { n: model.order.indexOf(active) + 1 })}
+                </span>
+                <span className="flex h-14 w-14 items-center justify-center rounded-full bg-[#F8EACB]">
+                  <V2MiniStar zones={[act.zone]} size={24} />
+                </span>
+              </div>
+              <div className="relative flex flex-col gap-3">
+                <span className="font-display text-[clamp(32px,3.4vw,44px)] font-medium leading-none">{act.name}</span>
+                <span className="text-[15px] leading-relaxed text-pretty opacity-85">{act.purpose}</span>
+              </div>
+              {unlocked.has(active) ? (
+                <div className="relative flex flex-col gap-2.5">
+                  <span className="text-[13px] font-bold">{t("starPage.yourNumbers")}</span>
+                  <div className="flex flex-wrap gap-2">
+                    {arcs.map((ar, i) => {
+                      const style: React.CSSProperties =
+                        i === 0
+                          ? { ...chipBase, background: V2_INK, color: "#FFFFFF", fontSize: 16 }
+                          : i < 3
+                            ? { ...chipBase, background: V2_GOLD, color: V2_INK, cursor: "pointer" }
+                            : { ...chipBase, background: col.t, color: col.ink };
+                      return (
+                        <button
+                          key={ar.id}
+                          type="button"
+                          title={ar.role}
+                          style={style}
+                          onClick={() => {
+                            if (i === 1) onPoint((ZONE_TO_SPHERE.indexOf(active) + 4) % 5);
+                            else if (i === 2) onPoint(ZONE_TO_SPHERE.indexOf(active));
+                            else scrollTo(ar.id);
+                          }}
+                        >
+                          {ar.value}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              ) : null}
+              <button
+                type="button"
+                onClick={() => scrollTo("decode")}
+                className="relative flex min-h-14 items-center justify-between rounded-full bg-[#2B1A33] py-2 pe-2 ps-[22px] text-[15px] font-bold text-white"
+              >
+                {t("v2.readDecode")}
+                <span className="flex h-10 w-10 items-center justify-center rounded-full bg-white text-lg text-[#2B1A33]">↓</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <section id="decode" className="flex flex-col gap-4 pt-12">
+          <div className="flex flex-wrap items-end justify-between gap-4">
+            <span className="font-display text-[clamp(30px,4vw,48px)] font-medium leading-none">{t("starPage.decodeTitle")}</span>
+            <span className="text-sm text-[#6E6878]">
+              {t("v2.openedCount")} <b style={{ color: V2_INK }}>{progressText}</b>
+            </span>
+          </div>
+          <div className="sticky top-2.5 z-[5] flex gap-1.5 overflow-x-auto rounded-full bg-white/88 p-1.5 shadow-[0_10px_30px_rgba(43,26,51,.08)] backdrop-blur-md no-scrollbar">
+            {model.order.map((id) => {
+              const tint = SPHERE_TINT[id];
+              const st = id === active ? "a" : unlocked.has(id) ? "o" : id === model.nextSphere ? "x" : "l";
+              const v: Record<string, React.CSSProperties> = {
+                a: { background: tint.a2, color: "#FFFFFF" },
+                o: { background: tint.t, color: tint.ink },
+                x: { background: "#FFFFFF", color: tint.ink, outline: "1.5px dashed " + tint.acc, outlineOffset: -2 },
+                l: { background: "transparent", color: "#8A8494", fontWeight: 600 }
+              };
+              return (
+                <button
+                  key={id}
+                  type="button"
+                  onClick={() => onSphere(id)}
+                  className="flex shrink-0 items-center gap-2 whitespace-nowrap rounded-full px-4 py-2.5 text-sm font-bold"
+                  style={{ minHeight: 44, border: "none", cursor: "pointer", ...v[st] }}
+                >
+                  <span
+                    className="h-2 w-2 shrink-0 rounded-full"
+                    style={{ background: st === "a" ? "#FFFFFF" : st === "l" ? "#D9D4DE" : tint.a2 }}
+                  />
+                  {model.spheres[id].name}
+                  {!unlocked.has(id) ? <V2LockIcon /> : null}
+                </button>
+              );
+            })}
+          </div>
+
+          <div className="flex flex-wrap items-start gap-4">
+            <aside
+              className="relative flex min-w-0 flex-[1_1_300px] flex-col gap-[18px] overflow-hidden rounded-[36px] bg-white p-[22px]"
+              style={{ maxWidth: isMob ? "none" : 360, position: isMob ? "relative" : "sticky", top: 84 }}
+            >
+              <div
+                className="pointer-events-none absolute inset-0"
+                style={{
+                  backgroundImage: "radial-gradient(rgba(217,165,92,.16) 1.2px, transparent 1.7px)",
+                  backgroundSize: "16px 16px"
+                }}
+              />
+              <div className="relative flex items-center gap-3">
+                <span className="flex h-12 w-12 items-center justify-center rounded-full bg-[#F8EACB]">
+                  <V2MiniStar zones={[act.zone]} size={24} />
+                </span>
+                <div className="flex flex-col gap-0.5">
+                  <span className="text-sm font-bold">{t("starPage.fragment")}</span>
+                  <span className="text-xs opacity-70">{act.part}</span>
+                </div>
+              </div>
+              {unlocked.has(active) ? (
+                <div className="relative flex justify-center py-1">
+                  <V2TriangleSvg width={isMob ? 150 : 190} sphere={active} star={model.star} onPoint={onPoint} />
+                </div>
+              ) : null}
+              {unlocked.has(active) ? (
+                <div className="relative flex flex-col gap-0.5 border-t border-[rgba(43,26,51,.08)] pt-2.5">
+                  <span className="px-2 pb-1.5 pt-2 text-[11px] font-bold tracking-[0.16em] text-[#8A8494]">{t("starPage.contents")}</span>
+                  {arcs.map((ar, i) => (
+                    <button
+                      key={ar.id}
+                      type="button"
+                      onClick={() => scrollTo(ar.id)}
+                      className="flex items-center gap-3 rounded-[14px] px-2 py-2 text-left hover:bg-[#F8F1E9]"
+                      style={{ color: V2_INK, background: "none", border: "none", cursor: "pointer" }}
+                    >
+                      <span
+                        className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-[13px] font-extrabold"
+                        style={{
+                          background: i === 0 ? col.a2 : i < 3 ? V2_GOLD : col.t,
+                          color: i === 0 ? "#FFFFFF" : V2_INK
+                        }}
+                      >
+                        {ar.value}
+                      </span>
+                      <span className="flex flex-col gap-px">
+                        <span className="text-sm font-bold">{ar.content?.title ?? t("points.arcana", { arcana, value: ar.value })}</span>
+                        <span className="text-xs text-[#8A8494]">{ar.role}</span>
+                      </span>
+                    </button>
+                  ))}
+                </div>
+              ) : null}
+            </aside>
+
+            <div className="flex min-w-0 flex-[999_1_520px] flex-col gap-4">
+              <div className="flex flex-wrap items-stretch gap-6 rounded-[36px] bg-white p-[clamp(20px,3vw,32px)]">
+                <div className="flex min-w-0 flex-[1_1_300px] flex-col items-start justify-center gap-4">
+                  <span className="rounded-full px-3 py-1.5 text-xs font-bold tracking-[0.06em]" style={{ background: col.t, color: col.ink }}>
+                    {t("v2.sphereOf", { n: model.order.indexOf(active) + 1 })} · {act.part.toUpperCase()}
+                  </span>
+                  <span className="font-display text-[clamp(34px,4vw,52px)] font-medium leading-none">{act.name}</span>
+                  <span className="text-[17px] leading-[1.65] text-[#5B5566] text-pretty">{act.purpose}</span>
+                  <span
+                    className={`rounded-full px-3 py-1.5 text-[13px] font-bold ${
+                      unlocked.has(active) ? "bg-[#D3F2DD] text-[#155A34]" : "bg-[#F1EBE4] text-[#6E6878]"
+                    }`}
+                  >
+                    {unlocked.has(active) ? t("starPage.openedBadge") : t("starPage.lockedBadge")}
+                  </span>
+                </div>
+                <div className="relative min-h-[260px] flex-[1_1_260px]">
+                  <SphereArt sphere={active} />
+                </div>
+              </div>
+
+              {unlocked.has(active)
+                ? arcs.map((ar, i) => (
+                    <section
+                      key={ar.id}
+                      id={ar.id}
+                      className="relative flex flex-col gap-5 overflow-hidden rounded-[36px] bg-white p-[clamp(22px,3vw,36px)]"
+                      style={{ border: i === 0 ? `1.5px solid ${col.a2}` : "none", scrollMarginTop: 90 }}
+                    >
+                      <div
+                        className="pointer-events-none absolute -right-[110px] -top-[110px] h-[320px] w-[320px] rounded-full"
+                        style={{ background: "repeating-radial-gradient(circle,rgba(217,165,92,.18) 0 1px,transparent 1.5px 20px)" }}
+                      />
+                      <div className="relative flex items-center gap-4">
+                        <span
+                          className="flex shrink-0 items-center justify-center rounded-full font-display font-medium"
+                          style={{
+                            width: i === 0 ? 76 : 60,
+                            height: i === 0 ? 76 : 60,
+                            fontSize: i === 0 ? 30 : 22,
+                            background: i === 0 ? `linear-gradient(140deg, ${col.a1}, ${col.a2})` : i < 3 ? V2_GOLD : col.t,
+                            color: i === 0 ? col.ink : V2_INK
+                          }}
+                        >
+                          {ar.value}
+                        </span>
+                        <div className="flex flex-col gap-1.5">
+                          <span className="text-xs font-bold tracking-[0.14em] opacity-70">{ar.roleUp}</span>
+                          <span className="font-display text-[clamp(24px,2.6vw,32px)] font-medium leading-tight">
+                            {ar.content?.title ?? t("points.arcana", { arcana, value: ar.value })}
+                          </span>
+                        </div>
+                      </div>
+                      {ar.content?.type === "structured" ? (
+                        <div className="relative grid grid-cols-[repeat(auto-fit,minmax(min(100%,260px),1fr))] gap-3">
+                          {ar.content.blocks.map((sb) => (
+                            <div
+                              key={sb.label}
+                              className="flex flex-col gap-2.5 rounded-3xl px-5 py-5"
+                              style={{ background: "#FFFFFF", border: "1px solid rgba(43,26,51,.08)" }}
+                            >
+                              <div className="flex items-center gap-2.5">
+                                <span className="flex h-[30px] w-[30px] items-center justify-center rounded-full bg-[#F8EACB] text-sm font-extrabold">
+                                  {sb.mark}
+                                </span>
+                                <span className="text-base font-bold">{sb.label}</span>
+                              </div>
+                              <div className="text-base leading-[1.65] text-pretty opacity-85">{sb.text}</div>
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <div className="relative flex max-w-[720px] flex-col gap-3.5">
+                          {ar.content?.type === "plain" && ar.content.lead ? (
+                            <div className="text-[17px] leading-[1.75] text-pretty opacity-85">{ar.content.lead}</div>
+                          ) : null}
+                          {(ar.content?.type === "plain" ? ar.content.paragraphs : []).map((pp) => (
+                            <div key={pp.slice(0, 32)} className="text-[17px] leading-[1.75] text-pretty opacity-85">
+                              {pp}
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </section>
+                  ))
+                : null}
+
+              {patterns.length > 0 ? (
+                <section className="flex flex-col gap-4 rounded-[36px] bg-white p-8">
+                  <span className="text-[11px] font-bold tracking-[0.16em] text-[#B07A33]">{t("starPage.patternsEyebrow")}</span>
+                  <span className="font-display text-[32px] font-medium">{t("starPage.patternsTitle")}</span>
+                  {patterns.map((pattern) => (
+                    <article key={pattern.id} className="flex flex-col gap-2 rounded-3xl border border-[rgba(43,26,51,.08)] p-5">
+                      <span className="font-display text-2xl font-medium">{pattern.title}</span>
+                      {pattern.content?.type === "plain"
+                        ? pattern.content.paragraphs.map((pp) => (
+                            <p key={pp.slice(0, 24)} className="text-[17px] leading-[1.75] text-[#5B5566]">
+                              {pp}
+                            </p>
+                          ))
+                        : null}
+                    </article>
+                  ))}
+                </section>
+              ) : null}
+
+              {offerNext && model.nextSphere && nextTint ? (
+                <div
+                  className="relative flex flex-wrap gap-6 overflow-hidden rounded-[36px] bg-white p-[clamp(22px,3vw,36px)]"
+                  style={{ border: "1.5px solid #E9C27C", color: V2_INK }}
+                >
+                  <div
+                    className="pointer-events-none absolute inset-0"
+                    style={{
+                      background: "repeating-conic-gradient(from 0deg at 90% 10%,rgba(217,165,92,.08) 0deg 5deg,transparent 5deg 16deg)"
+                    }}
+                  />
+                  <div className="relative flex min-w-0 flex-[1_1_320px] flex-col items-start gap-4">
+                    <span className="text-xs font-bold tracking-[0.16em] text-[#B07A33]">{t("starPage.nextStep")}</span>
+                    <div className="flex items-center gap-3.5">
+                      <span className="flex h-[52px] w-[52px] shrink-0 items-center justify-center rounded-full bg-[#F8EACB]">
+                        <V2MiniStar zones={[model.spheres[model.nextSphere].zone]} size={26} />
+                      </span>
+                      <span className="font-display text-[clamp(24px,2.6vw,32px)] font-medium leading-tight">
+                        {model.spheres[model.nextSphere].name}
+                      </span>
+                    </div>
+                    <span className="text-[15px] leading-relaxed text-[#6E6878]">{t("starPage.lead")}</span>
+                    <span className="text-base leading-relaxed text-[#5B5566]">{model.spheres[model.nextSphere].purpose}</span>
+                    <div className="flex flex-wrap items-center gap-4">
+                      {model.prices[model.nextSphere]?.soldSeparately ? (
+                        <button
+                          type="button"
+                          disabled={busy}
+                          onClick={() => goCheckout(model.prices[model.nextSphere!].sku)}
+                          className="min-h-[54px] rounded-full px-[26px] py-4 text-[15px] font-extrabold"
+                          style={{ background: nextTint.a1, color: nextTint.ink, border: "none", cursor: "pointer" }}
+                        >
+                          {t("starPage.openSpherePrice", { price: model.prices[model.nextSphere].formatted })}
+                        </button>
+                      ) : null}
+                      {model.showBundle && model.bundle && nOpen < 5 ? (
+                        <button
+                          type="button"
+                          disabled={busy}
+                          onClick={() => goCheckout(model.bundle!.sku)}
+                          className="min-h-11 bg-transparent p-2 text-sm text-[#6E6878] underline underline-offset-4"
+                        >
+                          {t("v2.unlockAllShort", { price: model.bundle.formatted })}
+                        </button>
+                      ) : null}
+                    </div>
+                    <PayHint
+                      saved={model.savedCard}
+                      onNewCard={
+                        busy
+                          ? undefined
+                          : () =>
+                              goCheckout(
+                                model.prices[model.nextSphere!]?.soldSeparately
+                                  ? model.prices[model.nextSphere!].sku
+                                  : (model.bundle?.sku ?? ""),
+                                false
+                              )
+                      }
+                      className="text-sm text-[#6E6878]"
+                      buttonClassName="bg-transparent p-0 text-sm font-semibold text-[#B07A33] underline underline-offset-4"
+                    />
+                    {payError ? <p className="text-sm text-red-700">{payError}</p> : null}
+                    <p className="text-[11px] leading-relaxed text-[#8A8494]">{t("legal.disclaimer")}</p>
+                  </div>
+                  <div className="relative min-h-[240px] flex-[1_1_240px]">
+                    <SphereArt sphere={model.nextSphere} />
+                  </div>
+                </div>
+              ) : null}
+
+              {nextOpen && nextId ? (
+                <div className="flex flex-wrap items-center gap-5 rounded-[36px] bg-white p-7">
+                  <span className="flex h-[52px] w-[52px] shrink-0 items-center justify-center rounded-full bg-white">
+                    <V2MiniStar zones={[model.spheres[nextId].zone]} size={26} />
+                  </span>
+                  <div className="flex min-w-[200px] flex-1 flex-col gap-1">
+                    <span className="text-xs font-bold tracking-[0.16em] opacity-70">{t("starPage.further")}</span>
+                    <span className="font-display text-[28px] font-medium">{model.spheres[nextId].name}</span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setActive(nextId);
+                      scrollTo("decode");
+                    }}
+                    className="min-h-[52px] rounded-full bg-[#2B1A33] px-6 py-4 text-[15px] font-bold text-white"
+                  >
+                    {t("starPage.readSphere")}
+                  </button>
+                </div>
+              ) : null}
+
+              {nOpen >= 5 && !nextId ? (
+                <div
+                  className="relative flex flex-col items-start gap-4 overflow-hidden rounded-[36px] bg-white p-[clamp(22px,3vw,36px)]"
+                  style={{ border: "1.5px solid #E9C27C" }}
+                >
+                  <div
+                    className="pointer-events-none absolute inset-0"
+                    style={{
+                      background: "repeating-conic-gradient(from 0deg at 90% 10%,rgba(233,194,124,.12) 0deg 5deg,transparent 5deg 16deg)"
+                    }}
+                  />
+                  <span className="relative text-xs font-bold tracking-[0.16em] text-[#B07A33]">{t("starPage.allOpen")}</span>
+                  <span className="relative font-display text-[34px] font-medium">{t("starPage.soulMission")}</span>
+                  <span className="relative text-base leading-relaxed text-[#5B5566]">{t("starPage.soulMissionLead")}</span>
+                  <button
+                    type="button"
+                    onClick={onMission}
+                    className="relative min-h-[52px] rounded-full bg-[#E9C27C] px-[26px] py-4 text-[15px] font-extrabold"
+                    style={{ color: V2_INK }}
+                  >
+                    {t("starPage.openMission")}
+                  </button>
+                </div>
+              ) : null}
+            </div>
+          </div>
+        </section>
+
+        <V2PersonalBlocks
+          model={model}
+          email={user?.email}
+          busy={busy}
+          payError={payError}
+          onOrder={({ channel, contact, email, useSavedMethod }) => {
+            if (!model.recommendation) return;
+            if (channel === "tg" && !contact.replace(/^@/, "").trim()) {
+              setPayError(t("v2.rec.tgRequired"));
+              return;
+            }
+            if (channel === "email" && !contact.trim() && !model.loggedIn) {
+              setPayError(t("offer.emailRequired"));
+              return;
+            }
+            void buy(model.recommendation.sku, useSavedMethod !== false, {
+              recChannel: channel,
+              recContact: contact,
+              email
+            });
+          }}
+        />
+      </div>
+
+      {mounted && panel
+        ? createPortal(
+            <Overlay panel={panel} isMob={isMob} onClose={close}>
+              {isMob ? <div className="h-1 w-10 self-center rounded-sm bg-[rgba(43,26,51,.2)]" /> : null}
+              <div className="flex items-center justify-between gap-3">
+                <span className="text-xs font-bold tracking-[0.14em] text-[#8A8494]">
+                  {panel.type === "point"
+                    ? t("points.pointEyebrow", { arcana, value: model.star.bridges[BRIDGES[panel.j]].value })
+                    : panel.type === "offer"
+                      ? t("offer.nextEyebrow", { n: model.order.indexOf(panel.k) + 1 })
+                      : panel.type === "mission"
+                        ? t("offer.center")
+                        : t("offer.sphereOf", { n: model.order.indexOf(panel.k) + 1 })}
+                </span>
+                <button
+                  type="button"
+                  aria-label={t("points.close")}
+                  onClick={close}
+                  className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-[#F8F1E9] text-xl"
+                  style={{ color: V2_INK, border: "none" }}
+                >
+                  ×
+                </button>
+              </div>
+
+              {panel.type === "point" ? (
+                <PointPanel
+                  model={model}
+                  j={panel.j}
+                  ctx={panel.ctx}
+                  unlocked={unlocked}
+                  t={t}
+                  readings={readings}
+                  onCtx={(s) => setPanel({ type: "point", j: panel.j, ctx: s })}
+                />
+              ) : null}
+
+              {panel.type === "offer" ? (
+                <>
+                  <div
+                    className="flex items-center gap-3.5 rounded-3xl p-4"
+                    style={{ background: "#FFFFFF", border: `1.5px solid ${SPHERE_TINT[panel.k].a2}`, color: V2_INK }}
+                  >
+                    <span className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-white">
+                      <V2MiniStar zones={[model.spheres[panel.k].zone]} size={28} />
+                    </span>
+                    <div className="flex flex-col items-start gap-2">
+                      <span className="font-display text-[28px] font-medium leading-none">{model.spheres[panel.k].name}</span>
+                      <span className="rounded-full bg-white px-2.5 py-1 text-xs font-bold">{t("offer.available")}</span>
+                    </div>
+                  </div>
+                  <div className="flex flex-col gap-1.5">
+                    <span className="text-[13px] font-bold">{t("offer.whySphere")}</span>
+                    <span className="text-[15px] leading-relaxed text-[#5B5566]">{model.spheres[panel.k].purpose}</span>
+                  </div>
+                  <div className="flex flex-wrap gap-1.5">{seq(panel.k)}</div>
+                  <div className="flex items-baseline justify-between border-t border-[rgba(43,26,51,.08)] pt-4">
+                    <span className="text-sm text-[#6E6878]">{t("offer.priceLabel")}</span>
+                    <span className="font-display text-2xl font-medium">{model.prices[panel.k].formatted}</span>
+                  </div>
+                  {!model.loggedIn ? (
+                    <div className="flex flex-col gap-2">
+                      <span className="text-[13px] font-bold">{t("offer.emailTitle")}</span>
+                      <p className="text-sm leading-relaxed text-[#5B5566]">{t("offer.emailLead")}</p>
+                      <input
+                        type="email"
+                        autoComplete="email"
+                        required
+                        value={payEmail}
+                        onChange={(e) => setPayEmail(e.target.value)}
+                        placeholder={t("offer.emailPlaceholder")}
+                        className="min-h-12 rounded-[14px] border border-[rgba(43,26,51,.10)] bg-[#F8F1E9] px-4 text-sm"
+                      />
+                      {needsPassword ? (
+                        <>
+                          <p className="text-sm text-[#5B5566]">{t("offer.passwordLead")}</p>
+                          <input
+                            type="password"
+                            autoComplete="current-password"
+                            value={payPassword}
+                            onChange={(e) => setPayPassword(e.target.value)}
+                            placeholder={t("offer.passwordPlaceholder")}
+                            className="min-h-12 rounded-[14px] border border-[rgba(43,26,51,.10)] bg-[#F8F1E9] px-4 text-sm"
+                          />
+                        </>
+                      ) : (
+                        <button type="button" onClick={() => setNeedsPassword(true)} className="self-start bg-transparent py-1 text-sm font-bold">
+                          {t("offer.hasAccount")}
+                        </button>
+                      )}
+                    </div>
+                  ) : null}
+                  {model.prices[panel.k]?.soldSeparately ? (
+                    <button
+                      type="button"
+                      disabled={busy}
+                      onClick={() => goCheckout(pendingSku ?? skuForSphere(panel.k) ?? model.prices[panel.k].sku)}
+                      className="min-h-[54px] rounded-full bg-[#2B1A33] py-4 text-[15px] font-bold text-white"
+                    >
+                      {t("starPage.openSpherePrice", { price: model.prices[panel.k].formatted })}
+                    </button>
+                  ) : null}
+                  {model.showBundle && model.bundle && nOpen < 5 ? (
+                    <button
+                      type="button"
+                      disabled={busy}
+                      onClick={() => goCheckout(model.bundle!.sku)}
+                      className="min-h-11 bg-transparent text-sm text-[#6E6878] underline underline-offset-4"
+                    >
+                      {t("v2.unlockAllShort", { price: model.bundle.formatted })}
+                    </button>
+                  ) : null}
+                  <PayHint
+                    saved={model.savedCard}
+                    onNewCard={
+                      busy
+                        ? undefined
+                        : () =>
+                            goCheckout(pendingSku ?? skuForSphere(panel.k) ?? model.prices[panel.k].sku, false)
+                    }
+                    className="text-sm text-[#6E6878]"
+                    buttonClassName="bg-transparent p-0 text-sm font-semibold text-[#B07A33] underline underline-offset-4"
+                  />
+                  <p className="text-[11px] leading-relaxed text-[#8A8494]">{t("legal.disclaimer")}</p>
+                  {payError ? <p className="text-sm text-red-700">{payError}</p> : null}
+                  <button type="button" onClick={close} className="min-h-11 bg-transparent text-sm text-[#6E6878]">
+                    {t("offer.notNow")}
+                  </button>
+                </>
+              ) : null}
+
+              {panel.type === "blocked" ? (
+                <>
+                  <div className="flex items-center gap-3.5 rounded-3xl border border-[rgba(43,26,51,.10)] bg-white p-4">
+                    <span className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-white">
+                      <V2MiniStar zones={[model.spheres[panel.k].zone]} size={28} locked />
+                    </span>
+                    <div className="flex flex-col items-start gap-2">
+                      <span className="font-display text-[28px] font-medium leading-none">{model.spheres[panel.k].name}</span>
+                      <span className="rounded-full bg-white px-2.5 py-1 text-xs font-bold text-[#6E6878]">{t("offer.blocked")}</span>
+                    </div>
+                  </div>
+                  <div className="flex flex-col gap-2 rounded-[20px] bg-[#F8F1E9] p-[18px]">
+                    <span className="text-[17px] font-bold leading-snug">{model.unlockCopy[panel.k]?.blockedTitle}</span>
+                    <span className="text-sm leading-relaxed text-[#5B5566]">{model.unlockCopy[panel.k]?.blockedBody}</span>
+                    <button
+                      type="button"
+                      onClick={() => setWhy((v) => !v)}
+                      className="min-h-8 self-start bg-transparent py-1 text-sm font-bold underline underline-offset-4"
+                    >
+                      {t("offer.why")}
+                    </button>
+                    {why ? (
+                      <span className="border-t border-[rgba(43,26,51,.08)] pt-2.5 text-sm leading-relaxed text-[#5B5566]">
+                        {model.unlockCopy[panel.k]?.whyBody}
+                      </span>
+                    ) : null}
+                  </div>
+                  <div className="flex flex-col gap-1.5">
+                    <span className="text-[13px] font-bold">{t("offer.whySphere")}</span>
+                    <span className="text-[15px] leading-relaxed text-[#5B5566]">{model.spheres[panel.k].purpose}</span>
+                  </div>
+                  <div className="flex flex-wrap gap-1.5">{seq(panel.k)}</div>
+                  {model.nextSphere ? (
+                    <button
+                      type="button"
+                      onClick={() => setPanel({ type: "offer", k: model.nextSphere! })}
+                      className="min-h-[54px] rounded-full bg-[#2B1A33] py-4 text-[15px] font-bold text-white"
+                    >
+                      {t("offer.goToNeeded", { name: model.spheres[model.nextSphere].name })}
+                    </button>
+                  ) : null}
+                </>
+              ) : null}
+
+              {panel.type === "mission" ? (
+                <>
+                  <div
+                    className="relative flex items-center gap-3.5 overflow-hidden rounded-3xl p-[18px]"
+                    style={{ background: "#FFFFFF", color: V2_INK, border: "1.5px solid #E9C27C" }}
+                  >
+                    <div
+                      className="pointer-events-none absolute inset-0"
+                      style={{
+                        background: "repeating-conic-gradient(from 0deg at 90% 20%,rgba(233,194,124,.14) 0deg 5deg,transparent 5deg 16deg)"
+                      }}
+                    />
+                    <span className="relative flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-[rgba(233,194,124,.18)]">
+                      <V2MiniStar zones={[]} size={28} center />
+                    </span>
+                    <span className="relative font-display text-[28px] font-medium leading-none">{t("starPage.soulMission")}</span>
+                  </div>
+                  {missionOpen && missionReading?.content?.type === "plain" ? (
+                    <>
+                      {missionReading.content.lead ? (
+                        <div className="text-base leading-[1.7] text-[#5B5566]">{missionReading.content.lead}</div>
+                      ) : null}
+                      {missionReading.content.paragraphs.map((pp) => (
+                        <div key={pp.slice(0, 16)} className="text-base leading-[1.7] text-[#5B5566]">
+                          {pp}
+                        </div>
+                      ))}
+                    </>
+                  ) : (
+                    <div className="text-base leading-[1.7] text-[#5B5566]">{t("starPage.soulMissionLead")}</div>
+                  )}
+                  <div className="flex flex-wrap gap-1.5">{seq(null)}</div>
+                </>
+              ) : null}
+            </Overlay>,
+            document.body
+          )
+        : null}
+    </div>
+  );
+}
+
+function LegendDot({
+  fill,
+  dashed,
+  muted,
+  label
+}: {
+  fill?: string;
+  dashed?: boolean;
+  muted?: boolean;
+  label: string;
+}) {
+  return (
+    <span
+      className="flex items-center gap-1.5 rounded-full bg-[#F8F1E9] px-3 py-1.5 text-xs font-semibold"
+      style={{ color: muted ? "#8A8494" : undefined }}
+    >
+      <span
+        className="h-2.5 w-2.5 rounded-full"
+        style={
+          dashed
+            ? { border: "1.5px dashed #2B1A33", boxSizing: "border-box", background: "transparent" }
+            : { background: fill }
+        }
+      />
+      {label}
+    </span>
+  );
+}
+
+function Overlay({
+  panel,
+  isMob,
+  onClose,
+  children
+}: {
+  panel: Panel;
+  isMob: boolean;
+  onClose: () => void;
+  children: React.ReactNode;
+}) {
+  const isPointD = panel.type === "point" && !isMob;
+  const overlay: React.CSSProperties = {
+    position: "fixed",
+    inset: 0,
+    zIndex: 80,
+    background: "rgba(43,26,51,.4)",
+    backdropFilter: "blur(4px)",
+    display: "flex",
+    alignItems: isMob ? "flex-end" : isPointD ? "stretch" : "center",
+    justifyContent: isMob ? "center" : isPointD ? "flex-end" : "center"
+  };
+  const sheetBase: React.CSSProperties = {
+    background: "#FFFFFF",
+    color: V2_INK,
+    display: "flex",
+    flexDirection: "column",
+    gap: 18,
+    boxSizing: "border-box",
+    overflowY: "auto",
+    boxShadow: "0 30px 80px rgba(43,26,51,.25)"
+  };
+  const sheet: React.CSSProperties = isMob
+    ? { ...sheetBase, width: "100%", maxWidth: 520, maxHeight: "88vh", borderRadius: "32px 32px 0 0", padding: "10px 20px 28px" }
+    : isPointD
+      ? { ...sheetBase, width: 540, height: "calc(100vh - 24px)", margin: 12, borderRadius: 32, padding: "32px 40px 48px", gap: 22 }
+      : { ...sheetBase, width: 500, maxHeight: "88vh", borderRadius: 32, padding: 32 };
+  return (
+    <div style={overlay} onClick={onClose} role="dialog" aria-modal="true">
+      <div style={sheet} onClick={(e) => e.stopPropagation()}>
+        {children}
+      </div>
+    </div>
+  );
+}
+
+function PointPanel({
+  model,
+  j,
+  ctx,
+  unlocked,
+  t,
+  readings,
+  onCtx
+}: {
+  model: StarPageModel;
+  j: number;
+  ctx: SphereId;
+  unlocked: Set<SphereId>;
+  t: ReturnType<typeof useTranslations>;
+  readings: Record<SphereId, ArcReading[]>;
+  onCtx: (s: SphereId) => void;
+}) {
+  const bridge = BRIDGES[j];
+  const value = model.star.bridges[bridge].value;
+  const ks = model.star.bridges[bridge].spheres;
+  const other = ks.find((k) => k !== ctx)!;
+  const fatal = BRIDGE_KIND[bridge] === "fatal_error";
+  const pointKey = model.star.spheres[ctx].leftBase.id === bridge ? "leftBase" : "rightBase";
+  const content = readings[ctx]?.find((a) => a.point === pointKey)?.content;
+  const typeLabel = readings[ctx]?.find((a) => a.point === pointKey)?.role ?? (fatal ? t("points.fatal") : t("points.ancestral"));
+  return (
+    <>
+      <div className="flex items-center gap-4">
+        <span className="flex h-[60px] w-[60px] shrink-0 items-center justify-center rounded-full bg-[#E9C27C] text-[22px] font-extrabold" style={{ color: V2_INK }}>
+          {value}
+        </span>
+        <span className="font-display text-[28px] font-medium leading-tight">{typeLabel}</span>
+      </div>
+      <div className="flex gap-1.5 rounded-full bg-[#F8F1E9] p-[5px]">
+        {ks.map((k) => (
+          <button
+            key={k}
+            type="button"
+            onClick={() => {
+              if (unlocked.has(k)) onCtx(k);
+            }}
+            className="flex min-h-[42px] flex-1 items-center justify-center gap-1.5 rounded-full px-3 py-2.5 text-sm font-bold"
+            style={{
+              border: "none",
+              background: k === ctx ? SPHERE_TINT[k].a2 : "transparent",
+              color: k === ctx ? "#FFFFFF" : unlocked.has(k) ? "#5B5566" : "#AFA8B8",
+              cursor: unlocked.has(k) ? "pointer" : "default"
+            }}
+          >
+            {model.spheres[k].name}
+            {!unlocked.has(k) ? <V2LockIcon /> : null}
+          </button>
+        ))}
+      </div>
+      <div className="text-[17px] font-bold leading-snug">{t("points.leadIn", { name: model.spheres[ctx].name })}</div>
+      {content?.type === "plain" ? (
+        <>
+          {content.lead ? <div className="text-pretty text-base leading-[1.75] text-[#5B5566]">{content.lead}</div> : null}
+          {content.paragraphs.map((p) => (
+            <div key={p.slice(0, 16)} className="text-pretty text-base leading-[1.75] text-[#5B5566]">
+              {p}
+            </div>
+          ))}
+        </>
+      ) : content?.type === "structured" ? (
+        content.blocks.map((sb) => (
+          <div key={sb.label} className="flex flex-col gap-2 rounded-3xl border border-[rgba(43,26,51,.08)] bg-white px-4 py-3">
+            <span className="text-sm font-bold">
+              {sb.mark} {sb.label}
+            </span>
+            <span className="text-pretty text-base leading-[1.75] text-[#5B5566]">{sb.text}</span>
+          </div>
+        ))
+      ) : null}
+      <div className="rounded-2xl bg-[#F8F1E9] px-4 py-3.5 text-[13px] leading-relaxed text-[#6E6878]">
+        {unlocked.has(other) ? t("points.samePoint", { name: model.spheres[other].name }) : t("points.samePointLocked", { name: model.spheres[other].name })}
+      </div>
+    </>
+  );
+}

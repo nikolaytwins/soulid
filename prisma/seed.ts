@@ -83,7 +83,7 @@ const SPHERES = [
 const POINTS = ["apex", "leftBase", "rightBase", "innerLeft", "innerRight", "innerBottom"] as const;
 
 async function main() {
-  console.log("Seeding Soul Star…");
+  console.log("Seeding Soul ID…");
 
   await prisma.patternRule.deleteMany();
   await prisma.interpretation.deleteMany();
@@ -164,6 +164,25 @@ async function main() {
       { productId: bundle.id, locale: "ru", name: "Полный Soul ID", description: "Все четыре раздела + Здоровье в подарок" },
       { productId: bundle.id, locale: "en", name: "Complete Soul ID", description: "All four sections + Health as a gift" },
       { productId: bundle.id, locale: "ar", name: "Soul ID الكامل", description: "الأقسام الأربعة كلها + الصحة هدية" }
+    ]
+  });
+
+  const rec = await prisma.product.create({
+    data: {
+      sku: "personal_recommendation",
+      kind: "addon",
+      sortOrder: 100,
+      priceAmount: 199000,
+      currency: "RUB",
+      isFree: false,
+      isActive: true
+    }
+  });
+  await prisma.productTranslation.createMany({
+    data: [
+      { productId: rec.id, locale: "ru", name: "Персональная рекомендация", description: "Резюме открытых сфер и рекомендации по связям между ними" },
+      { productId: rec.id, locale: "en", name: "Personal recommendation", description: "A summary of opened spheres and advice on how they connect" },
+      { productId: rec.id, locale: "ar", name: "توصية شخصية", description: "ملخص للمجالات المفتوحة وتوصيات تراعي الروابط بينها" }
     ]
   });
 
@@ -317,7 +336,7 @@ async function main() {
       { key: "unlock_everything_after_sphere", value: "personality" },
       { key: "free_first_sphere", value: "personality" },
       { key: "default_locale", value: "ru" },
-      { key: "brand_name", value: "Soul Star" }
+      { key: "brand_name", value: "Soul ID" }
     ]
   });
 

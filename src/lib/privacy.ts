@@ -7,7 +7,8 @@ export async function exportUserData(userId: string) {
     include: {
       profiles: { include: { entitlements: true } },
       purchases: { include: { product: { select: { sku: true } } } },
-      entitlements: true
+      entitlements: true,
+      paymentMethods: true
     }
   });
   if (!user) return null;
@@ -44,6 +45,14 @@ export async function exportUserData(userId: string) {
       provider: p.provider,
       paidAt: p.paidAt,
       createdAt: p.createdAt
+    })),
+    paymentMethods: user.paymentMethods.map((m) => ({
+      brand: m.brand,
+      last4: m.last4,
+      expMonth: m.expMonth,
+      expYear: m.expYear,
+      provider: m.provider,
+      createdAt: m.createdAt
     }))
   };
 }
@@ -56,6 +65,7 @@ export async function deleteUserData(userId: string): Promise<{ ok: true } | { o
     if (others === 0) return { ok: false, error: "admin" };
   }
 
+  await prisma.savedPaymentMethod.deleteMany({ where: { userId } });
   await prisma.passwordResetToken.deleteMany({ where: { userId } });
   await prisma.analyticsEvent.updateMany({ where: { userId }, data: { userId: null, payload: "{}" } });
   await prisma.emailLog.updateMany({

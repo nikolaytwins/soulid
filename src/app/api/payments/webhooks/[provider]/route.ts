@@ -3,6 +3,7 @@ import { prisma } from "@/lib/db";
 import { fulfillPaidPurchase } from "@/lib/payments/fulfill";
 import { providerByName } from "@/lib/payments/provider";
 import { appendLedger } from "@/lib/ledger";
+import { capturePaymentMethod } from "@/lib/payments/capture";
 
 async function handle(providerName: string, req: Request) {
   const raw = await req.text();
@@ -33,6 +34,12 @@ async function handle(providerName: string, req: Request) {
       data: { providerPaymentId: parsed.providerPaymentId }
     });
     await fulfillPaidPurchase(purchaseId);
+    await capturePaymentMethod({
+      userId: purchase.userId,
+      provider: providerName,
+      providerPaymentId: parsed.providerPaymentId,
+      method: parsed.paymentMethod
+    });
   } else {
     await prisma.purchase.update({
       where: { id: purchaseId },

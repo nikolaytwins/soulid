@@ -30,7 +30,15 @@ export async function POST(req: Request) {
       providerPaymentId: session,
       metadata,
       amount,
-      currency
+      currency,
+      paymentMethod: {
+        methodId: "mock_card_default",
+        customerId: "mock_cus",
+        brand: "visa",
+        last4: "4242",
+        expMonth: 12,
+        expYear: 2030
+      }
     })
   });
 

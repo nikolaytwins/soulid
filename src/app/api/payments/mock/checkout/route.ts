@@ -8,7 +8,7 @@ export async function GET(req: Request) {
   const cancel = url.searchParams.get("cancel") ?? "/";
   const amount = url.searchParams.get("amount") ?? "0";
   const currency = url.searchParams.get("currency") ?? "RUB";
-  const name = escapeHtml(url.searchParams.get("name") ?? "Soul Star");
+  const name = escapeHtml(url.searchParams.get("name") ?? "Soul ID");
   const meta = escapeHtml(url.searchParams.get("meta") ?? "{}");
 
   const html = `<!doctype html>
@@ -20,7 +20,7 @@ export async function GET(req: Request) {
   <form method="post" action="/api/payments/mock/pay" style="background:#FBF8F4;border:1px solid rgba(80,60,45,.1);border-radius:24px;padding:32px;width:min(420px,92vw);display:flex;flex-direction:column;gap:16px">
     <div style="font-size:11px;letter-spacing:.2em;color:#B9813F;font-weight:700">MOCK CHECKOUT</div>
     <h1 style="font-family:'Cormorant Garamond',Georgia,serif;font-size:36px;margin:0;font-weight:500">${name}</h1>
-    <p style="color:#5E534C;line-height:1.5">Тестовый платёж. В production здесь Stripe или ЮKassa / СБП.</p>
+    <p style="color:#5E534C;line-height:1.5">Тестовый платёж. Карта сохранится для следующих покупок — номер в Soul ID не хранится.</p>
     <div style="display:flex;justify-content:space-between;align-items:baseline;border-top:1px solid rgba(80,60,45,.1);padding-top:12px">
       <span>Сумма</span><b>${escapeHtml(currency === "USD" ? `$${Math.round(Number(amount) / 100)}` : `${Math.round(Number(amount) / 100)} ${currency}`)}</b>
     </div>

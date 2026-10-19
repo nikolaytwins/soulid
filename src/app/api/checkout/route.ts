@@ -15,11 +15,16 @@ import { isIndividuallySold, productName } from "@/lib/domain/catalog";
 import { rateLimit, clientIp } from "@/lib/rate-limit";
 import { analyticsFromCookies, trackEvent, newEventId } from "@/lib/analytics";
 import { appendLedger } from "@/lib/ledger";
+import { capturePaymentMethod } from "@/lib/payments/capture";
 
 const schema = z.object({
   profileId: z.string().min(1),
   sku: z.string().min(1),
-  returnTo: z.enum(["star", "account"]).optional()
+  returnTo: z.enum(["star", "account"]).optional(),
+  skin: z.enum(["v2"]).optional(),
+  useSavedMethod: z.boolean().optional(),
+  recChannel: z.enum(["email", "tg"]).optional(),
+  recContact: z.string().max(120).optional()
 });
 
 export async function POST(req: Request) {
@@ -67,18 +72,33 @@ export async function POST(req: Request) {
   if (product.kind === "bundle" && remainingSpheres(order, unlocked).length === 0) {
     return NextResponse.json({ error: "Nothing left to unlock" }, { status: 400 });
   }
+  if (product.kind === "addon") {
+    const already = await prisma.purchase.findFirst({
+      where: { userId: session.user.id, profileId: profile.id, productId: product.id, status: "paid" }
+    });
+    if (already) {
+      const originPaid = process.env.APP_URL ?? new URL(req.url).origin;
+      const skinPaid = parsed.data.skin === "v2" ? "/v2" : "";
+      return NextResponse.json({
+        url: `${originPaid}/${session.user.locale ?? "ru"}${skinPaid}/star/${profile.id}?paid=1&rec=1`,
+        paid: true
+      });
+    }
+  }
 
   const eventId = newEventId();
   const locale = session.user.locale ?? "ru";
   const name = productName(product, locale)?.name ?? product.sku;
   const origin = process.env.APP_URL ?? new URL(req.url).origin;
   const toAccount = parsed.data.returnTo === "account";
+  const skin = parsed.data.skin === "v2" ? "/v2" : "";
+  const recQs = product.kind === "addon" ? "&rec=1" : "";
   const returnUrl = toAccount
-    ? `${origin}/${locale}/account?paid=1&star=${profile.id}`
-    : `${origin}/${locale}/star/${profile.id}?paid=1`;
+    ? `${origin}/${locale}${skin}/account?paid=1&star=${profile.id}${recQs}`
+    : `${origin}/${locale}${skin}/star/${profile.id}?paid=1${recQs}`;
   const cancelUrl = toAccount
-    ? `${origin}/${locale}/account?canceled=1&star=${profile.id}`
-    : `${origin}/${locale}/star/${profile.id}?canceled=1`;
+    ? `${origin}/${locale}${skin}/account?canceled=1&star=${profile.id}`
+    : `${origin}/${locale}${skin}/star/${profile.id}?canceled=1`;
 
   if (product.isFree || product.priceAmount <= 0) {
     const purchase = await prisma.purchase.create({
@@ -92,7 +112,12 @@ export async function POST(req: Request) {
         provider: "free",
         idempotencyKey: randomUUID(),
         eventId,
-        metadataJson: JSON.stringify({ sku: product.sku, sphere: product.sphere })
+        metadataJson: JSON.stringify({
+          sku: product.sku,
+          sphere: product.sphere,
+          recChannel: parsed.data.recChannel,
+          recContact: parsed.data.recContact
+        })
       }
     });
     await appendLedger({
@@ -126,28 +151,124 @@ export async function POST(req: Request) {
       provider: process.env.PAYMENT_PROVIDER ?? "mock",
       idempotencyKey,
       eventId,
-      metadataJson: JSON.stringify({ sku: product.sku, sphere: product.sphere })
+      metadataJson: JSON.stringify({
+        sku: product.sku,
+        sphere: product.sphere,
+        recChannel: parsed.data.recChannel,
+        recContact: parsed.data.recContact
+      })
     }
   });
 
   const provider = getPaymentProvider();
-  const checkout = await provider.createCheckout({
-    item: {
-      sku: product.sku,
-      name,
-      amount: product.priceAmount,
-      currency: product.currency,
-      sphere: product.sphere
-    },
-    metadata: {
-      purchaseId: purchase.id,
+  const saved =
+    parsed.data.useSavedMethod === false
+      ? null
+      : await prisma.savedPaymentMethod.findFirst({
+          where: { userId: session.user.id, provider: provider.name },
+          orderBy: [{ isDefault: "desc" }, { updatedAt: "desc" }]
+        });
+  const item = {
+    sku: product.sku,
+    name,
+    amount: product.priceAmount,
+    currency: product.currency,
+    sphere: product.sphere
+  };
+  const metadata = {
+    purchaseId: purchase.id,
+    userId: session.user.id,
+    profileId: profile.id,
+    sku: product.sku
+  };
+
+  const analytics = await analyticsFromCookies();
+  const started = async (providerName: string) => {
+    await trackEvent({
+      name: "checkout_started",
+      eventId,
       userId: session.user.id,
       profileId: profile.id,
-      sku: product.sku
-    },
+      ...analytics,
+      payload: { sku: product.sku, provider: providerName }
+    });
+  };
+
+  if (saved?.providerMethodId) {
+    const charged = await provider.chargeSaved({
+      item,
+      metadata,
+      customerId: saved.providerCustomerId || saved.userId,
+      methodId: saved.providerMethodId,
+      idempotencyKey,
+      returnUrl
+    });
+    if (charged.status === "paid") {
+      await prisma.purchase.update({
+        where: { id: purchase.id },
+        data: { providerPaymentId: charged.id, provider: provider.name }
+      });
+      const { fulfillPaidPurchase } = await import("@/lib/payments/fulfill");
+      await fulfillPaidPurchase(purchase.id);
+      await capturePaymentMethod({
+        userId: session.user.id,
+        provider: provider.name,
+        providerPaymentId: charged.id,
+        method: charged.paymentMethod
+      });
+      await appendLedger({
+        kind: "checkout.created",
+        actorType: "user",
+        actorId: session.user.id,
+        userId: session.user.id,
+        profileId: profile.id,
+        purchaseId: purchase.id,
+        sku: product.sku,
+        amount: product.priceAmount,
+        currency: product.currency,
+        provider: provider.name,
+        providerPaymentId: charged.id,
+        summary: `Saved-card checkout ${product.sku}`
+      });
+      await started(provider.name);
+      return NextResponse.json({ url: returnUrl, eventId, purchaseId: purchase.id, paid: true });
+    }
+    if (charged.checkoutUrl) {
+      await prisma.purchase.update({
+        where: { id: purchase.id },
+        data: { providerPaymentId: charged.id, provider: provider.name }
+      });
+      await appendLedger({
+        kind: "checkout.created",
+        actorType: "user",
+        actorId: session.user.id,
+        userId: session.user.id,
+        profileId: profile.id,
+        purchaseId: purchase.id,
+        sku: product.sku,
+        amount: product.priceAmount,
+        currency: product.currency,
+        provider: provider.name,
+        providerPaymentId: charged.id,
+        summary: `Checkout ${product.sku}`
+      });
+      await started(provider.name);
+      return NextResponse.json({ url: charged.checkoutUrl, eventId, purchaseId: purchase.id });
+    }
+  }
+
+  const reuseCustomer = await prisma.savedPaymentMethod.findFirst({
+    where: { userId: session.user.id, provider: provider.name },
+    orderBy: [{ isDefault: "desc" }, { updatedAt: "desc" }]
+  });
+
+  const checkout = await provider.createCheckout({
+    item,
+    metadata,
     returnUrl,
     cancelUrl,
     customerEmail: session.user.email ?? undefined,
+    customerId: reuseCustomer?.providerCustomerId || undefined,
     idempotencyKey
   });
 
@@ -170,15 +291,7 @@ export async function POST(req: Request) {
     summary: `Checkout ${product.sku}`
   });
 
-  const analytics = await analyticsFromCookies();
-  await trackEvent({
-    name: "checkout_started",
-    eventId,
-    userId: session.user.id,
-    profileId: profile.id,
-    ...analytics,
-    payload: { sku: product.sku }
-  });
+  await started(checkout.provider);
 
   return NextResponse.json({ url: checkout.checkoutUrl, eventId, purchaseId: purchase.id });
 }

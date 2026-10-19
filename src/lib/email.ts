@@ -32,7 +32,7 @@ class ResendEmailProvider implements EmailProvider {
         "Content-Type": "application/json"
       },
       body: JSON.stringify({
-        from: process.env.EMAIL_FROM ?? "Soul Star <noreply@localhost>",
+        from: process.env.EMAIL_FROM ?? "Soul ID <noreply@localhost>",
         to: payload.to,
         subject: payload.subject,
         html: payload.html,
@@ -104,10 +104,32 @@ export function sphereUnlockedEmail(locale: string, sphereName: string, url: str
   };
 }
 
+export function recommendationOrderedEmail(locale: string, channel: string, contact: string) {
+  if (locale === "en") {
+    return {
+      subject: "Your personal recommendation is in progress",
+      text: `We started preparing your personal recommendation. It will arrive via ${channel} (${contact}) within 24 hours.`,
+      html: `<p>We started preparing your personal recommendation.</p><p>It will arrive via <strong>${channel}</strong> (${contact}) within 24 hours.</p>`
+    };
+  }
+  if (locale === "ar") {
+    return {
+      subject: "توصيتك الشخصية قيد الإعداد",
+      text: `بدأنا إعداد توصيتك الشخصية. ستصل عبر ${channel} (${contact}) خلال 24 ساعة.`,
+      html: `<p>بدأنا إعداد توصيتك الشخصية.</p><p>ستصل عبر <strong>${channel}</strong> (${contact}) خلال 24 ساعة.</p>`
+    };
+  }
+  return {
+    subject: "Персональная рекомендация в работе",
+    text: `Мы начали готовить вашу персональную рекомендацию. Она придёт через ${channel} (${contact}) в течение 24 часов.`,
+    html: `<p>Мы начали готовить вашу персональную рекомендацию.</p><p>Она придёт через <strong>${channel}</strong> (${contact}) в течение 24 часов.</p>`
+  };
+}
+
 export function resetPasswordEmail(locale: string, url: string) {
   if (locale === "en") {
     return {
-      subject: "Reset your Soul Star password",
+      subject: "Reset your Soul ID password",
       text: `Reset link (valid 1 hour): ${url}`,
       html: `<p><a href="${url}">Reset password</a> — valid for 1 hour.</p>`
     };
@@ -120,7 +142,7 @@ export function resetPasswordEmail(locale: string, url: string) {
     };
   }
   return {
-    subject: "Восстановление доступа Soul Star",
+    subject: "Восстановление доступа Soul ID",
     text: `Ссылка для сброса пароля (действует 1 час): ${url}`,
     html: `<p><a href="${url}">Сбросить пароль</a> — ссылка действует 1 час.</p>`
   };

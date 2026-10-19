@@ -36,3 +36,14 @@ button {
 .no-scrollbar {
   scrollbar-width: none;
 }
+
+.v2-root {
+  background: #f8f1e9;
+  color: #2b1a33;
+}
+.v2-root a {
+  color: #b07a33;
+}
+.v2-root a:hover {
+  color: #8a5a24;
+}

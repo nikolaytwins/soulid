@@ -9,6 +9,7 @@ import { parseRelation } from "@/lib/domain/relations";
 import { SPHERE_IDS, type SphereId, type StarResult } from "@/lib/engine";
 import { Cabinet, type CabinetPurchase, type CabinetStarData } from "@/components/account/Cabinet";
 import type { CabinetStarLabels } from "@/components/account/CabinetStar";
+import { listSavedCards } from "@/lib/payments/saved";
 
 export const dynamic = "force-dynamic";
 
@@ -51,7 +52,7 @@ export default async function AccountPage({
   const user = await prisma.user.findUnique({ where: { id: session.user.id } });
   if (!user) redirect(`/${locale}/login?next=/${locale}/account`);
 
-  const [profiles, purchases, products, order] = await Promise.all([
+  const [profiles, purchases, products, order, savedCards] = await Promise.all([
     prisma.birthProfile.findMany({
       where: { userId: user.id },
       include: { entitlements: true },
@@ -63,7 +64,8 @@ export default async function AccountPage({
       orderBy: { createdAt: "desc" }
     }),
     prisma.product.findMany({ include: { translations: true } }),
-    getUnlockOrder()
+    getUnlockOrder(),
+    listSavedCards(user.id)
   ]);
 
   for (const p of profiles) {
@@ -143,6 +145,7 @@ export default async function AccountPage({
       sphereNames={sphereNames}
       starLabels={starLabels}
       purchases={purchaseRows}
+      savedCards={savedCards}
       initialStarId={sp.star && stars.some((s) => s.id === sp.star) ? sp.star : (stars[0]?.id ?? null)}
       paidToast={sp.paid === "1" ? t("toastPaid") : null}
     />

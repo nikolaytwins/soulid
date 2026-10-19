@@ -189,7 +189,9 @@ const LOCALES = ["ru", "en", "ar"] as const;
 function revalidateEntitlementSurfaces(profileId: string, userId: string) {
   for (const locale of LOCALES) {
     revalidatePath(`/${locale}/star/${profileId}`);
+    revalidatePath(`/${locale}/v2/star/${profileId}`);
     revalidatePath(`/${locale}/account`);
+    revalidatePath(`/${locale}/v2/account`);
     revalidatePath(`/${locale}/admin/unlocks`);
     revalidatePath(`/${locale}/admin/users`);
     revalidatePath(`/${locale}/admin/users/${userId}`);

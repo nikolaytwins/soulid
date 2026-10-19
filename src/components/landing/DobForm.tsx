@@ -1,8 +1,9 @@
 "use client";
 
-import { useRouter } from "@/i18n/routing";
+import { usePathname, useRouter } from "@/i18n/routing";
 import { useTranslations } from "next-intl";
 import { useEffect, useMemo, useState } from "react";
+import { isV2Path, v2Href } from "@/lib/v2";
 
 function daysInMonth(year: number, month: number) {
   return new Date(year, month, 0).getDate();
@@ -10,16 +11,15 @@ function daysInMonth(year: number, month: number) {
 
 export function DobForm({
   defaultDate,
-  compact,
-  hideDisclaimer
+  compact
 }: {
   defaultDate?: { day: number; month: number; year: number };
   compact?: boolean;
-  hideDisclaimer?: boolean;
 }) {
   const t = useTranslations("landing");
   const months = useTranslations();
   const router = useRouter();
+  const pathname = usePathname();
   const now = new Date();
   const [day, setDay] = useState(defaultDate?.day ?? 5);
   const [month, setMonth] = useState(defaultDate?.month ?? 3);
@@ -53,11 +53,14 @@ export function DobForm({
       setError(json.error || t("invalid"));
       return;
     }
-    router.push(`/star/${json.id}`);
+    const href = isV2Path(pathname) ? v2Href(`/star/${json.id}`) : `/star/${json.id}`;
+    router.push(href);
   }
 
-  const selectCls =
-    "rounded-xl border border-[rgba(80,60,45,0.12)] bg-card px-3 py-3 text-sm font-semibold text-ink min-h-12";
+  const v2 = isV2Path(pathname);
+  const selectCls = v2
+    ? "rounded-2xl border border-[rgba(43,26,51,0.10)] bg-[#F8F1E9] px-3 py-3 text-sm font-semibold text-[#2B1A33] min-h-12"
+    : "rounded-xl border border-[rgba(80,60,45,0.12)] bg-card px-3 py-3 text-sm font-semibold text-ink min-h-12";
 
   return (
     <form onSubmit={onSubmit} className={compact ? "flex flex-col gap-3" : "flex w-full max-w-md flex-col gap-4"}>
@@ -97,11 +100,14 @@ export function DobForm({
       <button
         type="submit"
         disabled={pending}
-        className="min-h-12 rounded-[14px] bg-ink px-4 py-4 text-[15px] font-semibold text-card disabled:opacity-60"
+        className={
+          v2
+            ? "min-h-12 rounded-full bg-[#2B1A33] px-4 py-4 text-[15px] font-bold text-white disabled:opacity-60"
+            : "min-h-12 rounded-[14px] bg-ink px-4 py-4 text-[15px] font-semibold text-card disabled:opacity-60"
+        }
       >
         {pending ? "…" : t("cta")}
       </button>
-      {hideDisclaimer ? null : <p className="text-[11px] leading-relaxed text-faint">{months("legal.disclaimer")}</p>}
     </form>
   );
 }

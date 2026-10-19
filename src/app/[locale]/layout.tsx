@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { routing, isRtl, type AppLocale } from "@/i18n/routing";
 import "../globals.css";
 import { Header } from "@/components/layout/Header";
+import { HideOnV2 } from "@/components/layout/HideOnV2";
 import { MetaPixel } from "@/components/analytics/MetaPixel";
 import { ClientAnalytics } from "@/components/analytics/ClientAnalytics";
 import { AuthSessionProvider } from "@/components/layout/AuthSessionProvider";
@@ -39,7 +40,7 @@ export default async function LocaleLayout({
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link
-          href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&family=Manrope:wght@400;500;600;700&display=swap"
+          href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&family=Manrope:wght@400;500;600;700&family=Unbounded:wght@500;600&display=swap"
           rel="stylesheet"
         />
       </head>
@@ -48,6 +49,7 @@ export default async function LocaleLayout({
           <AuthSessionProvider>
           <ClientAnalytics />
           <MetaPixel />
+          <HideOnV2>
           <Header
             locale={locale}
             stars={stars}
@@ -61,8 +63,11 @@ export default async function LocaleLayout({
                 : null
             }
           />
+          </HideOnV2>
           {children}
+          <HideOnV2>
           <Footer />
+          </HideOnV2>
           </AuthSessionProvider>
         </NextIntlClientProvider>
       </body>

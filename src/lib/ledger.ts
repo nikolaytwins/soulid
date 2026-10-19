@@ -9,7 +9,8 @@ export type LedgerKind =
   | "entitlement.revoked"
   | "entitlement.admin_grant"
   | "privacy.export"
-  | "privacy.delete";
+  | "privacy.delete"
+  | "payment.method_saved";
 
 export async function appendLedger(entry: {
   kind: LedgerKind;

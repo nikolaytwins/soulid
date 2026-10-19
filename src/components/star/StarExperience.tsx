@@ -16,6 +16,7 @@ import { trackClient } from "@/components/analytics/ids";
 import { signIn } from "next-auth/react";
 import { LtrText } from "@/components/ui/LtrText";
 import { NewStarDialog } from "@/components/layout/NewStarDialog";
+import { PayHint } from "@/components/pay/PayHint";
 
 type ViewId = SphereId | "soulMission";
 
@@ -144,7 +145,7 @@ export function StarExperience({
     window.scrollTo({ top: el.getBoundingClientRect().top + window.scrollY - (id === "decode" ? 8 : 90), behavior: "smooth" });
   }
 
-  async function buy(sku: string) {
+  async function buy(sku: string, useSavedMethod = true) {
     setBusy(true);
     setPayError("");
     try {
@@ -208,7 +209,7 @@ export function StarExperience({
       const res = await fetch("/api/checkout", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ profileId: model.profileId, sku })
+        body: JSON.stringify({ profileId: model.profileId, sku, useSavedMethod })
       });
       const json = (await res.json()) as { url?: string; error?: string; eventId?: string };
       if (json.eventId) trackPixel("InitiateCheckout", { content_type: "product", content_ids: [sku] }, json.eventId);
@@ -409,15 +410,15 @@ export function StarExperience({
       );
     });
 
-  async function goCheckout(sku: string) {
-    if (busy) return;
+  async function goCheckout(sku: string, useSavedMethod = true) {
+    if (busy || !sku) return;
     if (!model.loggedIn && panel?.type !== "offer") {
       setPendingSku(sku);
       if (model.nextSphere) setPanel({ type: "offer", k: model.nextSphere });
       return;
     }
     const actual = pendingSku ?? sku;
-    await buy(actual);
+    await buy(actual, useSavedMethod);
   }
 
   return (
@@ -709,6 +710,22 @@ export function StarExperience({
                     </button>
                   ) : null}
                 </div>
+                <PayHint
+                  saved={model.savedCard}
+                  onNewCard={
+                    busy
+                      ? undefined
+                      : () =>
+                          goCheckout(
+                            model.prices[model.nextSphere!]?.soldSeparately
+                              ? model.prices[model.nextSphere!].sku
+                              : (model.bundle?.sku ?? ""),
+                            false
+                          )
+                  }
+                  className="text-sm text-[#CFC4BA]"
+                  buttonClassName="bg-transparent p-0 text-sm text-gold underline underline-offset-4"
+                />
                 {!model.loggedIn ? <p className="text-sm text-[#CFC4BA]">{t("offer.emailLead")}</p> : null}
                 <p className="text-[11px] leading-relaxed text-[#A8988C]">{t("legal.disclaimer")}</p>
                 {payError ? <p className="text-sm text-red-400">{payError}</p> : null}
@@ -889,6 +906,17 @@ export function StarExperience({
                     {t("starPage.unlockAll", { price: model.bundle.formatted })}
                   </button>
                 ) : null}
+                <PayHint
+                  saved={model.savedCard}
+                  onNewCard={
+                    busy
+                      ? undefined
+                      : () =>
+                          goCheckout(pendingSku ?? skuForSphere(panel.k) ?? model.prices[panel.k].sku, false)
+                  }
+                  className="text-sm text-muted"
+                  buttonClassName="bg-transparent p-0 text-sm text-gold-deep underline underline-offset-4"
+                />
                 <p className="text-[11px] leading-relaxed text-faint">{t("legal.disclaimer")}</p>
                 {payError ? <p className="text-sm text-red-700">{payError}</p> : null}
                 <button type="button" onClick={close} className="min-h-11 bg-transparent text-sm text-muted">

@@ -28,7 +28,8 @@ const config: Config = {
       },
       fontFamily: {
         serif: ["Cormorant Garamond", "Georgia", "serif"],
-        sans: ["Manrope", "IBM Plex Sans Arabic", "system-ui", "sans-serif"]
+        sans: ["Manrope", "IBM Plex Sans Arabic", "system-ui", "sans-serif"],
+        display: ["Unbounded", "Manrope", "system-ui", "sans-serif"]
       },
       boxShadow: {
         panel: "0 20px 50px rgba(120,85,50,0.08)",

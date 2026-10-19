@@ -27,8 +27,29 @@ model User {
   resetTokens  PasswordResetToken[]
   analytics    AnalyticsEvent[]
   emails       EmailLog[]
+  paymentMethods SavedPaymentMethod[]
 
   @@map("users")
+}
+
+model SavedPaymentMethod {
+  id                  String   @id @default(cuid())
+  userId              String
+  user                User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  provider            String
+  providerCustomerId  String   @default("")
+  providerMethodId    String
+  brand               String   @default("")
+  last4               String   @default("")
+  expMonth            Int?
+  expYear             Int?
+  isDefault           Boolean  @default(true)
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+
+  @@unique([userId, provider, providerMethodId])
+  @@index([userId, provider])
+  @@map("saved_payment_methods")
 }
 
 model PasswordResetToken {

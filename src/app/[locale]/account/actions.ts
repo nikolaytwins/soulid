@@ -12,7 +12,10 @@ import { parseRelation, STAR_RELATIONS } from "@/lib/domain/relations";
 const LOCALES = ["ru", "en", "ar"] as const;
 
 function touch() {
-  for (const locale of LOCALES) revalidatePath(`/${locale}/account`);
+  for (const locale of LOCALES) {
+    revalidatePath(`/${locale}/account`);
+    revalidatePath(`/${locale}/v2/account`);
+  }
   revalidatePath("/account");
 }
 

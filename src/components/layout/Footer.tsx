@@ -13,6 +13,7 @@ export async function Footer() {
         <div className="flex gap-4">
           <Link href="/legal/privacy">{t("legal.privacy")}</Link>
           <Link href="/legal/terms">{t("legal.terms")}</Link>
+          <Link href="/v2">{t("v2.alt")}</Link>
         </div>
       </div>
     </footer>

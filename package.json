@@ -2,7 +2,7 @@
   "name": "soul-star",
   "version": "1.0.0",
   "private": true,
-  "description": "Soul Star — personal pentagram calculator by date of birth",
+  "description": "Soul ID — personal pentagram calculator by date of birth",
   "scripts": {
     "dev": "next dev --turbopack",
     "build": "next build",

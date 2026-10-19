@@ -1,9 +1,17 @@
 import { prisma } from "@/lib/db";
 import { calculateStarFromIso, SPHERE_IDS, sphereSlotKind, type SphereId, type StarResult } from "@/lib/engine";
 import { ensureFreeEntitlements, getUnlockOrder, getUnlockedSpheres, nextPurchasable } from "@/lib/domain/access";
-import { formatMoney, isIndividuallySold, productName } from "@/lib/domain/catalog";
+import {
+  ensureRecommendationProduct,
+  formatMoney,
+  formatRecEta,
+  isIndividuallySold,
+  productName,
+  RECOMMENDATION_SKU
+} from "@/lib/domain/catalog";
 import { getInterpretation, type ContentBlock } from "@/lib/domain/content";
 import { formatDob } from "@/lib/domain/dob";
+import { defaultSavedCard, type PublicSavedCard } from "@/lib/payments/saved";
 
 export { formatDob };
 
@@ -39,6 +47,14 @@ export type StarPageModel = {
   loggedIn: boolean;
   locale: string;
   canEdit: boolean;
+  savedCard: PublicSavedCard | null;
+  recommendation: {
+    sku: string;
+    formatted: string;
+    ordered: boolean;
+    eta: string | null;
+    channel: "email" | "tg" | null;
+  } | null;
   siblingStars: { id: string; displayDate: string; name: string; unlocked: number; total: number }[];
   unlockCopy: Record<
     string,
@@ -99,6 +115,7 @@ export async function loadStarPage(profileId: string, locale: string, userId: st
   const unlocked = order.filter((s) => unlockedSet.has(s));
   const nextSphere = nextPurchasable(order, unlockedSet);
 
+  await ensureRecommendationProduct();
   const products = await prisma.product.findMany({ include: { translations: true } });
   const prices = {} as StarPageModel["prices"];
   const spheres = {} as Record<SphereId, SphereCopy>;
@@ -159,6 +176,23 @@ export async function loadStarPage(profileId: string, locale: string, userId: st
     }
   }
 
+  const recProduct = products.find((p) => p.sku === RECOMMENDATION_SKU && p.isActive);
+  const recPaid = recProduct
+    ? await prisma.purchase.findFirst({
+        where: { profileId, productId: recProduct.id, status: "paid" },
+        orderBy: { paidAt: "desc" }
+      })
+    : null;
+  let recChannel: "email" | "tg" | null = null;
+  if (recPaid?.metadataJson) {
+    try {
+      const meta = JSON.parse(recPaid.metadataJson) as { recChannel?: string };
+      if (meta.recChannel === "email" || meta.recChannel === "tg") recChannel = meta.recChannel;
+    } catch {
+      recChannel = null;
+    }
+  }
+
   return {
     profileId,
     isoDate: profile.dateOfBirth,
@@ -178,6 +212,16 @@ export async function loadStarPage(profileId: string, locale: string, userId: st
       : null,
     showBundle: show,
     loggedIn: !!userId,
+    savedCard: userId ? await defaultSavedCard(userId, process.env.PAYMENT_PROVIDER ?? "mock") : null,
+    recommendation: recProduct
+      ? {
+          sku: recProduct.sku,
+          formatted: formatMoney(recProduct.priceAmount, recProduct.currency, locale),
+          ordered: Boolean(recPaid),
+          eta: recPaid?.paidAt ? formatRecEta(locale, recPaid.paidAt) : null,
+          channel: recChannel
+        }
+      : null,
     locale,
     canEdit: !profile.userId || profile.userId === userId,
     siblingStars,

@@ -2,7 +2,7 @@ import { prisma } from "@/lib/db";
 import { grantSpheres, remainingSpheres, getUnlockOrder } from "@/lib/domain/access";
 import type { SphereId } from "@/lib/engine";
 import { SPHERE_IDS } from "@/lib/engine";
-import { sendTransactionalEmail, sphereUnlockedEmail } from "@/lib/email";
+import { sendTransactionalEmail, recommendationOrderedEmail, sphereUnlockedEmail } from "@/lib/email";
 import { sendMetaCapi, trackEvent, visitorForUser } from "@/lib/analytics";
 import { productName } from "@/lib/domain/catalog";
 import { appendLedger } from "@/lib/ledger";
@@ -31,7 +31,7 @@ export async function fulfillPaidPurchase(purchaseId: string): Promise<void> {
   let spheres: SphereId[] = [];
   if (purchase.product.kind === "bundle") {
     spheres = remainingSpheres(order, unlocked);
-  } else if (purchase.product.sphere) {
+  } else if (purchase.product.kind === "sphere" && purchase.product.sphere) {
     spheres = [purchase.product.sphere as SphereId];
   }
 
@@ -71,14 +71,26 @@ export async function fulfillPaidPurchase(purchaseId: string): Promise<void> {
     });
     setPasswordUrl = `${origin}/${locale}/reset-password?token=${token}`;
   }
-  const mail = sphereUnlockedEmail(locale, name, url, setPasswordUrl);
+  let recChannel: "email" | "tg" | undefined;
+  let recContact: string | undefined;
+  try {
+    const meta = JSON.parse(purchase.metadataJson || "{}") as { recChannel?: string; recContact?: string };
+    if (meta.recChannel === "email" || meta.recChannel === "tg") recChannel = meta.recChannel;
+    recContact = meta.recContact;
+  } catch {
+    recChannel = undefined;
+  }
+  const mail =
+    purchase.product.kind === "addon"
+      ? recommendationOrderedEmail(locale, recChannel === "tg" ? "Telegram" : "email", recContact || purchase.user.email)
+      : sphereUnlockedEmail(locale, name, url, setPasswordUrl);
   try {
     await sendTransactionalEmail({
       to: purchase.user.email,
       subject: mail.subject,
       html: mail.html,
       text: mail.text,
-      template: "sphere_unlocked",
+      template: purchase.product.kind === "addon" ? "recommendation_ordered" : "sphere_unlocked",
       userId: purchase.userId,
       purchaseId: purchase.id
     });

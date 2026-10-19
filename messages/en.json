@@ -2,9 +2,9 @@
   "terms": {
     "arcana": "Arcana"
   },
-  "brand": "Soul Star",
+  "brand": "Soul ID",
   "meta": {
-    "title": "Soul Star — personal star from your date of birth",
+    "title": "Soul ID — personal star from your date of birth",
     "description": "Calculate your five-pointed star from your birth date and unlock spheres in sequence."
   },
   "nav": {
@@ -111,7 +111,10 @@
     "passwordLead": "This email already has an account. Enter the password to continue to payment.",
     "passwordPlaceholder": "Password",
     "passwordRequired": "Enter your account password.",
-    "blockedAccount": "This account is blocked. Checkout is unavailable."
+    "blockedAccount": "This account is blocked. Checkout is unavailable.",
+    "payWithSaved": "We’ll charge {card}",
+    "newCard": "Use another card",
+    "willSave": "Your card will be saved so you don’t have to enter it again next time."
   },
   "auth": {
     "loginTitle": "Log in",
@@ -212,6 +215,10 @@
     "notifyOnShort": "On",
     "notifyOffShort": "Off",
     "noPurchases": "No purchases yet.",
+    "savedCard": "Payment method",
+    "removeCard": "Remove card",
+    "noSavedCard": "After the first payment the card is saved for later purchases.",
+    "cardRemoved": "Card removed",
     "changePassword": "Change password",
     "exportData": "Download my data",
     "deleteLead": "Deleting the account erases name, email, dates and calculations. The payment journal is kept for accounting. Type your email to confirm.",
@@ -249,9 +256,9 @@
   },
   "legalPage": {
     "privacyTitle": "Privacy policy",
-    "privacyUpdated": "This document describes how Soul Star processes personal data of visitors and buyers.",
+    "privacyUpdated": "This document describes how Soul ID processes personal data of visitors and buyers.",
     "privacyWhoTitle": "Who processes the data",
-    "privacyWho": "The controller is the Soul Star service. Questions go through support in the account.",
+    "privacyWho": "The controller is the Soul ID service. Questions go through support in the account.",
     "privacyWhatTitle": "What is stored",
     "privacyWhat": "Email, name, date of birth, star calculation, purchases, interface language, technical cookies (guest, visitor, session, UTM) and the payment journal. Passwords are stored only as hashes.",
     "privacyWhyTitle": "Why",
@@ -483,6 +490,70 @@
     "formulaPoint_p34": "Between Money and Relationships",
     "formulaPoint_p45": "Between Relationships and Health",
     "formulaPoint_p51": "Between Health and Personality"
+  },
+  "v2": {
+    "classic": "Current design",
+    "alt": "New design",
+    "openLegend": "Open",
+    "nextLegend": "Next",
+    "lockedLegend": "Locked",
+    "readDecode": "Read the decoding",
+    "unlockAllShort": "or the whole star — {price}",
+    "sphereOf": "SPHERE {n} OF 5",
+    "openedCount": "Spheres open:",
+    "rec": {
+      "eyebrow": "PERSONAL ANALYSIS",
+      "title": "A personal recommendation for your star",
+      "lead": "We gather every opened sphere into one summary and give advice that accounts for how the spheres connect.",
+      "s1Title": "You place the request",
+      "s1Text": "Choose where to receive the result: email or Telegram.",
+      "s2Title": "We analyse the star",
+      "s2Text": "We collect the opened spheres and the links between them into one summary.",
+      "s3Title": "Within 24 hours",
+      "s3Text": "You receive a letter or a message with the summary and recommendations.",
+      "priceLabel": "Price",
+      "includes": "The analysis includes",
+      "scopeAll": "All 5 spheres and the Soul mission",
+      "scopeOpen": "Opened spheres: {list}. The more spheres are open, the fuller the analysis.",
+      "whereLabel": "Where to send it",
+      "channelEmail": "Email",
+      "channelTg": "Telegram",
+      "emailPlaceholder": "Email",
+      "emailHint": "The letter will go to the email you enter",
+      "emailContact": "The letter will go to {email}",
+      "tgPlaceholder": "@username",
+      "tgHint": "The message will go to Telegram",
+      "tgContact": "The message will go to Telegram {handle}",
+      "tgRequired": "Enter a Telegram username to send the recommendation.",
+      "cta": "Get the recommendation — {price}",
+      "etaNote": "The reply arrives within 24 hours after payment",
+      "doneTitle": "Request received",
+      "doneLead": "We started preparing your personal recommendation. It will arrive {where} by {eta}.",
+      "whereEmail": "by email",
+      "whereTg": "in Telegram",
+      "etaSoon": "the next day",
+      "status": "Status",
+      "preparing": "In progress"
+    },
+    "expert": {
+      "eyebrow": "METHOD AUTHOR",
+      "name": "First Last",
+      "bio": "A short note about the expert: experience, approach to numerology, and how a personal reading can help. The expert will provide this text.",
+      "ig": "@username on Instagram"
+    },
+    "reviews": {
+      "title": "Reviews",
+      "lead": "What people say after they opened their star",
+      "r1Name": "Ekaterina",
+      "r1Meta": "Opened the whole star",
+      "r1Text": "A real client review will go here. The card grows with reviews of any length.",
+      "r2Name": "Marina",
+      "r2Meta": "Personal recommendation",
+      "r2Text": "A second client review. The most useful notes say what the person learned and what changed after the reading.",
+      "r3Name": "Olga",
+      "r3Meta": "3 spheres",
+      "r3Text": "A third review. You can add as many cards as you need — the grid rearranges itself."
+    }
   },
   "notFound": {
     "title": "Page not found",

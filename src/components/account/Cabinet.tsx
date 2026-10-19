@@ -14,6 +14,8 @@ import { CabinetStar, type CabinetStarLabels } from "@/components/account/Cabine
 import { LtrText } from "@/components/ui/LtrText";
 import { STAR_RELATIONS, type StarRelation } from "@/lib/domain/relations";
 import type { SphereId } from "@/lib/engine";
+import { PayHint } from "@/components/pay/PayHint";
+import { cardLabel } from "@/lib/payments/card-label";
 
 export type CabinetStarData = {
   id: string;
@@ -74,6 +76,7 @@ export function Cabinet({
   sphereNames,
   starLabels,
   purchases,
+  savedCards = [],
   initialStarId,
   paidToast
 }: {
@@ -84,6 +87,7 @@ export function Cabinet({
   sphereNames: Record<SphereId, string>;
   starLabels: CabinetStarLabels;
   purchases: CabinetPurchase[];
+  savedCards?: { id: string; brand: string; last4: string }[];
   initialStarId: string | null;
   paidToast: string | null;
 }) {
@@ -98,9 +102,14 @@ export function Cabinet({
   const [err, setErr] = useState("");
   const [toast, setToast] = useState<string | null>(paidToast);
   const [pending, start] = useTransition();
+  const [cards, setCards] = useState(savedCards);
   const tt = useRef<number | null>(null);
 
   const cur = stars.find((s) => s.id === selectedId) ?? stars[0] ?? null;
+
+  useEffect(() => {
+    setCards(savedCards);
+  }, [savedCards]);
 
   useEffect(() => {
     if (!toast) return;
@@ -227,12 +236,12 @@ export function Cabinet({
     });
   }
 
-  async function buy() {
+  async function buy(useSavedMethod = true) {
     if (!cur?.nextSku) return;
     const res = await fetch("/api/checkout", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ profileId: cur.id, sku: cur.nextSku, returnTo: "account" })
+      body: JSON.stringify({ profileId: cur.id, sku: cur.nextSku, returnTo: "account", useSavedMethod })
     });
     const json = (await res.json()) as { url?: string; error?: string };
     if (json.url) window.location.href = json.url;
@@ -449,24 +458,31 @@ export function Cabinet({
                   {t("continue")}
                 </Link>
                 {n < 5 && cur.nextSku ? (
-                  <button
-                    type="button"
-                    onClick={buy}
-                    style={{
-                      flex: 1,
-                      minWidth: 200,
-                      background: "#E2AE63",
-                      color: "#2A211D",
-                      border: "none",
-                      borderRadius: 14,
-                      padding: "16px 20px",
-                      fontSize: 15,
-                      fontWeight: 700,
-                      cursor: "pointer"
-                    }}
-                  >
-                    {t("buyNext", { name: cur.nextName, price: cur.nextPrice })}
-                  </button>
+                  <div style={{ flex: 1, minWidth: 200, display: "flex", flexDirection: "column", gap: 8 }}>
+                    <button
+                      type="button"
+                      onClick={() => buy(true)}
+                      style={{
+                        width: "100%",
+                        background: "#E2AE63",
+                        color: "#2A211D",
+                        border: "none",
+                        borderRadius: 14,
+                        padding: "16px 20px",
+                        fontSize: 15,
+                        fontWeight: 700,
+                        cursor: "pointer"
+                      }}
+                    >
+                      {t("buyNext", { name: cur.nextName, price: cur.nextPrice })}
+                    </button>
+                    <PayHint
+                      saved={cards[0] ?? null}
+                      onNewCard={() => buy(false)}
+                      className="text-sm text-[#8E8178]"
+                      buttonClassName="bg-transparent p-0 text-sm font-semibold text-[#C78A3E] underline underline-offset-4"
+                    />
+                  </div>
                 ) : null}
                 {n >= 5 ? (
                   <span
@@ -786,6 +802,41 @@ export function Cabinet({
                   <span style={{ fontSize: 13, fontWeight: 600 }}>Email</span>
                   <input value={user.email} readOnly style={{ ...inputStyle, opacity: 0.7 }} />
                 </label>
+                <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                  <span style={{ fontSize: 13, fontWeight: 600 }}>{t("savedCard")}</span>
+                  {cards.length === 0 ? <p style={{ margin: 0, fontSize: 14, color: "#8E8178" }}>{t("noSavedCard")}</p> : null}
+                  {cards.map((c) => (
+                    <div
+                      key={c.id}
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "space-between",
+                        gap: 12,
+                        background: "#F5F0EA",
+                        borderRadius: 12,
+                        padding: "12px 14px"
+                      }}
+                    >
+                      <span style={{ fontSize: 15, fontWeight: 600 }}>{cardLabel(c.brand, c.last4)}</span>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          start(async () => {
+                            const res = await fetch(`/api/me/payment-methods?id=${encodeURIComponent(c.id)}`, { method: "DELETE" });
+                            if (!res.ok) return;
+                            setCards((prev) => prev.filter((x) => x.id !== c.id));
+                            flash(t("cardRemoved"));
+                            router.refresh();
+                          });
+                        }}
+                        style={{ background: "none", border: "none", color: "#A4472F", fontSize: 13, fontWeight: 600, cursor: "pointer" }}
+                      >
+                        {t("removeCard")}
+                      </button>
+                    </div>
+                  ))}
+                </div>
                 {err ? <span style={{ fontSize: 14, fontWeight: 600, color: "#A4472F" }}>{err}</span> : null}
                 <button
                   type="button"

@@ -6,10 +6,12 @@ import { Link, usePathname } from "@/i18n/routing";
 import { LtrText } from "@/components/ui/LtrText";
 import { NewStarDialog } from "./NewStarDialog";
 import type { NavStar } from "@/lib/domain/nav-stars";
+import { isV2Path, v2Href } from "@/lib/v2";
 
 export function StarsMenu({ stars }: { stars: NavStar[] }) {
   const t = useTranslations("nav");
   const pathname = usePathname();
+  const prefix = isV2Path(pathname);
   const [open, setOpen] = useState(false);
   const [create, setCreate] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
@@ -44,11 +46,12 @@ export function StarsMenu({ stars }: { stars: NavStar[] }) {
           {stars.length ? (
             <div className="mb-1.5 max-h-[240px] overflow-y-auto">
               {stars.map((s) => {
-                const on = pathname === `/star/${s.id}`;
+                const href = prefix ? v2Href(`/star/${s.id}`) : `/star/${s.id}`;
+                const on = pathname === href || pathname === `/star/${s.id}` || pathname === `/v2/star/${s.id}`;
                 return (
                   <Link
                     key={s.id}
-                    href={`/star/${s.id}`}
+                    href={href}
                     role="menuitem"
                     onClick={() => setOpen(false)}
                     className={`flex items-center justify-between gap-2 rounded-[10px] px-3 py-2.5 text-sm no-underline ${
@@ -78,7 +81,7 @@ export function StarsMenu({ stars }: { stars: NavStar[] }) {
             + {t("newStar")}
           </button>
           <Link
-            href="/account"
+            href={prefix ? v2Href("/account") : "/account"}
             role="menuitem"
             onClick={() => setOpen(false)}
             className="flex w-full items-center rounded-[10px] px-3 py-2.5 text-sm text-muted no-underline hover:bg-sand"

@@ -231,7 +231,7 @@ async function translateOpenAI(texts: string[], from: ContentLocale, to: Content
         {
           role: "system",
           content:
-            "You translate Soul Star numerology readings. Return JSON {\"texts\":[...]} with the same number of strings, same order. Keep meaning, tone, and quoted role names. Do not add commentary."
+            "You translate Soul ID numerology readings. Return JSON {\"texts\":[...]} with the same number of strings, same order. Keep meaning, tone, and quoted role names. Do not add commentary."
         },
         {
           role: "user",
