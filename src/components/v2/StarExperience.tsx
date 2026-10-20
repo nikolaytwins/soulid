@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/routing";
@@ -22,6 +22,8 @@ import { LtrText } from "@/components/ui/LtrText";
 import { SPHERE_TINT, V2_GOLD, V2_INK, V2_MISSION, v2Href } from "@/lib/v2";
 import { PayHint } from "@/components/pay/PayHint";
 import { V2PersonalBlocks } from "@/components/v2/PersonalBlocks";
+
+type ViewId = SphereId | "soulMission";
 
 type Panel =
   | { type: "point"; j: number; ctx: SphereId }
@@ -52,10 +54,12 @@ export function V2StarExperience({
   const t = useTranslations();
   const arcana = t("terms.arcana");
   const unlocked = useMemo(() => new Set(model.unlocked), [model.unlocked]);
+  const nOpen = model.unlocked.length;
+  const missionOpen = nOpen >= 5;
   const firstOpen =
     (focusLatest ? [...model.order].reverse().find((s) => unlocked.has(s)) : model.order.find((s) => unlocked.has(s))) ??
     model.order[0];
-  const [active, setActive] = useState<SphereId>(firstOpen);
+  const [active, setActive] = useState<ViewId>(firstOpen);
   const [panel, setPanel] = useState<Panel | null>(null);
   const [why, setWhy] = useState(false);
   const [hoverPt, setHoverPt] = useState<number | null>(null);
@@ -133,9 +137,17 @@ export function V2StarExperience({
   }
 
   function onMission() {
-    setPanel({ type: "mission" });
     setWhy(false);
+    setHoverPt(null);
+    setHoverTip(null);
     trackClient("sphere_viewed", { profileId: model.profileId, payload: { sphere: "soulMission" } });
+    if (missionOpen) {
+      setActive("soulMission");
+      setPanel(null);
+      requestAnimationFrame(() => scrollTo("decode"));
+      return;
+    }
+    setPanel({ type: "mission" });
   }
 
   function ptSpheres(j: number): SphereId[] {
@@ -146,7 +158,7 @@ export function V2StarExperience({
     const ks = ptSpheres(j);
     const open = ks.filter((s) => unlocked.has(s));
     if (!open.length) return onSphere(ks[0]);
-    const ctx = ks.includes(active) ? active : open[0];
+    const ctx = active !== "soulMission" && ks.includes(active) ? active : open[0];
     setPanel({ type: "point", j, ctx });
     setHoverPt(null);
     setHoverTip(null);
@@ -257,24 +269,33 @@ export function V2StarExperience({
   }
 
   const labels = Object.fromEntries(model.order.map((id) => [id, model.spheres[id].name])) as Record<SphereId, string>;
-  const nOpen = model.unlocked.length;
-  const missionOpen = nOpen >= 5;
-  const act = model.spheres[active];
-  const col = SPHERE_TINT[active];
-  const arcs = readings[active] ?? [];
+  const viewingMission = active === "soulMission";
+  const act = viewingMission
+    ? {
+        name: t("starPage.soulMission"),
+        purpose: missionOpen ? t("starPage.soulMissionPurpose") : t("offer.missionLocked"),
+        part: t("starPage.soulMissionPart"),
+        zone: -1
+      }
+    : model.spheres[active];
+  const col = viewingMission ? V2_MISSION : SPHERE_TINT[active];
+  const arcs = viewingMission ? (missionOpen && missionReading ? [missionReading] : []) : (readings[active] ?? []);
+  const activeOpen = viewingMission ? missionOpen : unlocked.has(active);
   const progressText = t("starPage.progressCount", { n: nOpen, total: 5 });
   const missionWords = t("starPage.soulMission").split(" ");
   const missionLabel: [string, string] = [missionWords[0] ?? "Миссия", missionWords.slice(1).join(" ") || "души"];
-  const missionChip: "a" | "o" | "l" = panel?.type === "mission" && missionOpen ? "a" : missionOpen ? "o" : "l";
-  const missionChipStyle: Record<"a" | "o" | "l", React.CSSProperties> = {
+  const missionChip: "a" | "o" | "x" | "l" = viewingMission && missionOpen ? "a" : missionOpen ? "o" : !model.nextSphere ? "x" : "l";
+  const missionChipStyle: Record<"a" | "o" | "x" | "l", React.CSSProperties> = {
     a: { background: V2_MISSION.a2, color: "#FFFFFF" },
     o: { background: V2_MISSION.t, color: V2_MISSION.ink },
-    l: { background: "#FFFFFF", color: V2_MISSION.ink, outline: "1.5px dashed " + V2_MISSION.acc, outlineOffset: -2 }
+    x: { background: "#FFFFFF", color: V2_MISSION.ink, outline: "1.5px dashed " + V2_MISSION.acc, outlineOffset: -2 },
+    l: { background: "transparent", color: "#8A8494", fontWeight: 600 }
   };
-  const nextIdx = model.order.indexOf(active) + 1;
+  const nextIdx = viewingMission ? -1 : model.order.indexOf(active) + 1;
   const nextId = nextIdx >= 0 ? model.order[nextIdx] : undefined;
   const nextOpen = Boolean(nextId && unlocked.has(nextId));
   const offerNext = Boolean(model.nextSphere && nOpen < 5 && !nextOpen);
+  const showMissionNext = !viewingMission && !nextId && missionOpen;
 
   function skuForSphere(k: SphereId): string | undefined {
     const price = model.prices[k];
@@ -293,7 +314,7 @@ export function V2StarExperience({
       at = I[hoverTip.j];
       const ks = ptSpheres(hoverTip.j);
       const open = ks.some((s) => unlocked.has(s));
-      const ctx = ks.includes(active) ? active : ks.find((s) => unlocked.has(s));
+      const ctx = active !== "soulMission" && ks.includes(active) ? active : ks.find((s) => unlocked.has(s));
       const fatal = BRIDGE_KIND[BRIDGES[hoverTip.j]] === "fatal_error";
       eyebrow = (fatal ? t("points.fatal") : t("points.ancestral")).toUpperCase();
       value = open ? t("points.arcana", { arcana, value: model.star.bridges[BRIDGES[hoverTip.j]].value }) : t("points.hidden");
@@ -396,7 +417,8 @@ export function V2StarExperience({
       <V2StarSvg
         star={model.star}
         mobile={isMob}
-        activeSphere={active}
+        activeSphere={viewingMission ? null : active}
+        missionActive={viewingMission}
         unlocked={model.unlocked}
         nextSphere={model.nextSphere}
         hoverPt={hoverPt}
@@ -487,17 +509,17 @@ export function V2StarExperience({
                   className="rounded-full px-3 py-1.5 text-xs font-bold tracking-[0.06em]"
                   style={{ background: col.t, color: col.ink }}
                 >
-                  {t("v2.sphereOf", { n: model.order.indexOf(active) + 1 })}
+                  {viewingMission ? t("offer.center") : t("v2.sphereOf", { n: model.order.indexOf(active) + 1 })}
                 </span>
                 <span className="flex h-14 w-14 items-center justify-center rounded-full bg-[#F8EACB]">
-                  <V2MiniStar zones={[act.zone]} size={24} />
+                  <V2MiniStar zones={viewingMission ? [] : [act.zone]} size={24} center={viewingMission} />
                 </span>
               </div>
               <div className="relative flex flex-col gap-3">
                 <span className="font-display text-[clamp(32px,3.4vw,44px)] font-medium leading-none">{act.name}</span>
                 <span className="text-[15px] leading-relaxed text-pretty opacity-85">{act.purpose}</span>
               </div>
-              {unlocked.has(active) ? (
+              {activeOpen ? (
                 <div className="relative flex flex-col gap-2.5">
                   <span className="text-[13px] font-bold">{t("starPage.yourNumbers")}</span>
                   <div className="flex flex-wrap gap-2">
@@ -515,8 +537,8 @@ export function V2StarExperience({
                           title={ar.role}
                           style={style}
                           onClick={() => {
-                            if (i === 1) onPoint((ZONE_TO_SPHERE.indexOf(active) + 4) % 5);
-                            else if (i === 2) onPoint(ZONE_TO_SPHERE.indexOf(active));
+                            if (!viewingMission && i === 1) onPoint((ZONE_TO_SPHERE.indexOf(active) + 4) % 5);
+                            else if (!viewingMission && i === 2) onPoint(ZONE_TO_SPHERE.indexOf(active));
                             else scrollTo(ar.id);
                           }}
                         >
@@ -539,7 +561,7 @@ export function V2StarExperience({
           </div>
         </div>
 
-        <section id="decode" className="flex flex-col gap-4 pt-12">
+        <section id="decode" className="flex flex-col gap-3 pt-4 lg:gap-4 lg:pt-12">
           <div className="flex flex-wrap items-end justify-between gap-4">
             <span className="font-display text-[clamp(30px,4vw,48px)] font-medium leading-none">{t("starPage.decodeTitle")}</span>
             <span className="text-sm text-[#6E6878]">
@@ -581,17 +603,17 @@ export function V2StarExperience({
             >
               <span
                 className="h-2 w-2 shrink-0 rounded-full"
-                style={{ background: missionChip === "a" ? "#FFFFFF" : V2_MISSION.a2 }}
+                style={{ background: missionChip === "a" ? "#FFFFFF" : missionChip === "l" ? "#D9D4DE" : V2_MISSION.a2 }}
               />
               {t("starPage.soulMission")}
               {!missionOpen ? <V2LockIcon /> : null}
             </button>
           </div>
 
-          <div className="flex flex-wrap items-start gap-4">
+          <div className="flex flex-col items-stretch gap-3 lg:flex-row lg:flex-wrap lg:items-start lg:gap-4">
             <aside
-              className="relative flex min-w-0 flex-[1_1_300px] flex-col gap-[18px] overflow-hidden rounded-[36px] bg-white p-[22px]"
-              style={{ maxWidth: isMob ? "none" : 360, position: isMob ? "relative" : "sticky", top: 84 }}
+              className="relative hidden min-w-0 flex-[1_1_300px] flex-col gap-[18px] overflow-hidden rounded-[36px] bg-white p-[22px] lg:flex"
+              style={{ maxWidth: 360, position: "sticky", top: 84 }}
             >
               <div
                 className="pointer-events-none absolute inset-0"
@@ -602,19 +624,19 @@ export function V2StarExperience({
               />
               <div className="relative flex items-center gap-3">
                 <span className="flex h-12 w-12 items-center justify-center rounded-full bg-[#F8EACB]">
-                  <V2MiniStar zones={[act.zone]} size={24} />
+                  <V2MiniStar zones={viewingMission ? [] : [act.zone]} size={24} center={viewingMission} />
                 </span>
                 <div className="flex flex-col gap-0.5">
                   <span className="text-sm font-bold">{t("starPage.fragment")}</span>
                   <span className="text-xs opacity-70">{act.part}</span>
                 </div>
               </div>
-              {unlocked.has(active) ? (
+              {activeOpen && !viewingMission ? (
                 <div className="relative flex justify-center py-1">
                   <V2TriangleSvg width={isMob ? 150 : 190} sphere={active} star={model.star} onPoint={onPoint} />
                 </div>
               ) : null}
-              {unlocked.has(active) ? (
+              {activeOpen ? (
                 <div className="relative flex flex-col gap-0.5 border-t border-[rgba(43,26,51,.08)] pt-2.5">
                   <span className="px-2 pb-1.5 pt-2 text-[11px] font-bold tracking-[0.16em] text-[#8A8494]">{t("starPage.contents")}</span>
                   {arcs.map((ar, i) => (
@@ -644,28 +666,39 @@ export function V2StarExperience({
               ) : null}
             </aside>
 
-            <div className="flex min-w-0 flex-[999_1_520px] flex-col gap-4">
-              <div className="flex flex-wrap items-stretch gap-6 rounded-[36px] bg-white p-[clamp(20px,3vw,32px)]">
-                <div className="flex min-w-0 flex-[1_1_300px] flex-col items-start justify-center gap-4">
+            <div className="flex min-w-0 w-full flex-col gap-3 lg:flex-[999_1_520px] lg:gap-4">
+              <div className="flex flex-col gap-4 rounded-[36px] bg-white p-[clamp(16px,3vw,32px)] lg:flex-row lg:flex-wrap lg:items-stretch lg:gap-6">
+                <div className="relative aspect-[2/1] w-full overflow-hidden rounded-[26px] lg:order-last lg:aspect-auto lg:min-h-[260px] lg:w-auto lg:flex-[1_1_260px]">
+                  <SphereArt sphere={viewingMission ? undefined : active} mission={viewingMission} />
+                </div>
+                <div className="relative z-[1] flex min-w-0 flex-col items-start justify-center gap-3 lg:flex-[1_1_300px] lg:gap-4">
                   <span className="rounded-full px-3 py-1.5 text-xs font-bold tracking-[0.06em]" style={{ background: col.t, color: col.ink }}>
-                    {t("v2.sphereOf", { n: model.order.indexOf(active) + 1 })} · {act.part.toUpperCase()}
+                    {viewingMission
+                      ? t("offer.center")
+                      : `${t("v2.sphereOf", { n: model.order.indexOf(active) + 1 })} · ${act.part.toUpperCase()}`}
                   </span>
                   <span className="font-display text-[clamp(34px,4vw,52px)] font-medium leading-none">{act.name}</span>
                   <span className="text-[17px] leading-[1.65] text-[#5B5566] text-pretty">{act.purpose}</span>
                   <span
                     className={`rounded-full px-3 py-1.5 text-[13px] font-bold ${
-                      unlocked.has(active) ? "bg-[#D3F2DD] text-[#155A34]" : "bg-[#F1EBE4] text-[#6E6878]"
+                      activeOpen ? "bg-[#D3F2DD] text-[#155A34]" : "bg-[#F1EBE4] text-[#6E6878]"
                     }`}
                   >
-                    {unlocked.has(active) ? t("starPage.openedBadge") : t("starPage.lockedBadge")}
+                    {activeOpen ? t("starPage.openedBadge") : t("starPage.lockedBadge")}
                   </span>
                 </div>
-                <div className="relative min-h-[260px] flex-[1_1_260px]">
-                  <SphereArt sphere={active} />
-                </div>
               </div>
+              {activeOpen && !viewingMission ? (
+                <div className="flex items-center gap-4 rounded-[28px] bg-white p-4 lg:hidden">
+                  <V2TriangleSvg width={120} sphere={active} star={model.star} onPoint={onPoint} />
+                  <div className="flex min-w-0 flex-col gap-1">
+                    <span className="text-sm font-bold">{t("starPage.fragment")}</span>
+                    <span className="text-xs leading-snug text-[#8A8494]">{t("starPage.tapTriangle")}</span>
+                  </div>
+                </div>
+              ) : null}
 
-              {unlocked.has(active)
+              {activeOpen
                 ? arcs.map((ar, i) => (
                     <section
                       key={ar.id}
@@ -752,7 +785,7 @@ export function V2StarExperience({
 
               {offerNext && model.nextSphere && nextTint ? (
                 <div
-                  className="relative flex flex-wrap gap-6 overflow-hidden rounded-[36px] bg-white p-[clamp(22px,3vw,36px)]"
+                  className="relative flex flex-col gap-4 overflow-hidden rounded-[36px] bg-white p-[clamp(16px,3vw,36px)] lg:flex-row lg:flex-wrap lg:gap-6"
                   style={{ border: "1.5px solid #E9C27C", color: V2_INK }}
                 >
                   <div
@@ -761,7 +794,10 @@ export function V2StarExperience({
                       background: "repeating-conic-gradient(from 0deg at 90% 10%,rgba(217,165,92,.08) 0deg 5deg,transparent 5deg 16deg)"
                     }}
                   />
-                  <div className="relative flex min-w-0 flex-[1_1_320px] flex-col items-start gap-4">
+                  <div className="relative aspect-[2/1] w-full overflow-hidden rounded-[26px] lg:order-last lg:aspect-auto lg:min-h-[240px] lg:w-auto lg:flex-[1_1_240px]">
+                    <SphereArt sphere={model.nextSphere} />
+                  </div>
+                  <div className="relative z-[1] flex min-w-0 flex-col items-start gap-4 lg:flex-[1_1_320px]">
                     <span className="text-xs font-bold tracking-[0.16em] text-[#B07A33]">{t("starPage.nextStep")}</span>
                     <div className="flex items-center gap-3.5">
                       <span className="flex h-[52px] w-[52px] shrink-0 items-center justify-center rounded-full bg-[#F8EACB]">
@@ -773,13 +809,13 @@ export function V2StarExperience({
                     </div>
                     <span className="text-[15px] leading-relaxed text-[#6E6878]">{t("starPage.lead")}</span>
                     <span className="text-base leading-relaxed text-[#5B5566]">{model.spheres[model.nextSphere].purpose}</span>
-                    <div className="flex flex-wrap items-center gap-4">
+                    <div className="flex w-full flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:gap-4">
                       {model.prices[model.nextSphere]?.soldSeparately ? (
                         <button
                           type="button"
                           disabled={busy}
                           onClick={() => goCheckout(model.prices[model.nextSphere!].sku)}
-                          className="min-h-[54px] rounded-full px-[26px] py-4 text-[15px] font-extrabold"
+                          className="relative z-[1] min-h-[54px] w-full touch-manipulation rounded-full px-[26px] py-4 text-[15px] font-extrabold sm:w-auto"
                           style={{ background: nextTint.a1, color: nextTint.ink, border: "none", cursor: "pointer" }}
                         >
                           {t("starPage.openSpherePrice", { price: model.prices[model.nextSphere].formatted })}
@@ -790,7 +826,7 @@ export function V2StarExperience({
                           type="button"
                           disabled={busy}
                           onClick={() => goCheckout(model.bundle!.sku)}
-                          className="min-h-11 bg-transparent p-2 text-sm text-[#6E6878] underline underline-offset-4"
+                          className="relative z-[1] min-h-11 bg-transparent p-2 text-sm text-[#6E6878] underline underline-offset-4"
                         >
                           {t("v2.unlockAllShort", { price: model.bundle.formatted })}
                         </button>
@@ -814,9 +850,6 @@ export function V2StarExperience({
                     />
                     {payError ? <p className="text-sm text-red-700">{payError}</p> : null}
                     <p className="text-[11px] leading-relaxed text-[#8A8494]">{t("legal.disclaimer")}</p>
-                  </div>
-                  <div className="relative min-h-[240px] flex-[1_1_240px]">
-                    <SphereArt sphere={model.nextSphere} />
                   </div>
                 </div>
               ) : null}
@@ -843,7 +876,7 @@ export function V2StarExperience({
                 </div>
               ) : null}
 
-              {nOpen >= 5 && !nextId ? (
+              {showMissionNext ? (
                 <div
                   className="flex flex-wrap items-stretch gap-6 overflow-hidden rounded-[36px] p-[clamp(22px,3vw,36px)]"
                   style={{ background: V2_MISSION.t, border: `1.5px solid ${V2_MISSION.a2}` }}
@@ -997,7 +1030,7 @@ export function V2StarExperience({
                       type="button"
                       disabled={busy}
                       onClick={() => goCheckout(pendingSku ?? skuForSphere(panel.k) ?? model.prices[panel.k].sku)}
-                      className="min-h-[54px] rounded-full bg-[#2B1A33] py-4 text-[15px] font-bold text-white"
+                      className="min-h-[54px] touch-manipulation rounded-full bg-[#2B1A33] py-4 text-[15px] font-bold text-white"
                     >
                       {t("starPage.openSpherePrice", { price: model.prices[panel.k].formatted })}
                     </button>
@@ -1067,7 +1100,7 @@ export function V2StarExperience({
                     <button
                       type="button"
                       onClick={() => setPanel({ type: "offer", k: model.nextSphere! })}
-                      className="min-h-[54px] rounded-full bg-[#2B1A33] py-4 text-[15px] font-bold text-white"
+                      className="min-h-[54px] touch-manipulation rounded-full bg-[#2B1A33] py-4 text-[15px] font-bold text-white"
                     >
                       {t("offer.goToNeeded", { name: model.spheres[model.nextSphere].name })}
                     </button>
@@ -1086,33 +1119,16 @@ export function V2StarExperience({
                   >
                     <span
                       className="relative flex h-14 w-14 shrink-0 items-center justify-center rounded-full"
-                      style={{ background: "rgba(94,174,130,.22)" }}
+                      style={{ background: "rgba(75,95,153,.18)" }}
                     >
-                      <V2MiniStar zones={[]} size={28} center locked={!missionOpen} />
+                      <V2MiniStar zones={[]} size={28} center locked />
                     </span>
                     <div className="relative flex flex-col items-start gap-2">
                       <span className="font-display text-[28px] font-medium leading-none">{t("starPage.soulMission")}</span>
-                      {!missionOpen ? (
-                        <span className="rounded-full bg-white px-2.5 py-1 text-xs font-bold text-[#6E6878]">{t("offer.blocked")}</span>
-                      ) : null}
+                      <span className="rounded-full bg-white px-2.5 py-1 text-xs font-bold text-[#6E6878]">{t("offer.blocked")}</span>
                     </div>
                   </div>
-                  {missionOpen && missionReading?.content?.type === "plain" ? (
-                    <>
-                      {missionReading.content.lead ? (
-                        <div className="text-base leading-[1.7] text-[#5B5566]">{missionReading.content.lead}</div>
-                      ) : null}
-                      {missionReading.content.paragraphs.map((pp) => (
-                        <div key={pp.slice(0, 16)} className="text-base leading-[1.7] text-[#5B5566]">
-                          {pp}
-                        </div>
-                      ))}
-                    </>
-                  ) : (
-                    <div className="text-base leading-[1.7] text-[#5B5566]">
-                      {missionOpen ? t("starPage.soulMissionLead") : t("offer.missionLocked")}
-                    </div>
-                  )}
+                  <div className="text-base leading-[1.7] text-[#5B5566]">{t("offer.missionLocked")}</div>
                   <div className="flex flex-wrap gap-1.5">{seq(null)}</div>
                 </>
               ) : null}
@@ -1164,6 +1180,14 @@ function Overlay({
   onClose: () => void;
   children: React.ReactNode;
 }) {
+  const closeReady = useRef(false);
+  useEffect(() => {
+    closeReady.current = false;
+    const t = window.setTimeout(() => {
+      closeReady.current = true;
+    }, 450);
+    return () => window.clearTimeout(t);
+  }, [panel]);
   const isPointD = panel.type === "point" && !isMob;
   const overlay: React.CSSProperties = {
     position: "fixed",
@@ -1183,16 +1207,32 @@ function Overlay({
     gap: 18,
     boxSizing: "border-box",
     overflowY: "auto",
+    overscrollBehavior: "contain",
     boxShadow: "0 30px 80px rgba(43,26,51,.25)"
   };
   const sheet: React.CSSProperties = isMob
-    ? { ...sheetBase, width: "100%", maxWidth: 520, maxHeight: "88vh", borderRadius: "32px 32px 0 0", padding: "10px 20px 28px" }
+    ? {
+        ...sheetBase,
+        width: "100%",
+        maxWidth: 520,
+        maxHeight: "88vh",
+        borderRadius: "32px 32px 0 0",
+        padding: "10px 20px max(28px, env(safe-area-inset-bottom))"
+      }
     : isPointD
       ? { ...sheetBase, width: 540, height: "calc(100vh - 24px)", margin: 12, borderRadius: 32, padding: "32px 40px 48px", gap: 22 }
       : { ...sheetBase, width: 500, maxHeight: "88vh", borderRadius: 32, padding: 32 };
   return (
-    <div style={overlay} onClick={onClose} role="dialog" aria-modal="true">
-      <div style={sheet} onClick={(e) => e.stopPropagation()}>
+    <div
+      style={overlay}
+      onClick={(e) => {
+        if (!closeReady.current) return;
+        if (e.target === e.currentTarget) onClose();
+      }}
+      role="dialog"
+      aria-modal="true"
+    >
+      <div style={sheet} onClick={(e) => e.stopPropagation()} onPointerDown={(e) => e.stopPropagation()}>
         {children}
       </div>
     </div>

@@ -44,13 +44,13 @@ export const V2_NEU: SphereTint = {
   acc: "#C48A3E"
 };
 
-/** Sage from the Soul mission illustration. */
+/** Section color #4B5F99 from the Soul mission palette. */
 export const V2_MISSION: SphereTint = {
-  t: "#E4F3EA",
-  a1: "#B7DEC6",
-  a2: "#5EAE82",
-  ink: "#1F4634",
-  acc: "#4A9A6E"
+  t: "#E8EBF4",
+  a1: "#A8B3D1",
+  a2: "#4B5F99",
+  ink: "#2A3658",
+  acc: "#4B5F99"
 };
 
 export const V2_STAR_THEME = {

@@ -684,9 +684,7 @@ function SphereChip({ id, name, st }: { id: SphereId | null; name: string; st: "
   const v: Record<"o" | "x" | "l", CSSProperties> = {
     o: { background: tint.t, color: tint.ink },
     x: { background: "#FFFFFF", color: tint.ink, outline: "1.5px dashed " + tint.acc, outlineOffset: -2 },
-    l: id
-      ? { background: "transparent", color: "#8A8494" }
-      : { background: "#FFFFFF", color: tint.ink, outline: "1.5px dashed " + tint.acc, outlineOffset: -2 }
+    l: { background: "transparent", color: "#8A8494" }
   };
   return (
     <span className="flex shrink-0 items-center gap-2 whitespace-nowrap rounded-full px-3 py-2 text-sm font-bold" style={v[st]}>

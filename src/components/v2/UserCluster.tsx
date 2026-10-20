@@ -80,30 +80,50 @@ function V2Avatar({
   const t = useTranslations("nav");
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
+  const closeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  function clearClose() {
+    if (closeTimer.current) {
+      clearTimeout(closeTimer.current);
+      closeTimer.current = null;
+    }
+  }
+
+  function openMenu() {
+    clearClose();
+    setOpen(true);
+  }
+
+  function scheduleClose() {
+    clearClose();
+    closeTimer.current = setTimeout(() => setOpen(false), 120);
+  }
 
   useEffect(() => {
-    function onDoc(e: MouseEvent) {
-      if (!ref.current?.contains(e.target as Node)) setOpen(false);
-    }
-    document.addEventListener("mousedown", onDoc);
-    return () => document.removeEventListener("mousedown", onDoc);
+    return () => clearClose();
   }, []);
 
   return (
-    <div className="relative" ref={ref}>
-      <button
-        type="button"
-        aria-expanded={open}
+    <div
+      className="relative"
+      ref={ref}
+      onMouseEnter={openMenu}
+      onMouseLeave={scheduleClose}
+    >
+      <Link
+        href={v2Href("/account")}
         title={email ?? t("account")}
-        onClick={() => setOpen((v) => !v)}
-        className="flex h-11 w-11 items-center justify-center rounded-full bg-[#2B1A33] text-[13px] font-bold text-white"
+        aria-expanded={open}
+        className="flex h-11 w-11 items-center justify-center rounded-full bg-[#2B1A33] text-[13px] font-bold text-white no-underline"
       >
         {initials}
-      </button>
+      </Link>
       {open ? (
         <div
           role="menu"
-          className="absolute end-0 z-30 mt-2 w-[200px] rounded-[18px] bg-white p-2 shadow-[0_20px_50px_rgba(43,26,51,.15)]"
+          className="absolute end-0 z-30 mt-1 w-[200px] rounded-[18px] bg-white p-2 shadow-[0_20px_50px_rgba(43,26,51,.15)]"
+          onMouseEnter={openMenu}
+          onMouseLeave={scheduleClose}
         >
           {isAdmin ? (
             <Link

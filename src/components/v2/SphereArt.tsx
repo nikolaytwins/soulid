@@ -22,6 +22,7 @@ export function SphereArt({
   return (
     <div
       aria-hidden
+      className="pointer-events-none"
       style={{
         position: "absolute",
         inset: 0,
