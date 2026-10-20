@@ -44,6 +44,15 @@ export const V2_NEU: SphereTint = {
   acc: "#C48A3E"
 };
 
+/** Sage from the Soul mission illustration. */
+export const V2_MISSION: SphereTint = {
+  t: "#E4F3EA",
+  a1: "#B7DEC6",
+  a2: "#5EAE82",
+  ink: "#1F4634",
+  acc: "#4A9A6E"
+};
+
 export const V2_STAR_THEME = {
   line: "#9A93A3",
   outline: "#B5AEBD",

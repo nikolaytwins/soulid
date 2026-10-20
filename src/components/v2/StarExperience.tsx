@@ -19,7 +19,7 @@ import { trackPixel } from "@/components/analytics/MetaPixel";
 import { trackClient } from "@/components/analytics/ids";
 import { signIn } from "next-auth/react";
 import { LtrText } from "@/components/ui/LtrText";
-import { SPHERE_TINT, V2_GOLD, V2_INK, V2_NEU, v2Href } from "@/lib/v2";
+import { SPHERE_TINT, V2_GOLD, V2_INK, V2_MISSION, v2Href } from "@/lib/v2";
 import { PayHint } from "@/components/pay/PayHint";
 import { V2PersonalBlocks } from "@/components/v2/PersonalBlocks";
 
@@ -267,9 +267,9 @@ export function V2StarExperience({
   const missionLabel: [string, string] = [missionWords[0] ?? "Миссия", missionWords.slice(1).join(" ") || "души"];
   const missionChip: "a" | "o" | "l" = panel?.type === "mission" && missionOpen ? "a" : missionOpen ? "o" : "l";
   const missionChipStyle: Record<"a" | "o" | "l", React.CSSProperties> = {
-    a: { background: V2_NEU.a2, color: "#FFFFFF" },
-    o: { background: V2_NEU.t, color: V2_NEU.ink },
-    l: { background: "#FFFFFF", color: V2_NEU.ink, outline: "1.5px dashed " + V2_NEU.acc, outlineOffset: -2 }
+    a: { background: V2_MISSION.a2, color: "#FFFFFF" },
+    o: { background: V2_MISSION.t, color: V2_MISSION.ink },
+    l: { background: "#FFFFFF", color: V2_MISSION.ink, outline: "1.5px dashed " + V2_MISSION.acc, outlineOffset: -2 }
   };
   const nextIdx = model.order.indexOf(active) + 1;
   const nextId = nextIdx >= 0 ? model.order[nextIdx] : undefined;
@@ -378,7 +378,7 @@ export function V2StarExperience({
       );
     });
     const missionSt: React.CSSProperties = missionOpen
-      ? { background: V2_NEU.t, color: V2_NEU.ink, border: "1px solid " + V2_NEU.t }
+      ? { background: V2_MISSION.t, color: V2_MISSION.ink, border: "1px solid " + V2_MISSION.t }
       : target === null && panel?.type === "mission"
         ? { background: "transparent", color: V2_INK, border: "1px dashed #8A8494" }
         : { background: "transparent", color: "#AFA8B8", border: "1px solid rgba(43,26,51,.10)" };
@@ -581,7 +581,7 @@ export function V2StarExperience({
             >
               <span
                 className="h-2 w-2 shrink-0 rounded-full"
-                style={{ background: missionChip === "a" ? "#FFFFFF" : V2_NEU.a2 }}
+                style={{ background: missionChip === "a" ? "#FFFFFF" : V2_MISSION.a2 }}
               />
               {t("starPage.soulMission")}
               {!missionOpen ? <V2LockIcon /> : null}
@@ -845,26 +845,31 @@ export function V2StarExperience({
 
               {nOpen >= 5 && !nextId ? (
                 <div
-                  className="relative flex flex-col items-start gap-4 overflow-hidden rounded-[36px] bg-white p-[clamp(22px,3vw,36px)]"
-                  style={{ border: "1.5px solid #E9C27C" }}
+                  className="flex flex-wrap items-stretch gap-6 overflow-hidden rounded-[36px] p-[clamp(22px,3vw,36px)]"
+                  style={{ background: V2_MISSION.t, border: `1.5px solid ${V2_MISSION.a2}` }}
                 >
-                  <div
-                    className="pointer-events-none absolute inset-0"
-                    style={{
-                      background: "repeating-conic-gradient(from 0deg at 90% 10%,rgba(233,194,124,.12) 0deg 5deg,transparent 5deg 16deg)"
-                    }}
-                  />
-                  <span className="relative text-xs font-bold tracking-[0.16em] text-[#B07A33]">{t("starPage.allOpen")}</span>
-                  <span className="relative font-display text-[34px] font-medium">{t("starPage.soulMission")}</span>
-                  <span className="relative text-base leading-relaxed text-[#5B5566]">{t("starPage.soulMissionLead")}</span>
-                  <button
-                    type="button"
-                    onClick={onMission}
-                    className="relative min-h-[52px] rounded-full bg-[#E9C27C] px-[26px] py-4 text-[15px] font-extrabold"
-                    style={{ color: V2_INK }}
-                  >
-                    {t("starPage.openMission")}
-                  </button>
+                  <div className="relative flex min-w-0 flex-[1_1_280px] flex-col items-start justify-center gap-4">
+                    <span className="text-xs font-bold tracking-[0.16em]" style={{ color: V2_MISSION.ink }}>
+                      {t("starPage.allOpen")}
+                    </span>
+                    <span className="font-display text-[34px] font-medium" style={{ color: V2_MISSION.ink }}>
+                      {t("starPage.soulMission")}
+                    </span>
+                    <span className="text-base leading-relaxed" style={{ color: V2_MISSION.ink, opacity: 0.82 }}>
+                      {t("starPage.soulMissionLead")}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={onMission}
+                      className="min-h-[52px] rounded-full px-[26px] py-4 text-[15px] font-extrabold text-white"
+                      style={{ background: V2_MISSION.ink }}
+                    >
+                      {t("starPage.openMission")}
+                    </button>
+                  </div>
+                  <div className="relative min-h-[220px] flex-[1_1_240px]">
+                    <SphereArt mission />
+                  </div>
                 </div>
               ) : null}
             </div>
@@ -1072,17 +1077,17 @@ export function V2StarExperience({
 
               {panel.type === "mission" ? (
                 <>
+                  <div className="relative min-h-[160px] overflow-hidden rounded-3xl">
+                    <SphereArt mission />
+                  </div>
                   <div
                     className="relative flex items-center gap-3.5 overflow-hidden rounded-3xl p-[18px]"
-                    style={{ background: "#FFFFFF", color: V2_INK, border: "1.5px solid #E9C27C" }}
+                    style={{ background: V2_MISSION.t, color: V2_MISSION.ink, border: `1.5px solid ${V2_MISSION.a2}` }}
                   >
-                    <div
-                      className="pointer-events-none absolute inset-0"
-                      style={{
-                        background: "repeating-conic-gradient(from 0deg at 90% 20%,rgba(233,194,124,.14) 0deg 5deg,transparent 5deg 16deg)"
-                      }}
-                    />
-                    <span className="relative flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-[rgba(233,194,124,.18)]">
+                    <span
+                      className="relative flex h-14 w-14 shrink-0 items-center justify-center rounded-full"
+                      style={{ background: "rgba(94,174,130,.22)" }}
+                    >
                       <V2MiniStar zones={[]} size={28} center locked={!missionOpen} />
                     </span>
                     <div className="relative flex flex-col items-start gap-2">
