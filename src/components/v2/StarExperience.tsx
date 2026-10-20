@@ -265,7 +265,9 @@ export function V2StarExperience({
       if (model.nextSphere) setPanel({ type: "offer", k: model.nextSphere });
       return;
     }
-    await buy(pendingSku ?? sku, useSavedMethod);
+    const paySku = pendingSku || sku;
+    setPendingSku(null);
+    await buy(paySku, useSavedMethod);
   }
 
   const labels = Object.fromEntries(model.order.map((id) => [id, model.spheres[id].name])) as Record<SphereId, string>;
@@ -814,11 +816,22 @@ export function V2StarExperience({
                         <button
                           type="button"
                           disabled={busy}
-                          onClick={() => goCheckout(model.prices[model.nextSphere!].sku)}
-                          className="relative z-[1] min-h-[54px] w-full touch-manipulation rounded-full px-[26px] py-4 text-[15px] font-extrabold sm:w-auto"
-                          style={{ background: nextTint.a1, color: nextTint.ink, border: "none", cursor: "pointer" }}
+                          onPointerUp={(e) => {
+                            if (e.pointerType === "mouse" && e.button !== 0) return;
+                            e.preventDefault();
+                            e.stopPropagation();
+                            const sku = model.prices[model.nextSphere!]?.sku;
+                            if (!sku || busy) return;
+                            void goCheckout(sku);
+                          }}
+                          onClick={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                          }}
+                          className="relative z-[1] min-h-[54px] w-full touch-manipulation rounded-full px-[26px] py-4 text-[15px] font-extrabold [-webkit-tap-highlight-color:transparent] sm:w-auto"
+                          style={{ background: nextTint.a1, color: nextTint.ink, border: "none", cursor: "pointer", touchAction: "manipulation" }}
                         >
-                          {t("starPage.openSpherePrice", { price: model.prices[model.nextSphere].formatted })}
+                          {busy ? "…" : t("starPage.openSpherePrice", { price: model.prices[model.nextSphere].formatted })}
                         </button>
                       ) : null}
                       {model.showBundle && model.bundle && nOpen < 5 ? (
@@ -1025,22 +1038,46 @@ export function V2StarExperience({
                       )}
                     </div>
                   ) : null}
+                  {payError ? <p className="text-sm text-red-700">{payError}</p> : null}
                   {model.prices[panel.k]?.soldSeparately ? (
                     <button
                       type="button"
                       disabled={busy}
-                      onClick={() => goCheckout(pendingSku ?? skuForSphere(panel.k) ?? model.prices[panel.k].sku)}
-                      className="min-h-[54px] touch-manipulation rounded-full bg-[#2B1A33] py-4 text-[15px] font-bold text-white"
+                      onPointerUp={(e) => {
+                        if (e.pointerType === "mouse" && e.button !== 0) return;
+                        e.preventDefault();
+                        e.stopPropagation();
+                        const sku = pendingSku || skuForSphere(panel.k) || model.prices[panel.k].sku;
+                        if (!sku || busy) return;
+                        void goCheckout(sku);
+                      }}
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                      }}
+                      className="relative z-10 min-h-[54px] touch-manipulation rounded-full bg-[#2B1A33] py-4 text-[15px] font-bold text-white [-webkit-tap-highlight-color:transparent]"
+                      style={{ touchAction: "manipulation" }}
                     >
-                      {t("starPage.openSpherePrice", { price: model.prices[panel.k].formatted })}
+                      {busy ? "…" : t("starPage.openSpherePrice", { price: model.prices[panel.k].formatted })}
                     </button>
                   ) : null}
                   {model.showBundle && model.bundle && nOpen < 5 ? (
                     <button
                       type="button"
                       disabled={busy}
-                      onClick={() => goCheckout(model.bundle!.sku)}
-                      className="min-h-11 bg-transparent text-sm text-[#6E6878] underline underline-offset-4"
+                      onPointerUp={(e) => {
+                        if (e.pointerType === "mouse" && e.button !== 0) return;
+                        e.preventDefault();
+                        e.stopPropagation();
+                        if (!model.bundle?.sku || busy) return;
+                        void goCheckout(model.bundle.sku);
+                      }}
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                      }}
+                      className="relative z-10 min-h-11 touch-manipulation bg-transparent p-2 text-sm text-[#6E6878] underline underline-offset-4"
+                      style={{ touchAction: "manipulation" }}
                     >
                       {t("v2.unlockAllShort", { price: model.bundle.formatted })}
                     </button>
@@ -1051,13 +1088,12 @@ export function V2StarExperience({
                       busy
                         ? undefined
                         : () =>
-                            goCheckout(pendingSku ?? skuForSphere(panel.k) ?? model.prices[panel.k].sku, false)
+                            goCheckout(pendingSku || skuForSphere(panel.k) || model.prices[panel.k].sku, false)
                     }
                     className="text-sm text-[#6E6878]"
                     buttonClassName="bg-transparent p-0 text-sm font-semibold text-[#B07A33] underline underline-offset-4"
                   />
                   <p className="text-[11px] leading-relaxed text-[#8A8494]">{t("legal.disclaimer")}</p>
-                  {payError ? <p className="text-sm text-red-700">{payError}</p> : null}
                   <button type="button" onClick={close} className="min-h-11 bg-transparent text-sm text-[#6E6878]">
                     {t("offer.notNow")}
                   </button>
@@ -1185,7 +1221,7 @@ function Overlay({
     closeReady.current = false;
     const t = window.setTimeout(() => {
       closeReady.current = true;
-    }, 450);
+    }, 700);
     return () => window.clearTimeout(t);
   }, [panel]);
   const isPointD = panel.type === "point" && !isMob;
@@ -1197,7 +1233,8 @@ function Overlay({
     backdropFilter: "blur(4px)",
     display: "flex",
     alignItems: isMob ? "flex-end" : isPointD ? "stretch" : "center",
-    justifyContent: isMob ? "center" : isPointD ? "flex-end" : "center"
+    justifyContent: isMob ? "center" : isPointD ? "flex-end" : "center",
+    touchAction: "none"
   };
   const sheetBase: React.CSSProperties = {
     background: "#FFFFFF",
@@ -1208,7 +1245,9 @@ function Overlay({
     boxSizing: "border-box",
     overflowY: "auto",
     overscrollBehavior: "contain",
-    boxShadow: "0 30px 80px rgba(43,26,51,.25)"
+    boxShadow: "0 30px 80px rgba(43,26,51,.25)",
+    touchAction: "pan-y",
+    WebkitOverflowScrolling: "touch"
   };
   const sheet: React.CSSProperties = isMob
     ? {
@@ -1225,14 +1264,20 @@ function Overlay({
   return (
     <div
       style={overlay}
-      onClick={(e) => {
+      onPointerDown={(e) => {
+        // Close on a real backdrop tap only. Ghost `click` from the gesture that
+        // opened the sheet must not dismiss it or steal the CTA press.
         if (!closeReady.current) return;
         if (e.target === e.currentTarget) onClose();
       }}
       role="dialog"
       aria-modal="true"
     >
-      <div style={sheet} onClick={(e) => e.stopPropagation()} onPointerDown={(e) => e.stopPropagation()}>
+      <div
+        style={sheet}
+        onPointerDown={(e) => e.stopPropagation()}
+        onClick={(e) => e.stopPropagation()}
+      >
         {children}
       </div>
     </div>
