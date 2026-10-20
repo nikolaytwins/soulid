@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState, useTransition } from "react";
+import { useEffect, useMemo, useRef, useState, useTransition, type CSSProperties } from "react";
 import { useTranslations } from "next-intl";
 import { Link, useRouter } from "@/i18n/routing";
 import {
@@ -10,12 +10,15 @@ import {
   saveProfileNameAction,
   updateStarAction
 } from "@/app/[locale]/account/actions";
-import { CabinetStar, type CabinetStarLabels } from "@/components/account/CabinetStar";
+import type { CabinetStarLabels } from "@/components/account/CabinetStar";
 import { LtrText } from "@/components/ui/LtrText";
 import { STAR_RELATIONS, type StarRelation } from "@/lib/domain/relations";
-import type { SphereId } from "@/lib/engine";
+import { ZONE_TO_SPHERE, type SphereId, type StarResult } from "@/lib/engine";
 import { PayHint } from "@/components/pay/PayHint";
 import { cardLabel } from "@/lib/payments/card-label";
+import { SPHERE_TINT, V2_GOLD, V2_INK, V2_NEU, v2Href } from "@/lib/v2";
+import { V2StarSvg } from "./StarSvg";
+import { V2LockIcon, V2MiniStar } from "./TriangleSvg";
 
 export type CabinetStarData = {
   id: string;
@@ -23,6 +26,8 @@ export type CabinetStarData = {
   relation: StarRelation;
   date: string;
   unlockedCount: number;
+  unlocked: SphereId[];
+  star: StarResult | null;
   values: Record<SphereId, number>;
   nextSku: string | null;
   nextName: string;
@@ -38,17 +43,8 @@ export type CabinetPurchase = {
   status: string;
 };
 
-const inputStyle: React.CSSProperties = {
-  width: "100%",
-  boxSizing: "border-box",
-  background: "#F8F1E9",
-  border: "1px solid rgba(80,60,45,.14)",
-  borderRadius: 12,
-  padding: "14px 16px",
-  fontSize: 16,
-  color: "#2B1A33",
-  outline: "none"
-};
+const inputClass =
+  "min-h-12 w-full rounded-[14px] border border-[rgba(43,26,51,.10)] bg-[#F8F1E9] px-4 text-base text-[#2B1A33] outline-none";
 
 function fmtDate(v: string) {
   const d = v.replace(/\D/g, "").slice(0, 8);
@@ -58,14 +54,6 @@ function fmtDate(v: string) {
 function relEyebrow(rel: StarRelation, t: ReturnType<typeof useTranslations>) {
   const label = t(`rel_${rel}`).toUpperCase();
   return rel === "self" ? t("myStarEyebrow") : t("relStarEyebrow", { rel: label });
-}
-
-function segs(n: number, hgt: number) {
-  return [0, 1, 2, 3, 4].map((i) => ({
-    height: hgt,
-    borderRadius: 3,
-    background: i < n ? "#E2AE63" : "rgba(80,60,45,.12)"
-  }));
 }
 
 export function V2Cabinet({
@@ -92,7 +80,6 @@ export function V2Cabinet({
   paidToast: string | null;
 }) {
   const t = useTranslations("account");
-  const legal = useTranslations("legal");
   const router = useRouter();
   const [selectedId, setSelectedId] = useState<string | null>(initialStarId ?? stars[0]?.id ?? null);
   const [sheet, setSheet] = useState<null | "create" | "edit" | "profile" | "purchases" | "support">(null);
@@ -106,6 +93,7 @@ export function V2Cabinet({
   const tt = useRef<number | null>(null);
 
   const cur = stars.find((s) => s.id === selectedId) ?? stars[0] ?? null;
+  const missionLabel: [string, string] = [starLabels.missionTop, starLabels.missionBottom];
 
   useEffect(() => {
     setCards(savedCards);
@@ -217,7 +205,7 @@ export function V2Cabinet({
         setErr(res.error === "confirm" ? t("deleteConfirmErr") : t("errGeneric"));
         return;
       }
-      window.location.href = "/";
+      window.location.href = `/${locale}/v2`;
     });
   }
 
@@ -249,149 +237,100 @@ export function V2Cabinet({
   }
 
   const n = cur?.unlockedCount ?? 0;
+  const nextSphere = n < 5 ? (order[n] ?? null) : null;
   const rows = order.map((id, k) => {
     const st: "o" | "x" | "l" = k < n ? "o" : k === n ? "x" : "l";
-    return { id, name: sphereNames[id], num: String(k + 1), st };
+    return { id, name: sphereNames[id], st };
   });
 
-  const textBtn: React.CSSProperties = {
-    background: "none",
-    border: "none",
-    padding: "8px 4px",
-    fontSize: 14,
-    fontWeight: 600,
-    color: "#5E534C",
-    cursor: "pointer"
-  };
-
   return (
-    <div
-      style={{
-        background: "#F8F1E9",
-        minHeight: "100vh",
-        color: "#2B1A33",
-        fontFamily: "Manrope, sans-serif",
-        position: "relative",
-        overflow: "clip"
-      }}
-    >
-      <div
-        style={{
-          position: "absolute",
-          left: "50%",
-          top: 60,
-          width: 1100,
-          height: 800,
-          transform: "translateX(-50%)",
-          background: "radial-gradient(closest-side,rgba(242,205,150,.4),rgba(245,240,234,0))",
-          pointerEvents: "none"
-        }}
-      />
-
-      <div
-        style={{
-          position: "relative",
-          maxWidth: 1280,
-          margin: "0 auto",
-          padding: "8px clamp(20px,4vw,56px) 96px",
-          boxSizing: "border-box",
-          display: "flex",
-          flexDirection: "column",
-          gap: 48
-        }}
-      >
-        <div
-          style={{
-            display: "flex",
-            flexWrap: "wrap",
-            alignItems: "flex-end",
-            justifyContent: "space-between",
-            gap: 16
-          }}
-        >
-          <div style={{ display: "flex", flexDirection: "column", gap: 8, minWidth: 0 }}>
-            <span style={{ fontSize: 11, letterSpacing: ".22em", color: "#8E8178", fontWeight: 600 }}>{todayLabel}</span>
-            <span
-              style={{
-                fontFamily: "Unbounded, sans-serif",
-                fontSize: "clamp(36px,5vw,56px)",
-                lineHeight: 1,
-                fontWeight: 500
-              }}
-            >
-              {greeting}
-            </span>
-          </div>
-          <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: 8 }}>
-            <button type="button" style={textBtn} onClick={() => { setProfileName(user.name); setErr(""); setSheet("profile"); }}>
-              {t("menuProfile")}
-            </button>
-            <button type="button" style={textBtn} onClick={() => setSheet("purchases")}>
-              {t("menuPurchases")}
-            </button>
-            <button type="button" style={textBtn} onClick={() => setSheet("support")}>
-              {t("menuSupport")}
-            </button>
-            <button
-              type="button"
-              onClick={openCreate}
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: 8,
-                background: "linear-gradient(160deg,#F3CF94,#D9A055)",
-                border: "none",
-                borderRadius: 999,
-                padding: "12px 22px",
-                fontSize: 15,
-                fontWeight: 700,
-                color: "#2B1A33",
-                cursor: "pointer",
-                minHeight: 46,
-                boxShadow: "0 8px 24px rgba(217,160,85,.45),0 0 0 4px rgba(242,205,150,.35)"
-              }}
-            >
-              + {t("newStar")}
-            </button>
-          </div>
+    <div className="relative mx-auto flex max-w-[1360px] flex-col gap-4 overflow-x-clip px-[clamp(16px,3vw,40px)] pb-24 pt-1">
+      <div className="flex flex-wrap items-end justify-between gap-4 px-1 pt-2">
+        <div className="flex min-w-0 flex-col gap-2.5">
+          <span suppressHydrationWarning className="text-xs font-bold tracking-[0.16em] text-[#8A8494]">
+            {todayLabel}
+          </span>
+          <h1 suppressHydrationWarning className="text-balance font-display text-[clamp(32px,4vw,52px)] font-medium leading-[1.08]">
+            {greeting}
+          </h1>
         </div>
-
-        {cur ? (
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: "repeat(auto-fit,minmax(min(100%,420px),1fr))",
-              gap: 24,
-              background: "rgba(251,248,244,.85)",
-              border: "1px solid rgba(80,60,45,.10)",
-              borderRadius: 28,
-              padding: "clamp(20px,3vw,40px)",
-              boxShadow: "0 20px 50px rgba(120,85,50,.08)",
-              alignItems: "center"
+        <div className="flex flex-wrap items-center gap-2">
+          <button
+            type="button"
+            className="min-h-11 rounded-full bg-white px-4 py-2.5 text-sm font-bold text-[#5B5566]"
+            onClick={() => {
+              setProfileName(user.name);
+              setErr("");
+              setSheet("profile");
             }}
           >
-            <div style={{ position: "relative", display: "flex", justifyContent: "center" }}>
-              <div style={{ width: "100%", maxWidth: 480 }}>
-                <CabinetStar id={cur.id} big openCount={cur.unlockedCount} values={cur.values} labels={starLabels} />
-              </div>
+            {t("menuProfile")}
+          </button>
+          <button
+            type="button"
+            className="min-h-11 rounded-full bg-white px-4 py-2.5 text-sm font-bold text-[#5B5566]"
+            onClick={() => setSheet("purchases")}
+          >
+            {t("menuPurchases")}
+          </button>
+          <button
+            type="button"
+            className="min-h-11 rounded-full bg-white px-4 py-2.5 text-sm font-bold text-[#5B5566]"
+            onClick={() => setSheet("support")}
+          >
+            {t("menuSupport")}
+          </button>
+          <button
+            type="button"
+            onClick={openCreate}
+            className="flex min-h-11 items-center rounded-full bg-[#2B1A33] px-5 py-2.5 text-sm font-bold text-white"
+          >
+            + {t("newStar")}
+          </button>
+        </div>
+      </div>
+
+      {cur ? (
+        <div className="flex flex-row-reverse flex-wrap items-stretch gap-4">
+          <div className="relative flex min-w-0 flex-[1.3_1_520px] flex-col gap-3 overflow-hidden rounded-[36px] bg-white p-[clamp(20px,3vw,36px)]">
+            <div
+              className="pointer-events-none absolute inset-0"
+              style={{
+                backgroundImage: "radial-gradient(rgba(43,26,51,.11) 1.2px, transparent 1.7px)",
+                backgroundSize: "20px 20px",
+                WebkitMaskImage: "radial-gradient(circle at 50% 55%, #000 20%, transparent 75%)",
+                maskImage: "radial-gradient(circle at 50% 55%, #000 20%, transparent 75%)"
+              }}
+            />
+            <div className="relative flex justify-center">
+              <div
+                className="pointer-events-none absolute left-1/2 top-1/2 aspect-square w-[90%] -translate-x-1/2 -translate-y-1/2 rounded-full"
+                style={{ background: "radial-gradient(closest-side,rgba(242,205,150,.55),rgba(255,255,255,0))" }}
+              />
+              <CabinetPreview
+                svgId={`cab-${cur.id}`}
+                star={cur.star}
+                unlocked={cur.unlocked}
+                nextSphere={nextSphere}
+                labels={sphereNames}
+                missionLabel={missionLabel}
+              />
             </div>
-            <div style={{ display: "flex", flexDirection: "column", gap: 22 }}>
-              <div style={{ display: "flex", alignItems: "flex-start", gap: 12 }}>
-                <div style={{ display: "flex", flexDirection: "column", gap: 8, flex: 1 }}>
-                  <span style={{ fontSize: 11, letterSpacing: ".22em", color: "#B9813F", fontWeight: 700 }}>{relEyebrow(cur.relation, t)}</span>
-                  <span
-                    style={{
-                      fontFamily: "Unbounded, sans-serif",
-                      fontSize: "clamp(34px,4vw,48px)",
-                      lineHeight: 1,
-                      fontWeight: 500
-                    }}
-                  >
-                    {cur.name}
-                  </span>
-                  <span style={{ fontSize: 14, color: "#5E534C" }}>
+          </div>
+
+          <div className="flex min-w-0 flex-[1_1_380px] flex-col gap-4">
+            <div className="relative flex flex-1 flex-col gap-5 overflow-hidden rounded-[36px] bg-white p-[clamp(20px,2.6vw,30px)]">
+              <div
+                className="pointer-events-none absolute -right-[90px] -top-[90px] h-[300px] w-[300px] rounded-full"
+                style={{ background: "repeating-radial-gradient(circle,rgba(217,165,92,.22) 0 1px,transparent 1.5px 18px)" }}
+              />
+              <div className="relative flex items-start justify-between gap-3">
+                <div className="flex min-w-0 flex-col gap-2">
+                  <span className="text-xs font-bold tracking-[0.16em] text-[#B07A33]">{relEyebrow(cur.relation, t)}</span>
+                  <span className="font-display text-[clamp(32px,3.4vw,44px)] font-medium leading-none">{cur.name}</span>
+                  <span className="text-sm text-[#5B5566]">
                     {t("dob")}:{" "}
-                    <b style={{ color: "#2B1A33" }}>
+                    <b style={{ color: V2_INK }}>
                       <LtrText>{cur.date}</LtrText>
                     </b>
                   </span>
@@ -399,227 +338,142 @@ export function V2Cabinet({
                 <button
                   type="button"
                   onClick={openEdit}
-                  style={{
-                    background: "none",
-                    border: "1px solid rgba(80,60,45,.15)",
-                    borderRadius: 999,
-                    padding: "8px 14px",
-                    fontSize: 13,
-                    color: "#5E534C",
-                    cursor: "pointer",
-                    minHeight: 40
-                  }}
+                  className="shrink-0 rounded-full bg-[#F8F1E9] px-4 py-2 text-[13px] font-bold text-[#5B5566]"
                 >
                   {t("edit")}
                 </button>
               </div>
-              <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-                <div style={{ display: "flex", justifyContent: "space-between", fontSize: 13 }}>
-                  <span style={{ color: "#5E534C" }}>{t("opened")}</span>
-                  <span style={{ fontWeight: 700 }}>{t("openCount", { n, total: 5 })}</span>
+
+              <div className="relative flex flex-col gap-2.5">
+                <div className="flex items-baseline justify-between text-sm">
+                  <span className="text-[#6E6878]">{t("opened")}</span>
+                  <b style={{ color: V2_INK }}>{t("openCount", { n, total: 5 })}</b>
                 </div>
-                <div style={{ display: "grid", gridTemplateColumns: "repeat(5,1fr)", gap: 5 }}>
-                  {segs(n, 6).map((s, i) => (
-                    <span key={i} style={s} />
+                <div className="grid grid-cols-5 gap-1.5">
+                  {order.map((id, i) => (
+                    <span
+                      key={id}
+                      className="h-1.5 rounded-full"
+                      style={{ background: i < n ? SPHERE_TINT[id].a2 : "#E8E2EC" }}
+                    />
                   ))}
                 </div>
               </div>
-              <div style={{ display: "flex", flexDirection: "column", borderTop: "1px solid rgba(80,60,45,.10)" }}>
+
+              <div className="relative flex flex-wrap gap-1.5">
                 {rows.map((r) => (
-                  <SphereRow key={r.id} num={r.num} name={r.name} st={r.st} nextPrice={cur.nextPrice} t={t} />
+                  <SphereChip key={r.id} id={r.id} name={r.name} st={r.st} />
                 ))}
-                <SphereRow
-                  num="6"
-                  name={t("soulMission")}
-                  st={n >= 5 ? "o" : "l"}
-                  nextPrice={cur.nextPrice}
-                  t={t}
-                />
+                <SphereChip id={null} name={t("soulMission")} st={n >= 5 ? "o" : "l"} />
               </div>
-              <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
-                <Link
-                  href={`/v2/star/${cur.id}`}
-                  className="no-underline"
-                  style={{
-                    flex: 1,
-                    minWidth: 200,
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    background: "#2B1A33",
-                    color: "#FFFFFF",
-                    fontSize: 15,
-                    fontWeight: 600,
-                    padding: "16px 20px",
-                    borderRadius: 14,
-                    boxSizing: "border-box"
-                  }}
-                >
-                  {t("continue")}
-                </Link>
-                {n < 5 && cur.nextSku ? (
-                  <div style={{ flex: 1, minWidth: 200, display: "flex", flexDirection: "column", gap: 8 }}>
-                    <button
-                      type="button"
-                      onClick={() => buy(true)}
-                      style={{
-                        width: "100%",
-                        background: "#E2AE63",
-                        color: "#2B1A33",
-                        border: "none",
-                        borderRadius: 14,
-                        padding: "16px 20px",
-                        fontSize: 15,
-                        fontWeight: 700,
-                        cursor: "pointer"
-                      }}
-                    >
-                      {t("buyNext", { name: cur.nextName, price: cur.nextPrice })}
-                    </button>
-                    <PayHint
-                      saved={cards[0] ?? null}
-                      onNewCard={() => buy(false)}
-                      className="text-sm text-[#8A8494]"
-                      buttonClassName="bg-transparent p-0 text-sm font-semibold text-[#B07A33] underline underline-offset-4"
-                    />
-                  </div>
-                ) : null}
-                {n >= 5 ? (
-                  <span
-                    style={{
-                      flex: 1,
-                      minWidth: 200,
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      gap: 8,
-                      background: "#E3EBDD",
-                      color: "#4B6B43",
-                      borderRadius: 14,
-                      padding: "16px 20px",
-                      fontSize: 15,
-                      fontWeight: 600,
-                      boxSizing: "border-box"
-                    }}
+
+              <Link
+                href={v2Href(`/star/${cur.id}`)}
+                className="relative flex min-h-14 items-center justify-between rounded-full bg-[#2B1A33] py-2 pe-2 ps-[22px] text-[15px] font-bold text-white no-underline"
+              >
+                {t("continue")}
+                <span className="flex h-10 w-10 items-center justify-center rounded-full bg-white text-lg text-[#2B1A33]">→</span>
+              </Link>
+
+              {n < 5 && cur.nextSku ? (
+                <div className="relative flex flex-col gap-2">
+                  <button
+                    type="button"
+                    onClick={() => buy(true)}
+                    className="min-h-[52px] rounded-full px-[26px] py-4 text-[15px] font-extrabold"
+                    style={{ background: V2_GOLD, color: V2_INK }}
                   >
-                    ✓ {t("allOpen")}
-                  </span>
-                ) : null}
-              </div>
-              <p style={{ margin: 0, fontSize: 11, lineHeight: 1.45, color: "#A8988C" }}>{legal("disclaimer")}</p>
+                    {t("buyNext", { name: cur.nextName, price: cur.nextPrice })}
+                  </button>
+                  <PayHint
+                    saved={cards[0] ?? null}
+                    onNewCard={() => buy(false)}
+                    className="text-sm text-[#8A8494]"
+                    buttonClassName="bg-transparent p-0 text-sm font-semibold text-[#B07A33] underline underline-offset-4"
+                  />
+                </div>
+              ) : null}
+
+              {n >= 5 ? (
+                <span className="relative flex min-h-[52px] items-center justify-center gap-2 rounded-full bg-[#E3EBDD] px-5 text-[15px] font-bold text-[#4B6B43]">
+                  ✓ {t("allOpen")}
+                </span>
+              ) : null}
             </div>
           </div>
-        ) : null}
+        </div>
+      ) : null}
 
-        <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
-          <div style={{ display: "flex", alignItems: "baseline", gap: 12 }}>
-            <span style={{ fontFamily: "Unbounded, sans-serif", fontSize: 36, fontWeight: 500, flex: 1 }}>{t("stars")}</span>
-            <span style={{ fontSize: 13, color: "#8E8178" }}>{t("starsCount", { n: stars.length })}</span>
-          </div>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill,minmax(220px,1fr))", gap: 16 }}>
-            {stars.map((s) => {
-              const on = s.id === cur?.id;
-              return (
-                <button
-                  key={s.id}
-                  type="button"
-                  onClick={() => {
-                    setSelectedId(s.id);
-                    window.scrollTo({ top: 0, behavior: "smooth" });
-                  }}
-                  style={{
-                    display: "flex",
-                    flexDirection: "column",
-                    gap: 14,
-                    alignItems: "flex-start",
-                    textAlign: "left",
-                    background: "#FFFFFF",
-                    borderRadius: 22,
-                    padding: 20,
-                    cursor: "pointer",
-                    color: "#2B1A33",
-                    border: on ? "1.5px solid #E2AE63" : "1px solid rgba(80,60,45,.10)",
-                    boxShadow: on ? "0 12px 30px rgba(120,85,50,.10)" : "none"
-                  }}
-                >
-                  <div style={{ width: "100%", display: "flex", justifyContent: "center", padding: "6px 0 2px" }}>
-                    <CabinetStar id={s.id} openCount={s.unlockedCount} values={s.values} labels={starLabels} />
-                  </div>
-                  <div style={{ display: "flex", flexDirection: "column", gap: 3, alignItems: "flex-start" }}>
-                    <span style={{ fontSize: 11, letterSpacing: ".16em", color: "#B9813F", fontWeight: 700 }}>{relEyebrow(s.relation, t)}</span>
-                    <span style={{ fontFamily: "Unbounded, sans-serif", fontSize: 26, lineHeight: 1.05, fontWeight: 500 }}>{s.name}</span>
-                    <span style={{ fontSize: 13, color: "#8E8178" }}>
-                      <LtrText>{s.date}</LtrText>
-                    </span>
-                  </div>
-                  <div style={{ display: "grid", gridTemplateColumns: "repeat(5,1fr)", gap: 3, width: "100%" }}>
-                    {segs(s.unlockedCount, 4).map((st, i) => (
-                      <span key={i} style={st} />
-                    ))}
-                  </div>
-                  <span style={{ fontSize: 12, color: "#5E534C" }}>
-                    {s.unlockedCount >= 5 ? t("cardDone") : t("cardProgress", { n: s.unlockedCount })}
-                  </span>
-                </button>
-              );
-            })}
-            <button
-              type="button"
-              onClick={openCreate}
-              style={{
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "center",
-                justifyContent: "center",
-                gap: 12,
-                minHeight: 300,
-                background: "transparent",
-                border: "1.5px dashed rgba(142,95,42,.4)",
-                borderRadius: 22,
-                padding: 24,
-                cursor: "pointer",
-                color: "#8E5F2A"
-              }}
-            >
-              <span
+      <section className="flex flex-col gap-4 pt-8">
+        <div className="flex flex-wrap items-end justify-between gap-4">
+          <span className="font-display text-[clamp(30px,4vw,48px)] font-medium leading-none">{t("stars")}</span>
+          <span className="text-sm text-[#6E6878]">{t("starsCount", { n: stars.length })}</span>
+        </div>
+        <div className="grid grid-cols-[repeat(auto-fill,minmax(220px,1fr))] gap-4">
+          {stars.map((s) => {
+            const on = s.id === cur?.id;
+            return (
+              <button
+                key={s.id}
+                type="button"
+                onClick={() => {
+                  setSelectedId(s.id);
+                  window.scrollTo({ top: 0, behavior: "smooth" });
+                }}
+                className="flex flex-col items-start gap-4 rounded-[36px] bg-white p-6 text-left"
                 style={{
-                  width: 56,
-                  height: 56,
-                  borderRadius: "50%",
-                  background: "#F6E6CC",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  fontSize: 26,
-                  fontWeight: 500
+                  color: V2_INK,
+                  outline: on ? `1.5px solid ${V2_GOLD}` : "1.5px solid transparent",
+                  boxShadow: on ? "0 12px 30px rgba(43,26,51,.10)" : "none"
                 }}
               >
-                +
-              </span>
-              <span style={{ fontSize: 16, fontWeight: 600, color: "#2B1A33" }}>{t("createStar")}</span>
-              <span style={{ fontSize: 13, lineHeight: 1.5, color: "#8E8178", textAlign: "center", maxWidth: 200 }}>{t("createHint")}</span>
-            </button>
-          </div>
+                <div className="flex w-full justify-center py-1">
+                  <V2MiniStar
+                    zones={s.unlocked.map((id) => ZONE_TO_SPHERE.indexOf(id)).filter((z) => z >= 0)}
+                    size={72}
+                    center={s.unlockedCount >= 5}
+                  />
+                </div>
+                <div className="flex flex-col items-start gap-1">
+                  <span className="text-[11px] font-bold tracking-[0.16em] text-[#B07A33]">{relEyebrow(s.relation, t)}</span>
+                  <span className="font-display text-[26px] font-medium leading-[1.05]">{s.name}</span>
+                  <span className="text-[13px] text-[#8A8494]">
+                    <LtrText>{s.date}</LtrText>
+                  </span>
+                </div>
+                <div className="grid w-full grid-cols-5 gap-1">
+                  {order.map((id, i) => (
+                    <span
+                      key={id}
+                      className="h-1 rounded-full"
+                      style={{ background: i < s.unlockedCount ? SPHERE_TINT[id].a2 : "#E8E2EC" }}
+                    />
+                  ))}
+                </div>
+                <span className="text-xs text-[#6E6878]">
+                  {s.unlockedCount >= 5 ? t("cardDone") : t("cardProgress", { n: s.unlockedCount })}
+                </span>
+              </button>
+            );
+          })}
+          <button
+            type="button"
+            onClick={openCreate}
+            className="flex min-h-[300px] flex-col items-center justify-center gap-3 rounded-[36px] border border-dashed border-[rgba(43,26,51,.22)] bg-transparent p-6"
+          >
+            <span className="flex h-14 w-14 items-center justify-center rounded-full bg-[#F8EACB] text-2xl font-medium" style={{ color: V2_INK }}>
+              +
+            </span>
+            <span className="text-base font-bold" style={{ color: V2_INK }}>
+              {t("createStar")}
+            </span>
+            <span className="max-w-[200px] text-center text-[13px] leading-relaxed text-[#8A8494]">{t("createHint")}</span>
+          </button>
         </div>
-      </div>
+      </section>
 
       {toast ? (
-        <div
-          style={{
-            position: "fixed",
-            left: "50%",
-            bottom: 28,
-            transform: "translateX(-50%)",
-            zIndex: 60,
-            background: "#2B1A33",
-            color: "#FFFFFF",
-            padding: "14px 20px",
-            borderRadius: 14,
-            fontSize: 14,
-            fontWeight: 600,
-            boxShadow: "0 12px 30px rgba(42,33,29,.25)"
-          }}
-        >
+        <div className="fixed bottom-7 left-1/2 z-[60] -translate-x-1/2 rounded-[18px] bg-[#2B1A33] px-5 py-3.5 text-sm font-semibold text-white shadow-[0_12px_30px_rgba(43,26,51,.25)]">
           {toast}
         </div>
       ) : null}
@@ -627,36 +481,15 @@ export function V2Cabinet({
       {sheet ? (
         <div
           onClick={close}
-          style={{
-            position: "fixed",
-            inset: 0,
-            zIndex: 50,
-            background: "rgba(42,33,29,.38)",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            padding: 16
-          }}
+          className="fixed inset-0 z-[80] flex items-center justify-center bg-[rgba(43,26,51,.4)] p-4 backdrop-blur-[4px]"
         >
           <div
             onClick={(e) => e.stopPropagation()}
-            style={{
-              width: "100%",
-              maxWidth: 480,
-              maxHeight: "90vh",
-              overflowY: "auto",
-              background: "#FFFFFF",
-              borderRadius: 24,
-              padding: 32,
-              boxSizing: "border-box",
-              display: "flex",
-              flexDirection: "column",
-              gap: 20,
-              boxShadow: "0 30px 80px rgba(42,33,29,.25)"
-            }}
+            className="flex max-h-[90vh] w-full max-w-[500px] flex-col gap-[18px] overflow-y-auto rounded-[32px] bg-white p-8 shadow-[0_30px_80px_rgba(43,26,51,.25)]"
+            style={{ color: V2_INK }}
           >
-            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12 }}>
-              <span style={{ fontFamily: "Unbounded, sans-serif", fontSize: 36, lineHeight: 1, fontWeight: 500 }}>
+            <div className="flex items-center justify-between gap-3">
+              <span className="font-display text-[28px] font-medium leading-none">
                 {sheet === "create"
                   ? t("modalCreate")
                   : sheet === "edit"
@@ -671,17 +504,8 @@ export function V2Cabinet({
                 type="button"
                 aria-label={t("close")}
                 onClick={close}
-                style={{
-                  width: 44,
-                  height: 44,
-                  borderRadius: "50%",
-                  border: "1px solid rgba(80,60,45,.15)",
-                  background: "#F8F1E9",
-                  color: "#5E534C",
-                  fontSize: 20,
-                  cursor: "pointer",
-                  flexShrink: 0
-                }}
+                className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-[#F8F1E9] text-xl"
+                style={{ color: V2_INK }}
               >
                 ×
               </button>
@@ -689,8 +513,8 @@ export function V2Cabinet({
 
             {sheet === "create" || sheet === "edit" ? (
               <>
-                <label style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-                  <span style={{ fontSize: 13, fontWeight: 600 }}>{t("fieldName")}</span>
+                <label className="flex flex-col gap-2">
+                  <span className="text-[13px] font-bold">{t("fieldName")}</span>
                   <input
                     value={form.name}
                     onChange={(e) => {
@@ -698,11 +522,11 @@ export function V2Cabinet({
                       setErr("");
                     }}
                     placeholder={t("namePlaceholder")}
-                    style={inputStyle}
+                    className={inputClass}
                   />
                 </label>
-                <label style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-                  <span style={{ fontSize: 13, fontWeight: 600 }}>{t("fieldDate")}</span>
+                <label className="flex flex-col gap-2">
+                  <span className="text-[13px] font-bold">{t("fieldDate")}</span>
                   <input
                     value={form.date}
                     onChange={(e) => {
@@ -711,12 +535,12 @@ export function V2Cabinet({
                     }}
                     placeholder="ДД.ММ.ГГГГ"
                     inputMode="numeric"
-                    style={inputStyle}
+                    className={inputClass}
                   />
                 </label>
-                <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-                  <span style={{ fontSize: 13, fontWeight: 600 }}>{t("fieldRel")}</span>
-                  <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+                <div className="flex flex-col gap-2">
+                  <span className="text-[13px] font-bold">{t("fieldRel")}</span>
+                  <div className="flex flex-wrap gap-2">
                     {STAR_RELATIONS.map((r) => {
                       const on = form.rel === r;
                       return (
@@ -724,16 +548,11 @@ export function V2Cabinet({
                           key={r}
                           type="button"
                           onClick={() => setForm((f) => ({ ...f, rel: r }))}
+                          className="min-h-10 rounded-full px-3.5 py-2 text-sm font-bold"
                           style={{
-                            padding: "9px 14px",
-                            borderRadius: 999,
-                            fontSize: 14,
-                            fontWeight: 600,
-                            cursor: "pointer",
-                            minHeight: 40,
-                            background: on ? "#2B1A33" : "transparent",
-                            color: on ? "#FFFFFF" : "#5E534C",
-                            border: on ? "1px solid #2B1A33" : "1px solid rgba(43,26,51,.16)"
+                            background: on ? V2_INK : "transparent",
+                            color: on ? "#FFFFFF" : "#5B5566",
+                            border: on ? "none" : "1px solid rgba(43,26,51,.16)"
                           }}
                         >
                           {t(`rel_${r}`)}
@@ -743,49 +562,22 @@ export function V2Cabinet({
                   </div>
                 </div>
                 {sheet === "edit" ? (
-                  <div
-                    style={{
-                      display: "flex",
-                      gap: 10,
-                      alignItems: "flex-start",
-                      fontSize: 13,
-                      lineHeight: 1.5,
-                      color: "#5E534C",
-                      background: "#F8F1E9",
-                      borderRadius: 12,
-                      padding: "12px 14px"
-                    }}
-                  >
-                    <span style={{ width: 8, height: 8, marginTop: 5, borderRadius: "50%", border: "1.5px solid #C78A3E", flexShrink: 0 }} />
+                  <div className="flex gap-2.5 rounded-[18px] bg-[#F8F1E9] px-3.5 py-3 text-[13px] leading-relaxed text-[#5B5566]">
+                    <span className="mt-1.5 h-2 w-2 shrink-0 rounded-full" style={{ border: "1.5px solid #C78A3E" }} />
                     <span>{t("noteEdit")}</span>
                   </div>
                 ) : null}
-                {err ? <span style={{ fontSize: 14, fontWeight: 600, color: "#A4472F" }}>{err}</span> : null}
+                {err ? <span className="text-sm font-bold text-[#A4472F]">{err}</span> : null}
                 <button
                   type="button"
                   onClick={saveStar}
                   disabled={pending}
-                  style={{
-                    background: "#2B1A33",
-                    color: "#FFFFFF",
-                    border: "none",
-                    borderRadius: 14,
-                    padding: 16,
-                    fontSize: 15,
-                    fontWeight: 600,
-                    cursor: "pointer",
-                    minHeight: 50,
-                    opacity: pending ? 0.7 : 1
-                  }}
+                  className="min-h-[54px] rounded-full bg-[#2B1A33] py-4 text-[15px] font-bold text-white disabled:opacity-70"
                 >
                   {sheet === "edit" ? t("save") : t("build")}
                 </button>
                 {sheet === "edit" && cur?.canDelete ? (
-                  <button
-                    type="button"
-                    onClick={removeStar}
-                    style={{ background: "none", border: "none", color: "#A4472F", fontSize: 14, fontWeight: 600, cursor: "pointer", minHeight: 44 }}
-                  >
+                  <button type="button" onClick={removeStar} className="min-h-11 bg-transparent text-sm font-bold text-[#A4472F]">
                     {t("deleteStar")}
                   </button>
                 ) : null}
@@ -794,31 +586,20 @@ export function V2Cabinet({
 
             {sheet === "profile" ? (
               <>
-                <label style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-                  <span style={{ fontSize: 13, fontWeight: 600 }}>{t("fieldName")}</span>
-                  <input value={profileName} onChange={(e) => setProfileName(e.target.value)} style={inputStyle} />
+                <label className="flex flex-col gap-2">
+                  <span className="text-[13px] font-bold">{t("fieldName")}</span>
+                  <input value={profileName} onChange={(e) => setProfileName(e.target.value)} className={inputClass} />
                 </label>
-                <label style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-                  <span style={{ fontSize: 13, fontWeight: 600 }}>Email</span>
-                  <input value={user.email} readOnly style={{ ...inputStyle, opacity: 0.7 }} />
+                <label className="flex flex-col gap-2">
+                  <span className="text-[13px] font-bold">Email</span>
+                  <input value={user.email} readOnly className={`${inputClass} opacity-70`} />
                 </label>
-                <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-                  <span style={{ fontSize: 13, fontWeight: 600 }}>{t("savedCard")}</span>
-                  {cards.length === 0 ? <p style={{ margin: 0, fontSize: 14, color: "#8A8494" }}>{t("noSavedCard")}</p> : null}
+                <div className="flex flex-col gap-2">
+                  <span className="text-[13px] font-bold">{t("savedCard")}</span>
+                  {cards.length === 0 ? <p className="m-0 text-sm text-[#8A8494]">{t("noSavedCard")}</p> : null}
                   {cards.map((c) => (
-                    <div
-                      key={c.id}
-                      style={{
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "space-between",
-                        gap: 12,
-                        background: "#F8F1E9",
-                        borderRadius: 12,
-                        padding: "12px 14px"
-                      }}
-                    >
-                      <span style={{ fontSize: 15, fontWeight: 600 }}>{cardLabel(c.brand, c.last4)}</span>
+                    <div key={c.id} className="flex items-center justify-between gap-3 rounded-[18px] bg-[#F8F1E9] px-3.5 py-3">
+                      <span className="text-[15px] font-bold">{cardLabel(c.brand, c.last4)}</span>
                       <button
                         type="button"
                         onClick={() => {
@@ -830,80 +611,50 @@ export function V2Cabinet({
                             router.refresh();
                           });
                         }}
-                        style={{ background: "none", border: "none", color: "#A4472F", fontSize: 13, fontWeight: 600, cursor: "pointer" }}
+                        className="bg-transparent text-[13px] font-bold text-[#A4472F]"
                       >
                         {t("removeCard")}
                       </button>
                     </div>
                   ))}
                 </div>
-                {err ? <span style={{ fontSize: 14, fontWeight: 600, color: "#A4472F" }}>{err}</span> : null}
+                {err ? <span className="text-sm font-bold text-[#A4472F]">{err}</span> : null}
                 <button
                   type="button"
                   onClick={saveProfile}
                   disabled={pending}
-                  style={{
-                    background: "#2B1A33",
-                    color: "#FFFFFF",
-                    border: "none",
-                    borderRadius: 14,
-                    padding: 16,
-                    fontSize: 15,
-                    fontWeight: 600,
-                    cursor: "pointer",
-                    minHeight: 50
-                  }}
+                  className="min-h-[54px] rounded-full bg-[#2B1A33] py-4 text-[15px] font-bold text-white"
                 >
                   {t("save")}
                 </button>
-                <Link href="/v2/forgot-password" className="text-center text-sm font-semibold">
+                <Link href={v2Href("/forgot-password")} className="text-center text-sm font-semibold">
                   {t("changePassword")}
                 </Link>
                 <a href="/api/me/export" className="text-center text-sm font-semibold">
                   {t("exportData")}
                 </a>
-                <p style={{ fontSize: 13, color: "#8E8178", lineHeight: 1.5 }}>{t("deleteLead")}</p>
-                <input
-                  value={deleteConfirm}
-                  onChange={(e) => setDeleteConfirm(e.target.value)}
-                  placeholder={user.email}
-                  style={inputStyle}
-                />
-                <button
-                  type="button"
-                  onClick={wipeAccount}
-                  disabled={pending}
-                  style={{ background: "none", border: "none", color: "#A4472F", fontSize: 14, fontWeight: 600, cursor: "pointer", minHeight: 44 }}
-                >
+                <p className="text-[13px] leading-relaxed text-[#8A8494]">{t("deleteLead")}</p>
+                <input value={deleteConfirm} onChange={(e) => setDeleteConfirm(e.target.value)} placeholder={user.email} className={inputClass} />
+                <button type="button" onClick={wipeAccount} disabled={pending} className="min-h-11 bg-transparent text-sm font-bold text-[#A4472F]">
                   {t("deleteAccount")}
                 </button>
               </>
             ) : null}
 
             {sheet === "purchases" ? (
-              <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-                {purchases.length === 0 ? <p style={{ fontSize: 14, color: "#8E8178" }}>{t("noPurchases")}</p> : null}
+              <div className="flex flex-col gap-2.5">
+                {purchases.length === 0 ? <p className="text-sm text-[#8A8494]">{t("noPurchases")}</p> : null}
                 {purchases.map((p) => (
-                  <div
-                    key={p.id}
-                    style={{
-                      display: "flex",
-                      justifyContent: "space-between",
-                      gap: 12,
-                      padding: "14px 16px",
-                      borderRadius: 14,
-                      background: "#F8F1E9"
-                    }}
-                  >
+                  <div key={p.id} className="flex justify-between gap-3 rounded-[18px] bg-[#F8F1E9] px-4 py-3.5">
                     <div>
-                      <div style={{ fontWeight: 600 }}>{p.name}</div>
-                      <div style={{ fontSize: 12, color: "#8E8178" }}>
+                      <div className="font-bold">{p.name}</div>
+                      <div className="text-xs text-[#8A8494]">
                         <LtrText>{p.date}</LtrText>
                       </div>
                     </div>
-                    <div style={{ textAlign: "right", fontSize: 14 }}>
+                    <div className="text-right text-sm">
                       <div>{p.amount}</div>
-                      <div style={{ color: "#8E8178" }}>{p.status}</div>
+                      <div className="text-[#8A8494]">{p.status}</div>
                     </div>
                   </div>
                 ))}
@@ -912,20 +663,10 @@ export function V2Cabinet({
 
             {sheet === "support" ? (
               <>
-                <p style={{ fontSize: 15, lineHeight: 1.6, color: "#5E534C" }}>{t("supportBody")}</p>
+                <p className="text-[15px] leading-relaxed text-[#5B5566]">{t("supportBody")}</p>
                 <a
                   href="mailto:hello@soulstar.local"
-                  style={{
-                    background: "#2B1A33",
-                    color: "#FFFFFF",
-                    borderRadius: 14,
-                    padding: 16,
-                    fontSize: 15,
-                    fontWeight: 600,
-                    textAlign: "center",
-                    textDecoration: "none",
-                    minHeight: 50
-                  }}
+                  className="flex min-h-[54px] items-center justify-center rounded-full bg-[#2B1A33] py-4 text-center text-[15px] font-bold text-white no-underline"
                 >
                   {t("supportCta")}
                 </a>
@@ -938,64 +679,63 @@ export function V2Cabinet({
   );
 }
 
-function SphereRow({
-  num,
-  name,
-  st,
-  nextPrice,
-  t
-}: {
-  num: string;
-  name: string;
-  st: "o" | "x" | "l";
-  nextPrice: string;
-  t: ReturnType<typeof useTranslations>;
-}) {
-  const open = st === "o";
-  const next = st === "x";
-  const dot: React.CSSProperties = {
-    width: 28,
-    height: 28,
-    borderRadius: "50%",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    fontSize: 12,
-    fontWeight: 700,
-    flexShrink: 0,
-    boxSizing: "border-box",
-    ...(open
-      ? { background: "linear-gradient(160deg,#F3CF94,#D9A055)", color: "#3A2716" }
-      : next
-        ? { border: "1.5px dashed #E2AE63", color: "#8E5F2A" }
-        : { border: "1px solid rgba(80,60,45,.15)", color: "#A89A8F" })
+function SphereChip({ id, name, st }: { id: SphereId | null; name: string; st: "o" | "x" | "l" }) {
+  const tint = id ? SPHERE_TINT[id] : V2_NEU;
+  const v: Record<"o" | "x" | "l", CSSProperties> = {
+    o: { background: tint.t, color: tint.ink },
+    x: { background: "#FFFFFF", color: tint.ink, outline: "1.5px dashed " + tint.acc, outlineOffset: -2 },
+    l: id
+      ? { background: "transparent", color: "#8A8494" }
+      : { background: "#FFFFFF", color: tint.ink, outline: "1.5px dashed " + tint.acc, outlineOffset: -2 }
   };
-  const tag: React.CSSProperties = {
-    fontSize: 12,
-    fontWeight: 600,
-    padding: "5px 10px",
-    borderRadius: 999,
-    whiteSpace: "nowrap",
-    ...(open
-      ? { background: "#E3EBDD", color: "#4B6B43" }
-      : next
-        ? { background: "#FBF1E2", color: "#8E5F2A", border: "1px solid #E2AE63" }
-        : { color: "#A89A8F" })
-  };
-  const tagText = open ? `✓ ${t("openedBadge")}` : next ? t("nextPrice", { price: nextPrice }) : t("locked");
   return (
-    <div
-      style={{
-        display: "flex",
-        alignItems: "center",
-        gap: 12,
-        padding: "11px 0",
-        borderBottom: "1px solid rgba(80,60,45,.08)"
-      }}
-    >
-      <span style={dot}>{num}</span>
-      <span style={{ fontSize: 15, fontWeight: 600, flex: 1 }}>{name}</span>
-      <span style={tag}>{tagText}</span>
+    <span className="flex shrink-0 items-center gap-2 whitespace-nowrap rounded-full px-3 py-2 text-sm font-bold" style={v[st]}>
+      <span className="h-2 w-2 shrink-0 rounded-full" style={{ background: st === "l" ? "#D9D4DE" : tint.a2 }} />
+      {name}
+      {st !== "o" ? <V2LockIcon /> : null}
+    </span>
+  );
+}
+
+function CabinetPreview({
+  svgId,
+  star,
+  unlocked,
+  nextSphere,
+  labels,
+  missionLabel
+}: {
+  svgId: string;
+  star: StarResult | null;
+  unlocked: SphereId[];
+  nextSphere: SphereId | null;
+  labels: Record<SphereId, string>;
+  missionLabel: [string, string];
+}) {
+  if (!star) return null;
+  const ignore = () => undefined;
+  return (
+    <div className="star-ltr pointer-events-none relative w-full max-w-[600px]" dir="ltr">
+      <V2StarSvg
+        svgId={svgId}
+        star={star}
+        mobile
+        activeSphere={unlocked[unlocked.length - 1] ?? null}
+        unlocked={unlocked}
+        nextSphere={nextSphere}
+        hoverPt={null}
+        hoverZone={null}
+        hoverTip={null}
+        selectedPt={null}
+        onSphere={ignore}
+        onPoint={ignore}
+        onMission={ignore}
+        onHoverPt={ignore}
+        onHoverZone={ignore}
+        onHoverTip={ignore}
+        labels={labels}
+        missionLabel={missionLabel}
+      />
     </div>
   );
 }

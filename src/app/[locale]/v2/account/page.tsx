@@ -107,6 +107,8 @@ export default async function AccountPage({
       relation,
       date: formatDob(p.dateOfBirth, locale),
       unlockedCount: order.filter((s) => unlocked.has(s)).length,
+      unlocked: order.filter((s) => unlocked.has(s)),
+      star,
       values: {
         personality: star?.core.personality.value ?? 0,
         spirituality: star?.core.spirituality.value ?? 0,

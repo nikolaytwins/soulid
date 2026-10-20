@@ -15,6 +15,7 @@ export type HoverTip =
 type Props = {
   star: StarResult;
   mobile?: boolean;
+  svgId?: string;
   activeSphere: SphereId | null;
   missionActive?: boolean;
   unlocked: SphereId[];
@@ -59,7 +60,7 @@ export function V2StarSvg(props: Props) {
   const c = V2_STAR_THEME;
   const { O, I } = starGeometry();
   const mobile = !!props.mobile;
-  const id = mobile ? "stm" : "std";
+  const id = props.svgId ?? (mobile ? "stm" : "std");
   const blur = (props.lockStyle ?? "redacted") === "blur";
   const fs = mobile ? 1.22 : 1;
   const NP = { style: { pointerEvents: "none" as const } };

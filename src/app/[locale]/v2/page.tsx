@@ -7,8 +7,8 @@ export default async function V2LandingPage() {
   const t = await getTranslations();
   return (
     <main className="relative mx-auto max-w-[1360px] overflow-x-clip px-[clamp(16px,3vw,40px)] pb-24">
-      <div className="relative flex flex-row-reverse flex-wrap items-stretch gap-4 pt-2">
-        <div className="relative min-h-[420px] min-w-0 flex-[1.2_1_480px] overflow-hidden rounded-[36px] bg-white p-[clamp(24px,4vw,48px)]">
+      <div className="relative flex flex-col items-stretch gap-4 pt-1 lg:flex-row-reverse lg:pt-2">
+        <div className="relative hidden min-h-[420px] min-w-0 overflow-hidden rounded-[36px] bg-white p-[clamp(24px,4vw,48px)] lg:block lg:flex-[1.2_1_480px]">
           <div
             className="pointer-events-none absolute inset-0"
             style={{
@@ -33,7 +33,7 @@ export default async function V2LandingPage() {
             <p className="max-w-sm text-center text-sm leading-relaxed text-[#6E6878]">{t("landing.hint")}</p>
           </div>
         </div>
-        <div className="flex min-w-0 flex-[1_1_380px] flex-col justify-center gap-6 py-4">
+        <div className="flex min-w-0 flex-col justify-center gap-5 py-1 lg:flex-[1_1_380px] lg:gap-6 lg:py-4">
           <span className="text-xs font-bold tracking-[0.16em] text-[#8A8494]">{t("landing.eyebrow")}</span>
           <h1 className="text-balance font-display text-[clamp(32px,4vw,52px)] font-medium leading-[1.08]">{t("landing.title")}</h1>
           <p className="text-pretty text-[16px] leading-relaxed text-[#5B5566] md:text-[18px]">{t("landing.lead")}</p>

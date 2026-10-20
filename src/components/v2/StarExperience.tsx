@@ -19,7 +19,7 @@ import { trackPixel } from "@/components/analytics/MetaPixel";
 import { trackClient } from "@/components/analytics/ids";
 import { signIn } from "next-auth/react";
 import { LtrText } from "@/components/ui/LtrText";
-import { SPHERE_TINT, V2_GOLD, V2_INK, v2Href } from "@/lib/v2";
+import { SPHERE_TINT, V2_GOLD, V2_INK, V2_NEU, v2Href } from "@/lib/v2";
 import { PayHint } from "@/components/pay/PayHint";
 import { V2PersonalBlocks } from "@/components/v2/PersonalBlocks";
 
@@ -265,6 +265,12 @@ export function V2StarExperience({
   const progressText = t("starPage.progressCount", { n: nOpen, total: 5 });
   const missionWords = t("starPage.soulMission").split(" ");
   const missionLabel: [string, string] = [missionWords[0] ?? "Миссия", missionWords.slice(1).join(" ") || "души"];
+  const missionChip: "a" | "o" | "l" = panel?.type === "mission" && missionOpen ? "a" : missionOpen ? "o" : "l";
+  const missionChipStyle: Record<"a" | "o" | "l", React.CSSProperties> = {
+    a: { background: V2_NEU.a2, color: "#FFFFFF" },
+    o: { background: V2_NEU.t, color: V2_NEU.ink },
+    l: { background: "#FFFFFF", color: V2_NEU.ink, outline: "1.5px dashed " + V2_NEU.acc, outlineOffset: -2 }
+  };
   const nextIdx = model.order.indexOf(active) + 1;
   const nextId = nextIdx >= 0 ? model.order[nextIdx] : undefined;
   const nextOpen = Boolean(nextId && unlocked.has(nextId));
@@ -349,16 +355,16 @@ export function V2StarExperience({
     border: "none"
   };
 
-  const seq = (target: SphereId | null) =>
-    model.order.map((id, i) => {
+  const seq = (target: SphereId | null) => {
+    const base: React.CSSProperties = {
+      fontSize: 12,
+      fontWeight: 700,
+      padding: "6px 11px",
+      borderRadius: 999,
+      whiteSpace: "nowrap"
+    };
+    const spheres = model.order.map((id, i) => {
       const tint = SPHERE_TINT[id];
-      const base: React.CSSProperties = {
-        fontSize: 12,
-        fontWeight: 700,
-        padding: "6px 11px",
-        borderRadius: 999,
-        whiteSpace: "nowrap"
-      };
       let st: React.CSSProperties;
       if (unlocked.has(id)) st = { background: tint.t, color: tint.ink, border: "1px solid " + tint.t };
       else if (id === model.nextSphere) st = { background: "#FFFFFF", color: tint.ink, border: "1.5px dashed " + tint.acc };
@@ -371,6 +377,19 @@ export function V2StarExperience({
         </span>
       );
     });
+    const missionSt: React.CSSProperties = missionOpen
+      ? { background: V2_NEU.t, color: V2_NEU.ink, border: "1px solid " + V2_NEU.t }
+      : target === null && panel?.type === "mission"
+        ? { background: "transparent", color: V2_INK, border: "1px dashed #8A8494" }
+        : { background: "transparent", color: "#AFA8B8", border: "1px solid rgba(43,26,51,.10)" };
+    return [
+      ...spheres,
+      <span key="soulMission" style={{ ...base, ...missionSt }}>
+        {missionOpen ? "✓ " : "6. "}
+        {t("starPage.soulMission")}
+      </span>
+    ];
+  };
 
   const starBlock = (
     <div className="star-ltr relative w-full max-w-[600px]" dir="ltr">
@@ -554,6 +573,19 @@ export function V2StarExperience({
                 </button>
               );
             })}
+            <button
+              type="button"
+              onClick={onMission}
+              className="flex shrink-0 items-center gap-2 whitespace-nowrap rounded-full px-4 py-2.5 text-sm font-bold"
+              style={{ minHeight: 44, border: "none", cursor: "pointer", ...missionChipStyle[missionChip] }}
+            >
+              <span
+                className="h-2 w-2 shrink-0 rounded-full"
+                style={{ background: missionChip === "a" ? "#FFFFFF" : V2_NEU.a2 }}
+              />
+              {t("starPage.soulMission")}
+              {!missionOpen ? <V2LockIcon /> : null}
+            </button>
           </div>
 
           <div className="flex flex-wrap items-start gap-4">
@@ -1051,9 +1083,14 @@ export function V2StarExperience({
                       }}
                     />
                     <span className="relative flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-[rgba(233,194,124,.18)]">
-                      <V2MiniStar zones={[]} size={28} center />
+                      <V2MiniStar zones={[]} size={28} center locked={!missionOpen} />
                     </span>
-                    <span className="relative font-display text-[28px] font-medium leading-none">{t("starPage.soulMission")}</span>
+                    <div className="relative flex flex-col items-start gap-2">
+                      <span className="font-display text-[28px] font-medium leading-none">{t("starPage.soulMission")}</span>
+                      {!missionOpen ? (
+                        <span className="rounded-full bg-white px-2.5 py-1 text-xs font-bold text-[#6E6878]">{t("offer.blocked")}</span>
+                      ) : null}
+                    </div>
                   </div>
                   {missionOpen && missionReading?.content?.type === "plain" ? (
                     <>
@@ -1067,7 +1104,9 @@ export function V2StarExperience({
                       ))}
                     </>
                   ) : (
-                    <div className="text-base leading-[1.7] text-[#5B5566]">{t("starPage.soulMissionLead")}</div>
+                    <div className="text-base leading-[1.7] text-[#5B5566]">
+                      {missionOpen ? t("starPage.soulMissionLead") : t("offer.missionLocked")}
+                    </div>
                   )}
                   <div className="flex flex-wrap gap-1.5">{seq(null)}</div>
                 </>
