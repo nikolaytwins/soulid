@@ -444,8 +444,8 @@ export function V2StarExperience({
 
   return (
     <div className="v2-root min-h-screen overflow-x-clip" style={{ background: "#F8F1E9", color: V2_INK, fontFamily: "Manrope, sans-serif" }}>
-      <div className="mx-auto flex max-w-[1360px] items-center gap-3 px-[clamp(16px,3vw,40px)] py-5">
-        <Link href={v2Href("/")} className="flex flex-1 items-center gap-2.5 no-underline">
+      <div className="mx-auto flex max-w-[1360px] items-center gap-2 px-[clamp(16px,3vw,40px)] py-5 sm:gap-3">
+        <Link href={v2Href("/")} className="flex min-w-0 flex-1 items-center no-underline">
           <V2Logo />
         </Link>
         <Link
