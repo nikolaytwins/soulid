@@ -7,11 +7,22 @@ import { LtrText } from "@/components/ui/LtrText";
 import { NewStarDialog } from "./NewStarDialog";
 import type { NavStar } from "@/lib/domain/nav-stars";
 import { isV2Path, v2Href } from "@/lib/v2";
+import { isV3Path, v3Href } from "@/lib/v3";
 
 export function StarsMenu({ stars }: { stars: NavStar[] }) {
   const t = useTranslations("nav");
   const pathname = usePathname();
-  const prefix = isV2Path(pathname);
+  const v2 = isV2Path(pathname);
+  const v3 = isV3Path(pathname);
+  function starHref(id: string) {
+    if (v3) return v3Href(`/star/${id}`);
+    if (v2) return v2Href(`/star/${id}`);
+    return `/star/${id}`;
+  }
+  function accountHref() {
+    if (v2) return v2Href("/account");
+    return "/account";
+  }
   const [open, setOpen] = useState(false);
   const [create, setCreate] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
@@ -46,8 +57,12 @@ export function StarsMenu({ stars }: { stars: NavStar[] }) {
           {stars.length ? (
             <div className="mb-1.5 max-h-[240px] overflow-y-auto">
               {stars.map((s) => {
-                const href = prefix ? v2Href(`/star/${s.id}`) : `/star/${s.id}`;
-                const on = pathname === href || pathname === `/star/${s.id}` || pathname === `/v2/star/${s.id}`;
+                const href = starHref(s.id);
+                const on =
+                  pathname === href ||
+                  pathname === `/star/${s.id}` ||
+                  pathname === `/v2/star/${s.id}` ||
+                  pathname === `/v3/star/${s.id}`;
                 return (
                   <Link
                     key={s.id}
@@ -81,7 +96,7 @@ export function StarsMenu({ stars }: { stars: NavStar[] }) {
             + {t("newStar")}
           </button>
           <Link
-            href={prefix ? v2Href("/account") : "/account"}
+            href={accountHref()}
             role="menuitem"
             onClick={() => setOpen(false)}
             className="flex w-full items-center rounded-[10px] px-3 py-2.5 text-sm text-muted no-underline hover:bg-sand"

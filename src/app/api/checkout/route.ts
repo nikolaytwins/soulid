@@ -21,7 +21,7 @@ const schema = z.object({
   profileId: z.string().min(1),
   sku: z.string().min(1),
   returnTo: z.enum(["star", "account"]).optional(),
-  skin: z.enum(["v2"]).optional(),
+  skin: z.enum(["v2", "v3"]).optional(),
   useSavedMethod: z.boolean().optional(),
   recChannel: z.enum(["email", "tg"]).optional(),
   recContact: z.string().max(120).optional()
@@ -78,7 +78,7 @@ export async function POST(req: Request) {
     });
     if (already) {
       const originPaid = process.env.APP_URL ?? new URL(req.url).origin;
-      const skinPaid = parsed.data.skin === "v2" ? "/v2" : "";
+      const skinPaid = parsed.data.skin ? `/${parsed.data.skin}` : "";
       return NextResponse.json({
         url: `${originPaid}/${session.user.locale ?? "ru"}${skinPaid}/star/${profile.id}?paid=1&rec=1`,
         paid: true
@@ -91,7 +91,7 @@ export async function POST(req: Request) {
   const name = productName(product, locale)?.name ?? product.sku;
   const origin = process.env.APP_URL ?? new URL(req.url).origin;
   const toAccount = parsed.data.returnTo === "account";
-  const skin = parsed.data.skin === "v2" ? "/v2" : "";
+  const skin = parsed.data.skin ? `/${parsed.data.skin}` : "";
   const recQs = product.kind === "addon" ? "&rec=1" : "";
   const returnUrl = toAccount
     ? `${origin}/${locale}${skin}/account?paid=1&star=${profile.id}${recQs}`

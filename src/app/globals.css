@@ -47,3 +47,14 @@ button {
 .v2-root a:hover {
   color: #8a5a24;
 }
+
+.v3-root {
+  background: #f6f3f3;
+  color: #1a1a1a;
+}
+.v3-root a {
+  color: #1a1a1a;
+}
+.v3-root a:hover {
+  color: #e12020;
+}

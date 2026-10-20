@@ -4,6 +4,7 @@ import { usePathname, useRouter } from "@/i18n/routing";
 import { useTranslations } from "next-intl";
 import { useEffect, useMemo, useState } from "react";
 import { isV2Path, v2Href } from "@/lib/v2";
+import { isV3Path, v3Href } from "@/lib/v3";
 
 function daysInMonth(year: number, month: number) {
   return new Date(year, month, 0).getDate();
@@ -53,14 +54,21 @@ export function DobForm({
       setError(json.error || t("invalid"));
       return;
     }
-    const href = isV2Path(pathname) ? v2Href(`/star/${json.id}`) : `/star/${json.id}`;
+    const href = isV3Path(pathname)
+      ? v3Href(`/star/${json.id}`)
+      : isV2Path(pathname)
+        ? v2Href(`/star/${json.id}`)
+        : `/star/${json.id}`;
     router.push(href);
   }
 
   const v2 = isV2Path(pathname);
-  const selectCls = v2
-    ? "rounded-2xl border border-[rgba(43,26,51,0.10)] bg-[#F8F1E9] px-3 py-3 text-sm font-semibold text-[#2B1A33] min-h-12"
-    : "rounded-xl border border-[rgba(80,60,45,0.12)] bg-card px-3 py-3 text-sm font-semibold text-ink min-h-12";
+  const v3 = isV3Path(pathname);
+  const selectCls = v3
+    ? "border border-[rgba(26,26,26,0.15)] bg-[rgba(255,255,255,.55)] px-3 py-3 text-sm font-semibold text-[#1A1A1A] min-h-12"
+    : v2
+      ? "rounded-2xl border border-[rgba(43,26,51,0.10)] bg-[#F8F1E9] px-3 py-3 text-sm font-semibold text-[#2B1A33] min-h-12"
+      : "rounded-xl border border-[rgba(80,60,45,0.12)] bg-card px-3 py-3 text-sm font-semibold text-ink min-h-12";
 
   return (
     <form onSubmit={onSubmit} className={compact ? "flex flex-col gap-3" : "flex w-full max-w-md flex-col gap-4"}>
@@ -101,9 +109,11 @@ export function DobForm({
         type="submit"
         disabled={pending}
         className={
-          v2
-            ? "min-h-12 rounded-full bg-[#2B1A33] px-4 py-4 text-[15px] font-bold text-white disabled:opacity-60"
-            : "min-h-12 rounded-[14px] bg-ink px-4 py-4 text-[15px] font-semibold text-card disabled:opacity-60"
+          v3
+            ? "min-h-12 bg-[#E12020] px-4 py-4 text-[15px] font-semibold uppercase tracking-[0.1em] text-white disabled:opacity-60"
+            : v2
+              ? "min-h-12 rounded-full bg-[#2B1A33] px-4 py-4 text-[15px] font-bold text-white disabled:opacity-60"
+              : "min-h-12 rounded-[14px] bg-ink px-4 py-4 text-[15px] font-semibold text-card disabled:opacity-60"
         }
       >
         {pending ? "…" : t("cta")}
