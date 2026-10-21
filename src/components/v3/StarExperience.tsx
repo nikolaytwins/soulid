@@ -12,7 +12,7 @@ import { SphereArt } from "./SphereArt";
 import { V3Logo } from "./Logo";
 import { V3UserCluster } from "./UserCluster";
 import { CornerFrame } from "./CornerFrame";
-import { sphereInnerDots, starGeometry, starViewBox, type Pt } from "@/components/star/geometry";
+import { sphereInnerDots, starGeometry, type Pt } from "@/components/star/geometry";
 import type { ArcReading, StarPageModel } from "@/lib/domain/star-page";
 import type { PatternReading } from "@/lib/domain/patterns";
 import type { NavStar } from "@/lib/domain/nav-stars";
@@ -357,14 +357,15 @@ export function V3StarExperience({
       value = missionOpen ? t("points.arcana", { arcana, value: model.star.core.soulMission.value }) : t("points.hidden");
       hint = missionOpen ? t("points.clickRead", { name: t("points.soul") }) : t("offer.missionLocked");
     }
-    const vb = starViewBox(isMob);
+    // Matches v3 StarSvg viewBox="-155 -152 310 276"
+    const vb = { x: -155, y: -152, w: 310, h: 276 };
     return (
       <div
-        className="pointer-events-none absolute z-[3] flex w-[220px] flex-col gap-1 px-3.5 py-3 shadow-[0_12px_30px_rgba(26,26,26,.12)]"
+        className="pointer-events-none absolute z-[3] flex w-[230px] flex-col gap-1 px-4 py-3 shadow-[0_12px_30px_rgba(90,60,30,.15)]"
         style={{
-          background: "rgba(255,255,255,.92)",
+          background: "rgba(255,255,255,.96)",
           color: V3_INK,
-          border: "1px solid rgba(185,147,83,.35)",
+          borderTop: `1px solid ${V3_RED}`,
           left: `${((at[0] - vb.x) / vb.w) * 100}%`,
           top: `${((at[1] - vb.y) / vb.h) * 100}%`,
           transform: "translate(-50%, calc(-100% - 18px))"
@@ -377,10 +378,11 @@ export function V3StarExperience({
     );
   }
 
+  const chipD = isMob ? 44 : 48;
   const chipBase: React.CSSProperties = {
-    width: isMob ? 40 : 44,
-    height: isMob ? 40 : 44,
-    borderRadius: 0,
+    width: chipD,
+    height: chipD,
+    borderRadius: "50%",
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
@@ -388,7 +390,9 @@ export function V3StarExperience({
     fontWeight: 400,
     boxSizing: "border-box",
     padding: 0,
-    fontSize: 18,
+    fontSize: 22,
+    lineHeight: 1,
+    cursor: "default",
     border: "none"
   };
 
@@ -433,6 +437,7 @@ export function V3StarExperience({
       <V2StarSvg
         star={model.star}
         mobile={isMob}
+        lockStyle="blur"
         activeSphere={viewingMission ? null : active}
         missionActive={viewingMission}
         unlocked={model.unlocked}
@@ -486,8 +491,9 @@ export function V3StarExperience({
             <div className="relative flex flex-wrap items-start justify-end gap-4 text-xs tracking-[0.06em]" style={{ color: V3_MUTED }}>
               <div className="flex flex-wrap gap-[18px]">
                 <LegendDot fill="rgba(185,147,83,.35)" label={t("v2.openLegend")} />
-                <LegendDot solidBorder label={t("v2.nextLegend")} />
-                <LegendDot dashed muted label={t("v2.lockedLegend")} />
+                <LegendDot solidBorder label={t("v2.readingLegend")} />
+                <LegendDot dashed label={t("v2.nextLegend")} />
+                <LegendDot outlineMuted label={t("v2.lockedLegend")} />
               </div>
             </div>
             <div className="relative flex justify-center">
@@ -498,7 +504,12 @@ export function V3StarExperience({
           <div className="flex min-w-0 flex-[1_1_380px] flex-col gap-4">
             <div className="flex flex-col gap-2.5 px-1 pt-2">
               <span className="text-xs uppercase tracking-[0.2em]" style={{ color: V3_RED }}>{t("starPage.eyebrow")}</span>
-              <span className="text-balance text-[clamp(34px,4vw,54px)] uppercase leading-[1.02] tracking-[0.02em]" style={{ fontFamily: V3_FONT_DISPLAY }}>{t("starPage.title")}</span>
+              <span className="text-balance text-[clamp(34px,4vw,54px)] uppercase leading-[1.02] tracking-[0.02em]" style={{ fontFamily: V3_FONT_DISPLAY }}>
+                {t("v3.starTitle")}
+              </span>
+              <span className="max-w-[440px] text-[15px] leading-[1.7]" style={{ color: "#3A3532" }}>
+                {t("v3.starLead")}
+              </span>
               <Link href={v3Href("/")} className="flex items-center gap-2 text-sm no-underline md:hidden" style={{ color: V3_INK }}>
                 <span className="text-[#6B6461]">{t("starPage.dob")}</span>
                 <b>
@@ -521,19 +532,32 @@ export function V3StarExperience({
               </div>
               <div className="relative flex flex-col gap-3">
                 <span className="text-[clamp(36px,3.6vw,50px)] uppercase leading-none tracking-[0.03em]" style={{ fontFamily: V3_FONT_DISPLAY }}>{act.name}</span>
-                <span className="text-[15px] leading-relaxed text-pretty opacity-85">{act.purpose}</span>
+                <span className="text-[15px] leading-[1.7] text-pretty" style={{ color: "#3A3532" }}>{act.purpose}</span>
               </div>
               {activeOpen ? (
-                <div className="relative flex flex-col gap-2.5">
-                  <span className="text-[13px] font-bold">{t("starPage.yourNumbers")}</span>
+                <div className="relative flex flex-col gap-3">
+                  <span className="text-xs uppercase tracking-[0.14em]" style={{ color: V3_MUTED }}>
+                    {t("starPage.yourNumbers")}
+                  </span>
                   <div className="flex flex-wrap gap-2">
                     {arcs.map((ar, i) => {
                       const style: React.CSSProperties =
                         i === 0
-                          ? { ...chipBase, background: V3_RED, color: "#FFFFFF" }
+                          ? { ...chipBase, background: V3_RED, color: "#FFFFFF", fontSize: 24 }
                           : i < 3
-                            ? { ...chipBase, background: V3_GOLD, color: V3_INK, cursor: "pointer" }
-                            : { ...chipBase, background: "rgba(185,147,83,.22)", color: V3_INK };
+                            ? {
+                                ...chipBase,
+                                background: "rgba(255,255,255,.7)",
+                                color: V3_RED,
+                                border: `1.5px solid ${V3_GOLD}`,
+                                cursor: "pointer"
+                              }
+                            : {
+                                ...chipBase,
+                                background: "transparent",
+                                color: V3_INK,
+                                border: "1px solid rgba(185,147,83,.55)"
+                              };
                       return (
                         <button
                           key={ar.id}
@@ -666,10 +690,14 @@ export function V3StarExperience({
                       style={{ color: V3_INK, background: "none", border: "none", cursor: "pointer" }}
                     >
                       <span
-                        className="flex h-8 w-8 shrink-0 items-center justify-center rounded-none text-[13px] font-extrabold"
+                        className="flex h-[34px] w-[34px] shrink-0 items-center justify-center text-[18px]"
                         style={{
-                          background: i === 0 ? col.a2 : i < 3 ? V3_GOLD : col.t,
-                          color: i === 0 ? "#FFFFFF" : V3_INK
+                          borderRadius: "50%",
+                          fontFamily: V3_FONT_DISPLAY,
+                          color: i === 0 ? "#FFFFFF" : V3_RED,
+                          background: i === 0 ? V3_RED : "transparent",
+                          border: i === 0 ? "none" : `1px solid ${V3_GOLD}`,
+                          boxSizing: "border-box"
                         }}
                       >
                         {ar.value}
@@ -745,12 +773,15 @@ export function V3StarExperience({
                         <span
                           className="flex shrink-0 items-center justify-center"
                           style={{
-                            width: i === 0 ? 76 : 60,
-                            height: i === 0 ? 76 : 60,
-                            fontSize: i === 0 ? 30 : 22,
-                            background: i === 0 ? V3_RED : i < 3 ? V3_GOLD : "rgba(185,147,83,.22)",
-                            color: i === 0 ? "#FFFFFF" : V3_INK,
-                            fontFamily: V3_FONT_DISPLAY
+                            width: i === 0 ? 84 : 66,
+                            height: i === 0 ? 84 : 66,
+                            borderRadius: "50%",
+                            fontSize: i === 0 ? 44 : 32,
+                            color: V3_RED,
+                            border: `${i === 0 ? 1.5 : 1}px solid ${V3_GOLD}`,
+                            background: "rgba(255,255,255,.6)",
+                            fontFamily: V3_FONT_DISPLAY,
+                            lineHeight: 1
                           }}
                         >
                           {ar.value}
@@ -1200,22 +1231,27 @@ function LegendDot({
   fill,
   dashed,
   solidBorder,
-  muted,
+  outlineMuted,
   label
 }: {
   fill?: string;
   dashed?: boolean;
   solidBorder?: boolean;
-  muted?: boolean;
+  outlineMuted?: boolean;
   label: string;
 }) {
   const swatch: React.CSSProperties = dashed
     ? { border: `1px dashed ${V3_RED}`, boxSizing: "border-box", background: "transparent" }
     : solidBorder
       ? { border: `1.5px solid ${V3_RED}`, boxSizing: "border-box", background: "transparent" }
-      : { background: fill };
+      : outlineMuted
+        ? { border: "1px solid rgba(185,147,83,.5)", boxSizing: "border-box", background: "transparent" }
+        : { background: fill };
   return (
-    <span className="flex items-center gap-2 text-xs tracking-[0.06em]" style={{ color: muted ? "#8F8885" : V3_MUTED }}>
+    <span
+      className="flex items-center gap-2 text-xs tracking-[0.06em]"
+      style={{ color: outlineMuted ? "#8F8885" : V3_MUTED }}
+    >
       <span className="h-2.5 w-3.5 shrink-0" style={swatch} />
       {label}
     </span>

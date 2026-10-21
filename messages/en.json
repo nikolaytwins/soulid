@@ -495,6 +495,7 @@
     "classic": "Current design",
     "alt": "New design",
     "openLegend": "Open",
+    "readingLegend": "Reading",
     "nextLegend": "Next",
     "lockedLegend": "Locked",
     "readDecode": "Read the decoding",
@@ -554,6 +555,10 @@
       "r3Meta": "3 spheres",
       "r3Text": "A third review. You can add as many cards as you need — the grid rearranges itself."
     }
+  },
+  "v3": {
+    "starTitle": "Building the five-pointed star",
+    "starLead": "Five linked elements: personality, spirituality, realization, relationships, and health. At the centre — the higher soul mission."
   },
   "notFound": {
     "title": "Page not found",

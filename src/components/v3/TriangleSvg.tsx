@@ -2,7 +2,12 @@ import { createElement as h } from "react";
 import { diamond, pts as joinPts, starGeometry, type Pt } from "@/components/star/geometry";
 import type { SphereId, StarResult } from "@/lib/engine";
 import { ZONE_TO_SPHERE } from "@/lib/engine";
-import { SPHERE_TINT, V3_GOLD, V3_STAR_THEME } from "@/lib/v3";
+import { V3_GOLD, V3_INK, V3_RED } from "@/lib/v3";
+
+const G = V3_GOLD;
+const R = V3_RED;
+const INK = V3_INK;
+const F = "Forum, serif";
 
 export function V2TriangleSvg({
   width,
@@ -15,17 +20,14 @@ export function V2TriangleSvg({
   star: StarResult;
   onPoint: (zoneIndex: number) => void;
 }) {
-  const c = V3_STAR_THEME;
-  const col = SPHERE_TINT[sphere];
   const z = ZONE_TO_SPHERE.indexOf(sphere);
-  const id = "v2tr" + width + sphere;
   const jl = (z + 4) % 5;
   const jr = z;
   const A: Pt = [0, 0];
   const Cl: Pt = [-45, 138];
   const Cr: Pt = [45, 138];
-  const Sl: Pt = [-31.5, 96.6];
-  const Sr: Pt = [31.5, 96.6];
+  const SpL: Pt = [-31.5, 96.6];
+  const SpR: Pt = [31.5, 96.6];
   const M: Pt = [0, 138];
   const pts = [A, Cl, Cr].map((p) => p.join(",")).join(" ");
   const NP = { style: { pointerEvents: "none" as const } };
@@ -41,7 +43,7 @@ export function V2TriangleSvg({
   ];
 
   const L = (p: Pt, q: Pt, kk: string) =>
-    h("line", { key: kk, x1: p[0], y1: p[1], x2: q[0], y2: q[1], stroke: col.ink, strokeWidth: 0.9, opacity: 0.45, ...NP });
+    h("line", { key: kk, x1: p[0], y1: p[1], x2: q[0], y2: q[1], stroke: G, strokeWidth: 0.9, ...NP });
   const T = (x: number, y: number, v: number | string, fill: string, sz: number, kk: string) =>
     h(
       "text",
@@ -53,77 +55,61 @@ export function V2TriangleSvg({
         dominantBaseline: "central",
         fontSize: sz,
         fill,
-        fontFamily: "'Noto Sans', system-ui, sans-serif",
-        fontWeight: 800,
+        fontFamily: F,
         ...NP
       },
       v
     );
-  const D = (p: Pt, kk: string) => h("circle", { key: kk, cx: p[0], cy: p[1], r: 2.6, fill: col.ink, ...NP });
-  const corner = (p: Pt, j: number, kk: string) => {
-    const r = 5.5;
-    const o = { fill: "#FFFFFF", stroke: c.ink, strokeWidth: 1.6, ...NP };
-    return [
-      j === 2
-        ? h("polygon", { key: kk, ...o, points: diamond(p[0], p[1], r * 1.25) })
-        : h("circle", { key: kk, ...o, cx: p[0], cy: p[1], r }),
-      h("circle", {
-        key: kk + "h",
-        cx: p[0],
-        cy: p[1],
-        r: 16,
-        fill: "transparent",
-        style: { cursor: "pointer" },
-        onClick: () => onPoint(j)
-      })
-    ];
-  };
+  const D = (p: Pt, kk: string, r = 2.4) => h("circle", { key: kk, cx: p[0], cy: p[1], r, fill: G, ...NP });
+  const corner = (p: Pt, j: number, kk: string) => [
+    j === 2
+      ? h("polygon", { key: kk, points: diamond(p[0], p[1], 5), fill: G, ...NP })
+      : D(p, kk, 3.6),
+    h("circle", {
+      key: kk + "h",
+      cx: p[0],
+      cy: p[1],
+      r: 16,
+      fill: "transparent",
+      style: { cursor: "pointer" },
+      onClick: () => onPoint(j)
+    })
+  ];
 
   return h(
     "svg",
-    { viewBox: "-72 -24 144 186", style: { width, display: "block", overflow: "visible", flexShrink: 0 }, dir: "ltr" },
-    h(
-      "defs",
-      { key: "d" },
-      h(
-        "linearGradient",
-        { id: id + "g", x1: 0, y1: 0, x2: 0, y2: 1 },
-        h("stop", { offset: 0, stopColor: col.a1 }),
-        h("stop", { offset: 1, stopColor: col.a2 })
-      ),
-      h(
-        "radialGradient",
-        { id: id + "n" },
-        h("stop", { offset: 0, stopColor: "#FFFFFF" }),
-        h("stop", { offset: 1, stopColor: col.a1 })
-      ),
-      h("filter", { id: id + "f", x: "-60%", y: "-60%", width: "220%", height: "220%" }, h("feGaussianBlur", { stdDeviation: 9 }))
-    ),
-    h("polygon", { key: "gl", points: pts, fill: col.a2, opacity: 0.4, filter: `url(#${id}f)`, ...NP }),
-    h("polygon", { key: "p", points: pts, fill: `url(#${id}g)`, stroke: "#FFFFFF", strokeWidth: 2.4, strokeLinejoin: "round", ...NP }),
+    { viewBox: "-74 -40 148 204", style: { width, display: "block", overflow: "visible", flexShrink: 0 }, dir: "ltr" },
+    h("polygon", {
+      key: "p",
+      points: pts,
+      fill: "rgba(225,32,32,.05)",
+      stroke: R,
+      strokeWidth: 2,
+      strokeLinejoin: "round",
+      ...NP
+    }),
     L(A, M, "l1"),
-    L(Sl, Sr, "l2"),
-    L(Sl, M, "l3"),
-    L(Sr, M, "l4"),
-    D(Sl, "d1"),
-    D(Sr, "d2"),
+    L(SpL, SpR, "l2"),
+    L(SpL, M, "l3"),
+    L(SpR, M, "l4"),
+    D(SpL, "d1"),
+    D(SpR, "d2"),
     D(M, "d3"),
-    T(-44, 96.6, sm[0], col.ink, 10, "t1"),
-    T(44, 96.6, sm[1], col.ink, 10, "t2"),
-    T(0, 151, sm[2], col.ink, 10, "t3"),
+    T(-45, 94, sm[0], INK, 12, "t1"),
+    T(45, 94, sm[1], INK, 12, "t2"),
+    T(0, 152, sm[2], INK, 12, "t3"),
     ...corner(Cl, jl, "cl"),
     ...corner(Cr, jr, "cr"),
-    T(-60, 150, IV[jl], c.ink, 11, "t4"),
-    T(60, 150, IV[jr], c.ink, 11, "t5"),
-    h("circle", { key: "ac", r: 13.5, fill: `url(#${id}n)`, stroke: "#FFFFFF", strokeWidth: 1.6, ...NP }),
-    T(0, 0, OV[z], col.ink, 13, "t0")
+    T(-60, 152, IV[jl], R, 15, "t4"),
+    T(60, 152, IV[jr], R, 15, "t5"),
+    D(A, "ac", 4.4),
+    T(0, -22, OV[z], R, 30, "t0")
   );
 }
 
 export function V2MiniStar({
   zones,
   size = 26,
-  onDark = false,
   locked = false,
   center = false
 }: {
@@ -134,44 +120,29 @@ export function V2MiniStar({
   center?: boolean;
 }) {
   const { O, I } = starGeometry();
-  const c = V3_STAR_THEME;
-  const sphere = zones.length ? ZONE_TO_SPHERE[zones[0]] : null;
-  const col = sphere ? SPHERE_TINT[sphere] : null;
-  const fill = locked ? c.lock : col ? (onDark ? col.a1 : col.a2) : V3_GOLD;
-  const stroke = locked ? c.lock : onDark || !col ? (col ? col.a1 : V3_GOLD) : col.ink;
+  const fill = locked ? "rgba(185,147,83,.35)" : R;
   const el = [];
   zones.forEach((i) =>
-    el.push(
-      h("polygon", {
-        key: "z" + i,
-        points: joinPts([O[i], I[(i + 4) % 5], I[i]]),
-        fill,
-        opacity: locked ? 0.4 : 1
-      })
-    )
+    el.push(h("polygon", { key: "z" + i, points: joinPts([O[i], I[(i + 4) % 5], I[i]]), fill }))
   );
-  if (center) el.push(h("polygon", { key: "c", points: joinPts(I), fill, opacity: 0.6 }));
-  for (let i = 0; i < 5; i++) {
-    el.push(
-      h("line", {
-        key: "l" + i,
-        x1: O[i][0],
-        y1: O[i][1],
-        x2: O[(i + 2) % 5][0],
-        y2: O[(i + 2) % 5][1],
-        stroke,
-        strokeWidth: 10,
-        strokeLinejoin: "round",
-        strokeLinecap: "round"
-      })
-    );
-  }
+  if (center) el.push(h("polygon", { key: "c", points: joinPts(I), fill: R }));
+  el.push(
+    h("polygon", {
+      key: "o",
+      points: joinPts([O[0], O[2], O[4], O[1], O[3]]),
+      fill: "none",
+      stroke: G,
+      strokeWidth: 7,
+      strokeLinejoin: "round"
+    })
+  );
+  O.forEach((p, i) => el.push(h("circle", { key: "d" + i, cx: p[0], cy: p[1], r: 10, fill: G })));
   return h(
     "svg",
     {
-      viewBox: "-112 -112 224 210",
+      viewBox: "-115 -115 230 215",
       width: size,
-      height: (size * 210) / 224,
+      height: (size * 215) / 230,
       style: { display: "block", overflow: "visible" },
       dir: "ltr"
     },
