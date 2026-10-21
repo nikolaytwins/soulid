@@ -30,7 +30,8 @@ import {
   V3_INK,
   V3_MISSION,
   V3_MUTED,
-  V3_RED
+  V3_RED,
+  v3Href
 } from "@/lib/v3";
 import { PayHint } from "@/components/pay/PayHint";
 
@@ -458,11 +459,11 @@ export function V3StarExperience({
   return (
     <div className="v3-root min-h-screen overflow-x-clip" style={{ background: `#F6F3F3 url(${V3_BOOK_BG}) center/cover fixed`, color: V3_INK, fontFamily: V3_FONT_BODY, fontWeight: 300 }}>
       <div className="mx-auto flex max-w-[1360px] items-center gap-2 px-[clamp(16px,3vw,40px)] py-5 sm:gap-3">
-        <Link href="/" className="flex min-w-0 flex-1 items-center no-underline">
+        <Link href={v3Href("/")} className="flex min-w-0 flex-1 items-center no-underline">
           <V3Logo />
         </Link>
         <Link
-          href="/"
+          href={v3Href("/")}
           className="hidden items-center gap-3.5 py-2 pe-2 ps-[18px] text-sm no-underline md:flex"
           style={{ color: V3_INK, background: "rgba(255,255,255,.55)" }}
         >
@@ -498,7 +499,7 @@ export function V3StarExperience({
             <div className="flex flex-col gap-2.5 px-1 pt-2">
               <span className="text-xs uppercase tracking-[0.2em]" style={{ color: V3_RED }}>{t("starPage.eyebrow")}</span>
               <span className="text-balance text-[clamp(34px,4vw,54px)] uppercase leading-[1.02] tracking-[0.02em]" style={{ fontFamily: V3_FONT_DISPLAY }}>{t("starPage.title")}</span>
-              <Link href="/" className="flex items-center gap-2 text-sm no-underline md:hidden" style={{ color: V3_INK }}>
+              <Link href={v3Href("/")} className="flex items-center gap-2 text-sm no-underline md:hidden" style={{ color: V3_INK }}>
                 <span className="text-[#6B6461]">{t("starPage.dob")}</span>
                 <b>
                   <LtrText>{model.displayDate}</LtrText>

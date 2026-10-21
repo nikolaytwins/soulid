@@ -21,6 +21,7 @@ export function StarsMenu({ stars }: { stars: NavStar[] }) {
   }
   function accountHref() {
     if (v2) return v2Href("/account");
+    // v3 account comes later — keep classic cabinet for now
     return "/account";
   }
   const [open, setOpen] = useState(false);
