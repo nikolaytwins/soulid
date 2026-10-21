@@ -1,47 +1,35 @@
 import type { SphereId } from "@/lib/engine";
-import { SPHERE_TINT, V3_GOLD, V3_MISSION } from "@/lib/v3";
 
-export const SPHERE_ART: Record<SphereId | "soulMission", string> = {
-  relationships: "/v2/spheres/relationships.jpg",
-  spirituality: "/v2/spheres/spirituality.jpg",
-  personality: "/v2/spheres/personality.jpg",
-  health: "/v2/spheres/health.jpg",
-  money: "/v2/spheres/realization.jpg",
-  soulMission: "/v2/spheres/soul-mission.jpg"
-};
+/** Illustrations from the v3 design HTML (not the v2 photo set). */
+export const V3_ART = {
+  hero: "/v3/spheres/hero.png",
+  next: "/v3/spheres/next.png",
+  expert: "/v3/spheres/expert.jpg"
+} as const;
 
 export function SphereArt({
-  sphere,
-  mission
+  sphere: _sphere,
+  mission: _mission,
+  variant = "hero"
 }: {
   sphere?: SphereId;
   mission?: boolean;
+  /** `hero` — decode / mission card; `next` — unlock-next offer. */
+  variant?: "hero" | "next";
 }) {
-  const src = mission ? SPHERE_ART.soulMission : sphere ? SPHERE_ART[sphere] : null;
-  const c = mission ? V3_MISSION : sphere ? SPHERE_TINT[sphere] : { a1: "#E8D4B0", a2: V3_GOLD };
+  const src = variant === "next" ? V3_ART.next : V3_ART.hero;
   return (
     <div
       aria-hidden
-      className="pointer-events-none"
-      style={{
-        position: "absolute",
-        inset: 0,
-        overflow: "hidden",
-        background: `linear-gradient(150deg, ${c.a1}, ${c.a2})`
-      }}
+      className="pointer-events-none flex h-full w-full items-center justify-center"
+      style={{ position: "absolute", inset: 0 }}
     >
-      {src ? (
-        <img src={src} alt="" className="h-full w-full object-cover" />
-      ) : (
-        <div
-          style={{
-            position: "absolute",
-            inset: 0,
-            backgroundImage: "radial-gradient(rgba(26,26,26,.10) 1.2px, transparent 1.7px)",
-            backgroundSize: "16px 16px"
-          }}
-        />
-      )}
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img
+        src={src}
+        alt=""
+        className="max-h-full w-full max-w-[300px] object-contain object-center"
+      />
     </div>
   );
 }

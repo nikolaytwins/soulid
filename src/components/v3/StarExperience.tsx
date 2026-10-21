@@ -869,7 +869,7 @@ export function V3StarExperience({
                     }}
                   />
                   <div className="relative aspect-[2/1] w-full overflow-hidden rounded-[26px] lg:order-last lg:aspect-auto lg:min-h-[240px] lg:w-auto lg:flex-[1_1_240px]">
-                    <SphereArt sphere={model.nextSphere} />
+                    <SphereArt sphere={model.nextSphere} variant="next" />
                   </div>
                   <div className="relative z-[1] flex min-w-0 flex-col items-start gap-4 lg:flex-[1_1_320px]">
                     <span className="text-xs font-bold tracking-[0.16em] text-[#B99353]">{t("starPage.nextStep")}</span>
