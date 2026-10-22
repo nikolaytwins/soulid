@@ -42,8 +42,11 @@ export function packInterpretation(title: string, contentType: string, body: str
       });
       return { keys, values, contentType: "structured", marks };
     }
-    keys.push("lead");
-    values.push(parsed.lead ?? "");
+    const lead = (parsed.lead ?? "").trim();
+    if (lead) {
+      keys.push("lead");
+      values.push(lead);
+    }
     (parsed.paragraphs?.length ? parsed.paragraphs : [""]).forEach((paragraph, i) => {
       keys.push(`p${i}`);
       values.push(paragraph);
@@ -75,7 +78,11 @@ export function unpackInterpretation(packed: PackedInterpretation, translated: s
   }
   const paragraphs: string[] = [];
   for (let i = 0; map.has(`p${i}`); i++) paragraphs.push(map.get(`p${i}`) ?? "");
-  return { title, body: JSON.stringify({ lead: map.get("lead") ?? "", paragraphs }) };
+  const lead = (map.get("lead") ?? "").trim();
+  return {
+    title,
+    body: JSON.stringify(lead ? { lead, paragraphs } : { paragraphs })
+  };
 }
 
 export async function translateInterpretation(params: {

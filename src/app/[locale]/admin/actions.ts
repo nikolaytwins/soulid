@@ -102,7 +102,7 @@ export async function saveInterpretationAction(form: FormData) {
             text: String(form.get(`blockText${i}`) ?? "")
           }))
         )
-      : serializePlainBody(String(form.get("lead") ?? ""), String(form.get("text") ?? ""));
+      : serializePlainBody(String(form.get("text") ?? ""));
   const current = await prisma.interpretation.findUnique({ where: { id: String(form.get("id")) } });
   if (!current) return;
   await prisma.interpretation.update({

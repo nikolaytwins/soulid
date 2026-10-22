@@ -92,18 +92,22 @@ export function parseEditableBody(contentType: string, body: string): EditableIn
       return { lead: "", text: "", blocks };
     }
     const paragraphs = parsed.paragraphs?.length ? parsed.paragraphs : [typeof body === "string" ? body : ""];
-    return { lead: parsed.lead ?? "", text: paragraphs.join("\n\n"), blocks: [] };
+    const bodyText = paragraphs.join("\n\n");
+    const lead = (parsed.lead ?? "").trim();
+    // Fold legacy lead into the single textarea so nothing is lost when editing.
+    const text = lead ? (bodyText ? `${lead}\n\n${bodyText}` : lead) : bodyText;
+    return { lead: "", text, blocks: [] };
   } catch {
     return { lead: "", text: body, blocks: contentType === "structured" ? DEFAULT_STRUCTURED : [] };
   }
 }
 
-export function serializePlainBody(lead: string, text: string): string {
+export function serializePlainBody(text: string): string {
   const paragraphs = text
     .split(/\n\s*\n/)
     .map((p) => p.trim())
     .filter(Boolean);
-  return JSON.stringify({ lead: lead.trim(), paragraphs: paragraphs.length ? paragraphs : [""] });
+  return JSON.stringify({ paragraphs: paragraphs.length ? paragraphs : [""] });
 }
 
 export function serializeStructuredBody(blocks: EditableBlock[]): string {

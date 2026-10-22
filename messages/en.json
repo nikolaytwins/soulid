@@ -408,7 +408,7 @@
     "notice_err_self": "You cannot block your own account.",
     "notice_err_last_admin": "You cannot block the last admin.",
     "soulMissionName": "Soul mission",
-    "contentLead": "Pick a sphere, then a point on the star. Inside are 22 {arcana}. Write in plain text: a blank line starts a new paragraph.",
+    "contentLead": "Pick a sphere, then a point on the star. Inside are 22 {arcana}. Put the full reading in one field: a blank line starts a new paragraph.",
     "contentAutoNote": "Saving in one language auto-translates the others. A locale you already edited by hand is left alone — manual edits win.",
     "contentOriginDemo": "Draft",
     "contentOriginAuto": "Auto-translated",

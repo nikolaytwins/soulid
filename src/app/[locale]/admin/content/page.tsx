@@ -211,16 +211,10 @@ export default async function AdminContent({
                   ))}
                 </div>
               ) : (
-                <>
-                  <label className="mt-3 block text-xs font-semibold tracking-wide text-faint">
-                    {t("contentLeadField")}
-                    <input name="lead" defaultValue={edit.lead} className={field} />
-                  </label>
-                  <label className="mt-3 block text-xs font-semibold tracking-wide text-faint">
-                    {t("contentText")}
-                    <textarea name="text" defaultValue={edit.text} rows={7} className={field} />
-                  </label>
-                </>
+                <label className="mt-3 block text-xs font-semibold tracking-wide text-faint">
+                  {t("contentText")}
+                  <textarea name="text" defaultValue={edit.text} rows={12} className={field} />
+                </label>
               )}
               <div className="mt-4 flex items-center gap-4">
                 <button className={saveBtn}>{t("save")}</button>
