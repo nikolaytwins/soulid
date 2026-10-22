@@ -104,20 +104,23 @@ export const SPHERE_META: Record<
   personality: { zone: 4, neighbors: ["p51", "p12"] }
 };
 
-/** P45 is the only fatal-error bridge; the other four are ancestral. */
+/**
+ * Outer bridges between neighbouring spheres are ancestral programs.
+ * The fatal error is the bottom inner point of each sphere triangle (apex+… bases → innerBottom).
+ */
 export const BRIDGE_KIND: Record<BridgeId, Extract<PointKind, "ancestral_program" | "fatal_error">> = {
   p12: "ancestral_program",
   p23: "ancestral_program",
   p34: "ancestral_program",
-  p45: "fatal_error",
+  p45: "ancestral_program",
   p51: "ancestral_program"
 };
 
-export function sphereSlotKind(sphere: SphereId, point: SpherePointId): PointKind {
+export function sphereSlotKind(_sphere: SphereId, point: SpherePointId): PointKind {
   if (point === "apex") return "apex";
-  if (point === "innerLeft" || point === "innerRight" || point === "innerBottom") return "past_life";
-  const [left, right] = SPHERE_META[sphere].neighbors;
-  return BRIDGE_KIND[point === "leftBase" ? left : right];
+  if (point === "innerBottom") return "fatal_error";
+  if (point === "innerLeft" || point === "innerRight") return "past_life";
+  return "ancestral_program";
 }
 
 /** Inner pentagon vertex index in the SVG (clockwise from between spirit/money). */

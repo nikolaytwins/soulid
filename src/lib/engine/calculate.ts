@@ -64,8 +64,9 @@ function debugFrom(p: StarPoint, label: string, formula: string): DebugStep {
  *   G = C+F = p34
  *   H = A+B+C+F = health
  *   K = H+A = p51
- *   J = H+F = p45  (fatal error)
+ *   J = H+F = p45  (ancestral bridge)
  *   L = A+B+C+F+H = soul mission
+ *   Fatal error in each sphere = leftBase + rightBase (inner bottom)
  */
 export function calculateStar(date: BirthDate): StarResult;
 export function calculateStar(date: BirthDate, options: { debug: true; formula?: StarFormula }): StarResultDebug;
@@ -160,7 +161,7 @@ export function calculateStar(date: BirthDate, options?: { debug?: boolean; form
     );
     const innerBottom = point(
       `${sphere}.innerBottom`,
-      "past_life",
+      "fatal_error",
       left.value + right.value,
       [sphere],
       [`${sphere} innerBottom = leftBase+rightBase = ${left.value}+${right.value}`]
@@ -203,14 +204,14 @@ export function calculateStar(date: BirthDate, options?: { debug?: boolean; form
     debugFrom(p12, "P12 ancestral (personality–spirituality)", formulaLabel(formula.p12, names)),
     debugFrom(p23, "P23 ancestral (spirituality–money)", formulaLabel(formula.p23, names)),
     debugFrom(p34, "P34 ancestral (money–relationships)", formulaLabel(formula.p34, names)),
-    debugFrom(p45, "P45 fatal error (relationships–health)", formulaLabel(formula.p45, names)),
+    debugFrom(p45, "P45 ancestral (relationships–health)", formulaLabel(formula.p45, names)),
     debugFrom(p51, "P51 ancestral (health–personality)", formulaLabel(formula.p51, names)),
     ...SPHERE_IDS.flatMap((id) => {
       const t = spheres[id];
       return [
         debugFrom(t.innerLeft, `${id} inner left`, "apex + leftBase"),
         debugFrom(t.innerRight, `${id} inner right`, "apex + rightBase"),
-        debugFrom(t.innerBottom, `${id} inner bottom`, "leftBase + rightBase")
+        debugFrom(t.innerBottom, `${id} fatal error (inner bottom)`, "leftBase + rightBase")
       ];
     })
   ];

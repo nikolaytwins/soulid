@@ -254,7 +254,12 @@ export async function loadSphereArcs(
     },
     { point: "innerLeft", value: t.innerLeft.value, role: labels.inner, kind: "inner" },
     { point: "innerRight", value: t.innerRight.value, role: labels.inner, kind: "inner" },
-    { point: "innerBottom", value: t.innerBottom.value, role: labels.inner, kind: "inner" }
+    {
+      point: "innerBottom",
+      value: t.innerBottom.value,
+      role: labels.fatal,
+      kind: sphereSlotKind(sphere, "innerBottom")
+    }
   ];
   const out: ArcReading[] = [];
   for (const it of items) {

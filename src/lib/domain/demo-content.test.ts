@@ -39,30 +39,26 @@ describe("demo placeholders follow the actual point type", () => {
     expect(JSON.parse(money.body).blocks).toHaveLength(4);
   });
 
-  it("never swaps fatal error and ancestral program in any sphere", () => {
-    const fatalSlots = [
-      ["relationships", "rightBase"],
-      ["health", "leftBase"]
-    ] as const;
-    const ancestralSlots = SPHERE_IDS.flatMap((sphere) =>
-      (["leftBase", "rightBase"] as const).filter((point) => demoPointKind(sphere, point) === "ancestral_program").map((point) => [sphere, point] as const)
-    );
-
-    expect(fatalSlots).toHaveLength(2);
-    expect(ancestralSlots).toHaveLength(8);
+  it("marks both bases ancestral and only the bottom inner point as fatal in every sphere", () => {
+    for (const sphere of SPHERE_IDS) {
+      expect(demoPointKind(sphere, "leftBase")).toBe("ancestral_program");
+      expect(demoPointKind(sphere, "rightBase")).toBe("ancestral_program");
+      expect(demoPointKind(sphere, "innerBottom")).toBe("fatal_error");
+    }
 
     for (const locale of ["ru", "en", "ar"] as const) {
-      for (const [sphere, point] of fatalSlots) {
-        const demo = buildDemoInterpretation({ sphere, point, value: 9, locale });
-        expect(demo.body, `${sphere}.${point} ${locale}`).toContain(ROLE.fatal_error[locale]);
-        expect(demo.body, `${sphere}.${point} ${locale}`).not.toContain(ROLE.ancestral_program[locale]);
-        expect(demoPointLabel(sphere, point, locale)).toBe(ROLE.fatal_error[locale]);
-      }
-      for (const [sphere, point] of ancestralSlots) {
-        const demo = buildDemoInterpretation({ sphere, point, value: 9, locale });
-        expect(demo.body, `${sphere}.${point} ${locale}`).toContain(ROLE.ancestral_program[locale]);
-        expect(demo.body, `${sphere}.${point} ${locale}`).not.toContain(ROLE.fatal_error[locale]);
-        expect(demoPointLabel(sphere, point, locale)).toBe(ROLE.ancestral_program[locale]);
+      for (const sphere of SPHERE_IDS) {
+        expect(demoPointLabel(sphere, "innerBottom", locale)).toBe(ROLE.fatal_error[locale]);
+        const demo = buildDemoInterpretation({ sphere, point: "innerBottom", value: 9, locale });
+        expect(demo.body).toContain(ROLE.fatal_error[locale]);
+        expect(demo.body).not.toContain(ROLE.ancestral_program[locale]);
+
+        for (const point of ["leftBase", "rightBase"] as const) {
+          expect(demoPointLabel(sphere, point, locale)).toBe(ROLE.ancestral_program[locale]);
+          const base = buildDemoInterpretation({ sphere, point, value: 9, locale });
+          expect(base.body).toContain(ROLE.ancestral_program[locale]);
+          expect(base.body).not.toContain(ROLE.fatal_error[locale]);
+        }
       }
     }
   });

@@ -46,12 +46,12 @@ describe("calculateStar — book example 05.03.1992", () => {
     expect(star.core.soulMission.value).toBe(8);
   });
 
-  it("computes bridges including fatal error P45", () => {
+  it("computes bridges as ancestral programs", () => {
     expect(star.bridges.p12.value).toBe(8);
     expect(star.bridges.p23.value).toBe(6);
     expect(star.bridges.p34.value).toBe(5);
     expect(star.bridges.p45.value).toBe(15);
-    expect(star.bridges.p45.kind).toBe("fatal_error");
+    expect(star.bridges.p45.kind).toBe("ancestral_program");
     expect(star.bridges.p51.value).toBe(9);
     expect(star.bridges.p12.kind).toBe("ancestral_program");
   });
@@ -89,22 +89,19 @@ describe("calculateStar — book example 05.03.1992", () => {
     expect(star.bridges.p45.spheres).toEqual(["relationships", "health"]);
   });
 
-  it("marks only P45 bases as fatal error (relationships right, health left)", () => {
+  it("marks both bases as ancestral and inner bottom as fatal error in every sphere", () => {
     for (const id of SPHERE_IDS) {
       const t = star.spheres[id];
-      expect(sphereSlotKind(id, "leftBase")).toBe(t.leftBase.kind);
-      expect(sphereSlotKind(id, "rightBase")).toBe(t.rightBase.kind);
+      expect(sphereSlotKind(id, "leftBase")).toBe("ancestral_program");
+      expect(sphereSlotKind(id, "rightBase")).toBe("ancestral_program");
       expect(sphereSlotKind(id, "apex")).toBe("apex");
       expect(sphereSlotKind(id, "innerLeft")).toBe("past_life");
+      expect(sphereSlotKind(id, "innerRight")).toBe("past_life");
+      expect(sphereSlotKind(id, "innerBottom")).toBe("fatal_error");
+      expect(t.leftBase.kind).toBe("ancestral_program");
+      expect(t.rightBase.kind).toBe("ancestral_program");
+      expect(t.innerBottom.kind).toBe("fatal_error");
     }
-    expect(sphereSlotKind("relationships", "rightBase")).toBe("fatal_error");
-    expect(sphereSlotKind("health", "leftBase")).toBe("fatal_error");
-    expect(sphereSlotKind("relationships", "leftBase")).toBe("ancestral_program");
-    expect(sphereSlotKind("health", "rightBase")).toBe("ancestral_program");
-    expect(sphereSlotKind("personality", "leftBase")).toBe("ancestral_program");
-    expect(sphereSlotKind("personality", "rightBase")).toBe("ancestral_program");
-    expect(sphereSlotKind("spirituality", "leftBase")).toBe("ancestral_program");
-    expect(sphereSlotKind("money", "rightBase")).toBe("ancestral_program");
   });
 
   it("returns debug traces when requested", () => {

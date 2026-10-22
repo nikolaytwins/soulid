@@ -75,7 +75,8 @@ export function V2StarSvg(props: Props) {
 
   const outerValues = ZONE_TO_SPHERE.map((s) => props.star.core[s].value);
   const innerValues = (["p23", "p34", "p45", "p51", "p12"] as const).map((b) => props.star.bridges[b].value);
-  const innerKindFatal = [false, false, true, false, false];
+  // Outer bridges are ancestral; fatal error lives on each triangle's inner bottom.
+  const innerKindFatal = [false, false, false, false, false];
 
   const hidden = (x: number, y: number, val: number, size: number, key: string) =>
     blur
