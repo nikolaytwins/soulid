@@ -4,6 +4,7 @@ import { Suspense, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/routing";
+import { V3AuthCard } from "@/components/v3/AuthCard";
 
 function ResetForm() {
   const t = useTranslations("auth");
@@ -25,19 +26,19 @@ function ResetForm() {
 
   if (done) {
     return (
-      <main className="mx-auto max-w-md px-5 py-12">
+      <V3AuthCard>
         <p>{t("passwordChanged")}</p>
         <Link href="/login">{t("submitLogin")}</Link>
-      </main>
+      </V3AuthCard>
     );
   }
 
   return (
-    <main className="mx-auto flex max-w-md flex-col gap-4 px-5 py-12">
-      <h1 className="font-serif text-4xl font-medium">{t("resetTitle")}</h1>
+    <V3AuthCard>
+      <h1 className="font-[Forum,serif] text-4xl font-medium">{t("resetTitle")}</h1>
       <form onSubmit={onSubmit} className="flex flex-col gap-3">
         <input
-          className="rounded-xl border border-line px-4 py-3"
+          className="border border-[rgba(26,26,26,.15)] bg-[rgba(255,255,255,.55)] px-4 py-3"
           type="password"
           minLength={6}
           required
@@ -46,13 +47,13 @@ function ResetForm() {
           onChange={(e) => setPassword(e.target.value)}
         />
         {error ? <p className="text-sm text-red-700">{error}</p> : null}
-        <button className="rounded-[14px] bg-ink py-4 font-semibold text-card">{t("savePassword")}</button>
+        <button className="min-h-12 bg-[#E12020] py-4 font-bold text-white">{t("savePassword")}</button>
       </form>
-    </main>
+    </V3AuthCard>
   );
 }
 
-export default function ResetPage() {
+export default function V2ResetPage() {
   return (
     <Suspense>
       <ResetForm />

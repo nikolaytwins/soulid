@@ -6,12 +6,14 @@ import { Link } from "@/i18n/routing";
 import { getSession, signIn } from "next-auth/react";
 import { useParams, useSearchParams } from "next/navigation";
 import { safeNextPath } from "@/lib/safe-url";
+import { V3AuthCard } from "@/components/v3/AuthCard";
+import { V3_FONT_DISPLAY, V3_MUTED, V3_RED } from "@/lib/v3";
 
 function LoginForm() {
   const t = useTranslations("auth");
   const params = useSearchParams();
   const locale = String(useParams().locale ?? "ru");
-  const next = safeNextPath(params.get("next"), `/${locale}/account`);
+  const next = safeNextPath(params.get("next"), `/${locale}`);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -29,35 +31,51 @@ function LoginForm() {
       return;
     }
     const session = await getSession();
-    const account = `/${locale}/account`;
-    const toAdmin =
-      session?.user?.role === "admin" && (next === account || next === `${account}/`);
+    const toAdmin = session?.user?.role === "admin" && !params.get("next");
     window.location.href = toAdmin ? `/${locale}/admin` : next;
   }
 
-  const field = "w-full rounded-xl border border-line bg-card px-4 py-3 text-sm";
+  const field =
+    "w-full border border-[rgba(26,26,26,.15)] bg-[rgba(255,255,255,.55)] px-4 py-3 text-sm text-[#1A1A1A]";
 
   return (
-    <main className="mx-auto flex max-w-md flex-col gap-6 px-5 py-12">
-      <h1 className="font-serif text-4xl font-medium">{t("loginTitle")}</h1>
+    <V3AuthCard>
+      <h1 className="text-4xl uppercase tracking-[0.03em]" style={{ fontFamily: V3_FONT_DISPLAY }}>
+        {t("loginTitle")}
+      </h1>
       <form onSubmit={onSubmit} className="flex flex-col gap-3">
         <input className={field} type="email" required placeholder={t("email")} value={email} onChange={(e) => setEmail(e.target.value)} />
-        <input className={field} type="password" required minLength={6} placeholder={t("password")} value={password} onChange={(e) => setPassword(e.target.value)} />
+        <input
+          className={field}
+          type="password"
+          required
+          minLength={6}
+          placeholder={t("password")}
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+        />
         {error ? <p className="text-sm text-red-700">{error}</p> : null}
-        <button disabled={pending} className="rounded-[14px] bg-ink py-4 text-[15px] font-semibold text-card">
+        <button
+          disabled={pending}
+          className="min-h-12 py-4 text-[15px] font-semibold uppercase tracking-[0.1em] text-white disabled:opacity-60"
+          style={{ background: V3_RED }}
+        >
           {t("submitLogin")}
         </button>
       </form>
-      <p className="text-sm text-muted">
+      <p className="text-sm" style={{ color: V3_MUTED }}>
         {t("noAccount")}{" "}
-        <a href={`/${locale}/register?next=${encodeURIComponent(next)}`} className="font-semibold text-gold-deep">
+        <a href={`/${locale}/register?next=${encodeURIComponent(next)}`} className="font-semibold no-underline" style={{ color: V3_RED }}>
           {t("submitRegister")}
         </a>
       </p>
-      <Link href="/forgot-password" className="text-sm">
+      <Link href="/forgot-password" className="text-sm no-underline" style={{ color: V3_MUTED }}>
         {t("forgot")}
       </Link>
-    </main>
+      <Link href={"/"} className="text-sm no-underline" style={{ color: V3_MUTED }}>
+        ← {locale === "en" ? "Back" : locale === "ar" ? "رجوع" : "Назад"}
+      </Link>
+    </V3AuthCard>
   );
 }
 

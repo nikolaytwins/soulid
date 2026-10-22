@@ -1,18 +1,5 @@
 import type { SphereId } from "@/lib/engine";
 
-export const V3_PREFIX = "/v3";
-
-export function isV3Path(pathname: string | null | undefined): boolean {
-  if (!pathname) return false;
-  return pathname === V3_PREFIX || pathname.startsWith(`${V3_PREFIX}/`);
-}
-
-export function v3Href(path: string): string {
-  const clean = path.startsWith("/") ? path : `/${path}`;
-  if (clean === V3_PREFIX || clean.startsWith(`${V3_PREFIX}/`)) return clean;
-  return `${V3_PREFIX}${clean === "/" ? "" : clean}` || V3_PREFIX;
-}
-
 export const V3_INK = "#1A1A1A";
 export const V3_BODY = "#2E2A28";
 export const V3_MUTED = "#4A4441";

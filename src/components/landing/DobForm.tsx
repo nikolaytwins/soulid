@@ -1,10 +1,8 @@
 "use client";
 
-import { usePathname, useRouter } from "@/i18n/routing";
+import { useRouter } from "@/i18n/routing";
 import { useTranslations } from "next-intl";
 import { useEffect, useMemo, useState } from "react";
-import { isV2Path, v2Href } from "@/lib/v2";
-import { isV3Path, v3Href } from "@/lib/v3";
 
 function daysInMonth(year: number, month: number) {
   return new Date(year, month, 0).getDate();
@@ -20,7 +18,6 @@ export function DobForm({
   const t = useTranslations("landing");
   const months = useTranslations();
   const router = useRouter();
-  const pathname = usePathname();
   const now = new Date();
   const [day, setDay] = useState(defaultDate?.day ?? 5);
   const [month, setMonth] = useState(defaultDate?.month ?? 3);
@@ -54,26 +51,16 @@ export function DobForm({
       setError(json.error || t("invalid"));
       return;
     }
-    const href = isV3Path(pathname)
-      ? v3Href(`/star/${json.id}`)
-      : isV2Path(pathname)
-        ? v2Href(`/star/${json.id}`)
-        : `/star/${json.id}`;
-    router.push(href);
+    router.push(`/star/${json.id}`);
   }
 
-  const v2 = isV2Path(pathname);
-  const v3 = isV3Path(pathname);
-  const selectCls = v3
-    ? "border border-[rgba(26,26,26,0.15)] bg-[rgba(255,255,255,.55)] px-3 py-3 text-sm font-semibold text-[#1A1A1A] min-h-12"
-    : v2
-      ? "rounded-2xl border border-[rgba(43,26,51,0.10)] bg-[#F8F1E9] px-3 py-3 text-sm font-semibold text-[#2B1A33] min-h-12"
-      : "rounded-xl border border-[rgba(80,60,45,0.12)] bg-card px-3 py-3 text-sm font-semibold text-ink min-h-12";
+  const selectCls =
+    "border border-[rgba(26,26,26,0.15)] bg-[rgba(255,255,255,.55)] px-3 py-3 text-sm font-semibold text-[#1A1A1A] min-h-12";
 
   return (
     <form onSubmit={onSubmit} className={compact ? "flex flex-col gap-3" : "flex w-full max-w-md flex-col gap-4"}>
       <div className="grid grid-cols-3 gap-2">
-        <label className="flex flex-col gap-1 text-xs text-faint">
+        <label className="flex flex-col gap-1 text-xs text-[#6B6461]">
           {t("day")}
           <select className={selectCls} value={day} onChange={(e) => setDay(Number(e.target.value))}>
             {Array.from({ length: maxDay }, (_, i) => i + 1).map((d) => (
@@ -83,7 +70,7 @@ export function DobForm({
             ))}
           </select>
         </label>
-        <label className="flex flex-col gap-1 text-xs text-faint">
+        <label className="flex flex-col gap-1 text-xs text-[#6B6461]">
           {t("month")}
           <select className={selectCls} value={month} onChange={(e) => setMonth(Number(e.target.value))}>
             {Array.from({ length: 12 }, (_, i) => i + 1).map((m) => (
@@ -93,7 +80,7 @@ export function DobForm({
             ))}
           </select>
         </label>
-        <label className="flex flex-col gap-1 text-xs text-faint">
+        <label className="flex flex-col gap-1 text-xs text-[#6B6461]">
           {t("year")}
           <select className={selectCls} value={year} onChange={(e) => setYear(Number(e.target.value))}>
             {Array.from({ length: 120 }, (_, i) => now.getFullYear() - i).map((y) => (
@@ -108,13 +95,7 @@ export function DobForm({
       <button
         type="submit"
         disabled={pending}
-        className={
-          v3
-            ? "min-h-12 bg-[#E12020] px-4 py-4 text-[15px] font-semibold uppercase tracking-[0.1em] text-white disabled:opacity-60"
-            : v2
-              ? "min-h-12 rounded-full bg-[#2B1A33] px-4 py-4 text-[15px] font-bold text-white disabled:opacity-60"
-              : "min-h-12 rounded-[14px] bg-ink px-4 py-4 text-[15px] font-semibold text-card disabled:opacity-60"
-        }
+        className="min-h-12 bg-[#E12020] px-4 py-4 text-[15px] font-semibold uppercase tracking-[0.1em] text-white disabled:opacity-60"
       >
         {pending ? "…" : t("cta")}
       </button>

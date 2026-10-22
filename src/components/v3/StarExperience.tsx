@@ -31,7 +31,6 @@ import {
   V3_MISSION,
   V3_MUTED,
   V3_RED,
-  v3Href
 } from "@/lib/v3";
 import { PayHint } from "@/components/pay/PayHint";
 
@@ -254,7 +253,6 @@ export function V3StarExperience({
         body: JSON.stringify({
           profileId: model.profileId,
           sku,
-          skin: "v3",
           useSavedMethod,
           recChannel: extra?.recChannel,
           recContact: extra?.recContact
@@ -464,11 +462,11 @@ export function V3StarExperience({
   return (
     <div className="v3-root min-h-screen overflow-x-clip" style={{ background: `#F6F3F3 url(${V3_BOOK_BG}) center/cover fixed`, color: V3_INK, fontFamily: V3_FONT_BODY, fontWeight: 300 }}>
       <div className="mx-auto flex max-w-[1360px] items-center gap-2 px-[clamp(16px,3vw,40px)] py-5 sm:gap-3">
-        <Link href={v3Href("/")} className="flex min-w-0 flex-1 items-center no-underline">
+        <Link href={"/"} className="flex min-w-0 flex-1 items-center no-underline">
           <V3Logo />
         </Link>
         <Link
-          href={v3Href("/")}
+          href={"/"}
           className="hidden items-center gap-3.5 py-2 pe-2 ps-[18px] text-sm no-underline md:flex"
           style={{ color: V3_INK, background: "rgba(255,255,255,.55)" }}
         >
@@ -510,7 +508,7 @@ export function V3StarExperience({
               <span className="max-w-[440px] text-[15px] leading-[1.7]" style={{ color: "#3A3532" }}>
                 {t("v3.starLead")}
               </span>
-              <Link href={v3Href("/")} className="flex items-center gap-2 text-sm no-underline md:hidden" style={{ color: V3_INK }}>
+              <Link href={"/"} className="flex items-center gap-2 text-sm no-underline md:hidden" style={{ color: V3_INK }}>
                 <span className="text-[#6B6461]">{t("starPage.dob")}</span>
                 <b>
                   <LtrText>{model.displayDate}</LtrText>

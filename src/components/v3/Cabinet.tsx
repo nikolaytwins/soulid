@@ -16,7 +16,7 @@ import { STAR_RELATIONS, type StarRelation } from "@/lib/domain/relations";
 import { ZONE_TO_SPHERE, type SphereId, type StarResult } from "@/lib/engine";
 import { PayHint } from "@/components/pay/PayHint";
 import { cardLabel } from "@/lib/payments/card-label";
-import { SPHERE_TINT, V2_GOLD, V2_INK, V2_NEU, v2Href } from "@/lib/v2";
+import { SPHERE_TINT, V3_GOLD, V3_INK, V3_NEU, V3_RED, V3_FONT_DISPLAY } from "@/lib/v3";
 import { V2StarSvg } from "./StarSvg";
 import { V2LockIcon, V2MiniStar } from "./TriangleSvg";
 
@@ -44,7 +44,7 @@ export type CabinetPurchase = {
 };
 
 const inputClass =
-  "min-h-12 w-full rounded-[14px] border border-[rgba(43,26,51,.10)] bg-[#F8F1E9] px-4 text-base text-[#2B1A33] outline-none";
+  "min-h-12 w-full rounded-none border border-[rgba(43,26,51,.10)] bg-[#F6F3F3] px-4 text-base text-[#1A1A1A] outline-none";
 
 function fmtDate(v: string) {
   const d = v.replace(/\D/g, "").slice(0, 8);
@@ -56,7 +56,7 @@ function relEyebrow(rel: StarRelation, t: ReturnType<typeof useTranslations>) {
   return rel === "self" ? t("myStarEyebrow") : t("relStarEyebrow", { rel: label });
 }
 
-export function V2Cabinet({
+export function V3Cabinet({
   locale,
   user,
   stars,
@@ -229,7 +229,7 @@ export function V2Cabinet({
     const res = await fetch("/api/checkout", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ profileId: cur.id, sku: cur.nextSku, returnTo: "account", skin: "v2", useSavedMethod })
+      body: JSON.stringify({ profileId: cur.id, sku: cur.nextSku, returnTo: "account", useSavedMethod })
     });
     const json = (await res.json()) as { url?: string; error?: string };
     if (json.url) window.location.href = json.url;
@@ -247,17 +247,17 @@ export function V2Cabinet({
     <div className="relative mx-auto flex max-w-[1360px] flex-col gap-4 overflow-x-clip px-[clamp(16px,3vw,40px)] pb-24 pt-1">
       <div className="flex flex-wrap items-end justify-between gap-4 px-1 pt-2">
         <div className="flex min-w-0 flex-col gap-2.5">
-          <span suppressHydrationWarning className="text-xs font-bold tracking-[0.16em] text-[#8A8494]">
+          <span suppressHydrationWarning className="text-xs font-bold tracking-[0.16em] text-[#6B6461]">
             {todayLabel}
           </span>
-          <h1 suppressHydrationWarning className="text-balance font-display text-[clamp(32px,4vw,52px)] font-medium leading-[1.08]">
+          <h1 suppressHydrationWarning className="text-balance font-[Forum,serif] text-[clamp(32px,4vw,52px)] font-medium leading-[1.08]">
             {greeting}
           </h1>
         </div>
         <div className="flex flex-wrap items-center gap-2">
           <button
             type="button"
-            className="min-h-11 rounded-full bg-white px-4 py-2.5 text-sm font-bold text-[#5B5566]"
+            className="min-h-11 rounded-none bg-white px-4 py-2.5 text-sm font-bold text-[#4A4441]"
             onClick={() => {
               setProfileName(user.name);
               setErr("");
@@ -268,14 +268,14 @@ export function V2Cabinet({
           </button>
           <button
             type="button"
-            className="min-h-11 rounded-full bg-white px-4 py-2.5 text-sm font-bold text-[#5B5566]"
+            className="min-h-11 rounded-none bg-white px-4 py-2.5 text-sm font-bold text-[#4A4441]"
             onClick={() => setSheet("purchases")}
           >
             {t("menuPurchases")}
           </button>
           <button
             type="button"
-            className="min-h-11 rounded-full bg-white px-4 py-2.5 text-sm font-bold text-[#5B5566]"
+            className="min-h-11 rounded-none bg-white px-4 py-2.5 text-sm font-bold text-[#4A4441]"
             onClick={() => setSheet("support")}
           >
             {t("menuSupport")}
@@ -283,7 +283,7 @@ export function V2Cabinet({
           <button
             type="button"
             onClick={openCreate}
-            className="flex min-h-11 items-center rounded-full bg-[#2B1A33] px-5 py-2.5 text-sm font-bold text-white"
+            className="flex min-h-11 items-center rounded-none bg-[#E12020] px-5 py-2.5 text-sm font-bold text-white"
           >
             + {t("newStar")}
           </button>
@@ -292,7 +292,7 @@ export function V2Cabinet({
 
       {cur ? (
         <div className="flex flex-row-reverse flex-wrap items-stretch gap-4">
-          <div className="relative flex min-w-0 flex-[1.3_1_520px] flex-col gap-3 overflow-hidden rounded-[36px] bg-white p-[clamp(20px,3vw,36px)]">
+          <div className="relative flex min-w-0 flex-[1.3_1_520px] flex-col gap-3 overflow-hidden rounded-none bg-white p-[clamp(20px,3vw,36px)]">
             <div
               className="pointer-events-none absolute inset-0"
               style={{
@@ -304,7 +304,7 @@ export function V2Cabinet({
             />
             <div className="relative flex justify-center">
               <div
-                className="pointer-events-none absolute left-1/2 top-1/2 aspect-square w-[90%] -translate-x-1/2 -translate-y-1/2 rounded-full"
+                className="pointer-events-none absolute left-1/2 top-1/2 aspect-square w-[90%] -translate-x-1/2 -translate-y-1/2 rounded-none"
                 style={{ background: "radial-gradient(closest-side,rgba(242,205,150,.55),rgba(255,255,255,0))" }}
               />
               <CabinetPreview
@@ -319,18 +319,18 @@ export function V2Cabinet({
           </div>
 
           <div className="flex min-w-0 flex-[1_1_380px] flex-col gap-4">
-            <div className="relative flex flex-1 flex-col gap-5 overflow-hidden rounded-[36px] bg-white p-[clamp(20px,2.6vw,30px)]">
+            <div className="relative flex flex-1 flex-col gap-5 overflow-hidden rounded-none bg-white p-[clamp(20px,2.6vw,30px)]">
               <div
-                className="pointer-events-none absolute -right-[90px] -top-[90px] h-[300px] w-[300px] rounded-full"
+                className="pointer-events-none absolute -right-[90px] -top-[90px] h-[300px] w-[300px] rounded-none"
                 style={{ background: "repeating-radial-gradient(circle,rgba(217,165,92,.22) 0 1px,transparent 1.5px 18px)" }}
               />
               <div className="relative flex items-start justify-between gap-3">
                 <div className="flex min-w-0 flex-col gap-2">
-                  <span className="text-xs font-bold tracking-[0.16em] text-[#B07A33]">{relEyebrow(cur.relation, t)}</span>
-                  <span className="font-display text-[clamp(32px,3.4vw,44px)] font-medium leading-none">{cur.name}</span>
-                  <span className="text-sm text-[#5B5566]">
+                  <span className="text-xs font-bold tracking-[0.16em] text-[#B99353]">{relEyebrow(cur.relation, t)}</span>
+                  <span className="font-[Forum,serif] text-[clamp(32px,3.4vw,44px)] font-medium leading-none">{cur.name}</span>
+                  <span className="text-sm text-[#4A4441]">
                     {t("dob")}:{" "}
-                    <b style={{ color: V2_INK }}>
+                    <b style={{ color: V3_INK }}>
                       <LtrText>{cur.date}</LtrText>
                     </b>
                   </span>
@@ -338,7 +338,7 @@ export function V2Cabinet({
                 <button
                   type="button"
                   onClick={openEdit}
-                  className="shrink-0 rounded-full bg-[#F8F1E9] px-4 py-2 text-[13px] font-bold text-[#5B5566]"
+                  className="shrink-0 rounded-none bg-[#F6F3F3] px-4 py-2 text-[13px] font-bold text-[#4A4441]"
                 >
                   {t("edit")}
                 </button>
@@ -347,13 +347,13 @@ export function V2Cabinet({
               <div className="relative flex flex-col gap-2.5">
                 <div className="flex items-baseline justify-between text-sm">
                   <span className="text-[#6E6878]">{t("opened")}</span>
-                  <b style={{ color: V2_INK }}>{t("openCount", { n, total: 5 })}</b>
+                  <b style={{ color: V3_INK }}>{t("openCount", { n, total: 5 })}</b>
                 </div>
                 <div className="grid grid-cols-5 gap-1.5">
                   {order.map((id, i) => (
                     <span
                       key={id}
-                      className="h-1.5 rounded-full"
+                      className="h-1.5 rounded-none"
                       style={{ background: i < n ? SPHERE_TINT[id].a2 : "#E8E2EC" }}
                     />
                   ))}
@@ -368,11 +368,11 @@ export function V2Cabinet({
               </div>
 
               <Link
-                href={v2Href(`/star/${cur.id}`)}
-                className="relative flex min-h-14 items-center justify-between rounded-full bg-[#2B1A33] py-2 pe-2 ps-[22px] text-[15px] font-bold text-white no-underline"
+                href={`/star/${cur.id}`}
+                className="relative flex min-h-14 items-center justify-between rounded-none bg-[#E12020] py-2 pe-2 ps-[22px] text-[15px] font-bold text-white no-underline"
               >
                 {t("continue")}
-                <span className="flex h-10 w-10 items-center justify-center rounded-full bg-white text-lg text-[#2B1A33]">→</span>
+                <span className="flex h-10 w-10 items-center justify-center rounded-none bg-white text-lg text-[#1A1A1A]">→</span>
               </Link>
 
               {n < 5 && cur.nextSku ? (
@@ -380,22 +380,22 @@ export function V2Cabinet({
                   <button
                     type="button"
                     onClick={() => buy(true)}
-                    className="min-h-[52px] rounded-full px-[26px] py-4 text-[15px] font-extrabold"
-                    style={{ background: V2_GOLD, color: V2_INK }}
+                    className="min-h-[52px] rounded-none px-[26px] py-4 text-[15px] font-extrabold"
+                    style={{ background: V3_GOLD, color: V3_INK }}
                   >
                     {t("buyNext", { name: cur.nextName, price: cur.nextPrice })}
                   </button>
                   <PayHint
                     saved={cards[0] ?? null}
                     onNewCard={() => buy(false)}
-                    className="text-sm text-[#8A8494]"
-                    buttonClassName="bg-transparent p-0 text-sm font-semibold text-[#B07A33] underline underline-offset-4"
+                    className="text-sm text-[#6B6461]"
+                    buttonClassName="bg-transparent p-0 text-sm font-semibold text-[#B99353] underline underline-offset-4"
                   />
                 </div>
               ) : null}
 
               {n >= 5 ? (
-                <span className="relative flex min-h-[52px] items-center justify-center gap-2 rounded-full bg-[#E3EBDD] px-5 text-[15px] font-bold text-[#4B6B43]">
+                <span className="relative flex min-h-[52px] items-center justify-center gap-2 rounded-none bg-[#E3EBDD] px-5 text-[15px] font-bold text-[#4B6B43]">
                   ✓ {t("allOpen")}
                 </span>
               ) : null}
@@ -406,7 +406,7 @@ export function V2Cabinet({
 
       <section className="flex flex-col gap-4 pt-8">
         <div className="flex flex-wrap items-end justify-between gap-4">
-          <span className="font-display text-[clamp(30px,4vw,48px)] font-medium leading-none">{t("stars")}</span>
+          <span className="font-[Forum,serif] text-[clamp(30px,4vw,48px)] font-medium leading-none">{t("stars")}</span>
           <span className="text-sm text-[#6E6878]">{t("starsCount", { n: stars.length })}</span>
         </div>
         <div className="grid grid-cols-[repeat(auto-fill,minmax(220px,1fr))] gap-4">
@@ -420,10 +420,10 @@ export function V2Cabinet({
                   setSelectedId(s.id);
                   window.scrollTo({ top: 0, behavior: "smooth" });
                 }}
-                className="flex flex-col items-start gap-4 rounded-[36px] bg-white p-6 text-left"
+                className="flex flex-col items-start gap-4 rounded-none bg-white p-6 text-left"
                 style={{
-                  color: V2_INK,
-                  outline: on ? `1.5px solid ${V2_GOLD}` : "1.5px solid transparent",
+                  color: V3_INK,
+                  outline: on ? `1.5px solid ${V3_GOLD}` : "1.5px solid transparent",
                   boxShadow: on ? "0 12px 30px rgba(43,26,51,.10)" : "none"
                 }}
               >
@@ -435,9 +435,9 @@ export function V2Cabinet({
                   />
                 </div>
                 <div className="flex flex-col items-start gap-1">
-                  <span className="text-[11px] font-bold tracking-[0.16em] text-[#B07A33]">{relEyebrow(s.relation, t)}</span>
-                  <span className="font-display text-[26px] font-medium leading-[1.05]">{s.name}</span>
-                  <span className="text-[13px] text-[#8A8494]">
+                  <span className="text-[11px] font-bold tracking-[0.16em] text-[#B99353]">{relEyebrow(s.relation, t)}</span>
+                  <span className="font-[Forum,serif] text-[26px] font-medium leading-[1.05]">{s.name}</span>
+                  <span className="text-[13px] text-[#6B6461]">
                     <LtrText>{s.date}</LtrText>
                   </span>
                 </div>
@@ -445,7 +445,7 @@ export function V2Cabinet({
                   {order.map((id, i) => (
                     <span
                       key={id}
-                      className="h-1 rounded-full"
+                      className="h-1 rounded-none"
                       style={{ background: i < s.unlockedCount ? SPHERE_TINT[id].a2 : "#E8E2EC" }}
                     />
                   ))}
@@ -459,21 +459,21 @@ export function V2Cabinet({
           <button
             type="button"
             onClick={openCreate}
-            className="flex min-h-[300px] flex-col items-center justify-center gap-3 rounded-[36px] border border-dashed border-[rgba(43,26,51,.22)] bg-transparent p-6"
+            className="flex min-h-[300px] flex-col items-center justify-center gap-3 rounded-none border border-dashed border-[rgba(43,26,51,.22)] bg-transparent p-6"
           >
-            <span className="flex h-14 w-14 items-center justify-center rounded-full bg-[#F8EACB] text-2xl font-medium" style={{ color: V2_INK }}>
+            <span className="flex h-14 w-14 items-center justify-center rounded-none bg-[#F8EACB] text-2xl font-medium" style={{ color: V3_INK }}>
               +
             </span>
-            <span className="text-base font-bold" style={{ color: V2_INK }}>
+            <span className="text-base font-bold" style={{ color: V3_INK }}>
               {t("createStar")}
             </span>
-            <span className="max-w-[200px] text-center text-[13px] leading-relaxed text-[#8A8494]">{t("createHint")}</span>
+            <span className="max-w-[200px] text-center text-[13px] leading-relaxed text-[#6B6461]">{t("createHint")}</span>
           </button>
         </div>
       </section>
 
       {toast ? (
-        <div className="fixed bottom-7 left-1/2 z-[60] -translate-x-1/2 rounded-[18px] bg-[#2B1A33] px-5 py-3.5 text-sm font-semibold text-white shadow-[0_12px_30px_rgba(43,26,51,.25)]">
+        <div className="fixed bottom-7 left-1/2 z-[60] -translate-x-1/2 rounded-none bg-[#E12020] px-5 py-3.5 text-sm font-semibold text-white shadow-[0_12px_30px_rgba(43,26,51,.25)]">
           {toast}
         </div>
       ) : null}
@@ -486,10 +486,10 @@ export function V2Cabinet({
           <div
             onClick={(e) => e.stopPropagation()}
             className="flex max-h-[90vh] w-full max-w-[500px] flex-col gap-[18px] overflow-y-auto rounded-[32px] bg-white p-8 shadow-[0_30px_80px_rgba(43,26,51,.25)]"
-            style={{ color: V2_INK }}
+            style={{ color: V3_INK }}
           >
             <div className="flex items-center justify-between gap-3">
-              <span className="font-display text-[28px] font-medium leading-none">
+              <span className="font-[Forum,serif] text-[28px] font-medium leading-none">
                 {sheet === "create"
                   ? t("modalCreate")
                   : sheet === "edit"
@@ -504,8 +504,8 @@ export function V2Cabinet({
                 type="button"
                 aria-label={t("close")}
                 onClick={close}
-                className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-[#F8F1E9] text-xl"
-                style={{ color: V2_INK }}
+                className="flex h-11 w-11 shrink-0 items-center justify-center rounded-none bg-[#F6F3F3] text-xl"
+                style={{ color: V3_INK }}
               >
                 ×
               </button>
@@ -548,10 +548,10 @@ export function V2Cabinet({
                           key={r}
                           type="button"
                           onClick={() => setForm((f) => ({ ...f, rel: r }))}
-                          className="min-h-10 rounded-full px-3.5 py-2 text-sm font-bold"
+                          className="min-h-10 rounded-none px-3.5 py-2 text-sm font-bold"
                           style={{
-                            background: on ? V2_INK : "transparent",
-                            color: on ? "#FFFFFF" : "#5B5566",
+                            background: on ? V3_INK : "transparent",
+                            color: on ? "#FFFFFF" : "#4A4441",
                             border: on ? "none" : "1px solid rgba(43,26,51,.16)"
                           }}
                         >
@@ -562,8 +562,8 @@ export function V2Cabinet({
                   </div>
                 </div>
                 {sheet === "edit" ? (
-                  <div className="flex gap-2.5 rounded-[18px] bg-[#F8F1E9] px-3.5 py-3 text-[13px] leading-relaxed text-[#5B5566]">
-                    <span className="mt-1.5 h-2 w-2 shrink-0 rounded-full" style={{ border: "1.5px solid #C78A3E" }} />
+                  <div className="flex gap-2.5 rounded-none bg-[#F6F3F3] px-3.5 py-3 text-[13px] leading-relaxed text-[#4A4441]">
+                    <span className="mt-1.5 h-2 w-2 shrink-0 rounded-none" style={{ border: "1.5px solid #C78A3E" }} />
                     <span>{t("noteEdit")}</span>
                   </div>
                 ) : null}
@@ -572,7 +572,7 @@ export function V2Cabinet({
                   type="button"
                   onClick={saveStar}
                   disabled={pending}
-                  className="min-h-[54px] rounded-full bg-[#2B1A33] py-4 text-[15px] font-bold text-white disabled:opacity-70"
+                  className="min-h-[54px] rounded-none bg-[#E12020] py-4 text-[15px] font-bold text-white disabled:opacity-70"
                 >
                   {sheet === "edit" ? t("save") : t("build")}
                 </button>
@@ -596,9 +596,9 @@ export function V2Cabinet({
                 </label>
                 <div className="flex flex-col gap-2">
                   <span className="text-[13px] font-bold">{t("savedCard")}</span>
-                  {cards.length === 0 ? <p className="m-0 text-sm text-[#8A8494]">{t("noSavedCard")}</p> : null}
+                  {cards.length === 0 ? <p className="m-0 text-sm text-[#6B6461]">{t("noSavedCard")}</p> : null}
                   {cards.map((c) => (
-                    <div key={c.id} className="flex items-center justify-between gap-3 rounded-[18px] bg-[#F8F1E9] px-3.5 py-3">
+                    <div key={c.id} className="flex items-center justify-between gap-3 rounded-none bg-[#F6F3F3] px-3.5 py-3">
                       <span className="text-[15px] font-bold">{cardLabel(c.brand, c.last4)}</span>
                       <button
                         type="button"
@@ -623,17 +623,17 @@ export function V2Cabinet({
                   type="button"
                   onClick={saveProfile}
                   disabled={pending}
-                  className="min-h-[54px] rounded-full bg-[#2B1A33] py-4 text-[15px] font-bold text-white"
+                  className="min-h-[54px] rounded-none bg-[#E12020] py-4 text-[15px] font-bold text-white"
                 >
                   {t("save")}
                 </button>
-                <Link href={v2Href("/forgot-password")} className="text-center text-sm font-semibold">
+                <Link href="/forgot-password" className="text-center text-sm font-semibold">
                   {t("changePassword")}
                 </Link>
                 <a href="/api/me/export" className="text-center text-sm font-semibold">
                   {t("exportData")}
                 </a>
-                <p className="text-[13px] leading-relaxed text-[#8A8494]">{t("deleteLead")}</p>
+                <p className="text-[13px] leading-relaxed text-[#6B6461]">{t("deleteLead")}</p>
                 <input value={deleteConfirm} onChange={(e) => setDeleteConfirm(e.target.value)} placeholder={user.email} className={inputClass} />
                 <button type="button" onClick={wipeAccount} disabled={pending} className="min-h-11 bg-transparent text-sm font-bold text-[#A4472F]">
                   {t("deleteAccount")}
@@ -643,18 +643,18 @@ export function V2Cabinet({
 
             {sheet === "purchases" ? (
               <div className="flex flex-col gap-2.5">
-                {purchases.length === 0 ? <p className="text-sm text-[#8A8494]">{t("noPurchases")}</p> : null}
+                {purchases.length === 0 ? <p className="text-sm text-[#6B6461]">{t("noPurchases")}</p> : null}
                 {purchases.map((p) => (
-                  <div key={p.id} className="flex justify-between gap-3 rounded-[18px] bg-[#F8F1E9] px-4 py-3.5">
+                  <div key={p.id} className="flex justify-between gap-3 rounded-none bg-[#F6F3F3] px-4 py-3.5">
                     <div>
                       <div className="font-bold">{p.name}</div>
-                      <div className="text-xs text-[#8A8494]">
+                      <div className="text-xs text-[#6B6461]">
                         <LtrText>{p.date}</LtrText>
                       </div>
                     </div>
                     <div className="text-right text-sm">
                       <div>{p.amount}</div>
-                      <div className="text-[#8A8494]">{p.status}</div>
+                      <div className="text-[#6B6461]">{p.status}</div>
                     </div>
                   </div>
                 ))}
@@ -663,10 +663,10 @@ export function V2Cabinet({
 
             {sheet === "support" ? (
               <>
-                <p className="text-[15px] leading-relaxed text-[#5B5566]">{t("supportBody")}</p>
+                <p className="text-[15px] leading-relaxed text-[#4A4441]">{t("supportBody")}</p>
                 <a
                   href="mailto:hello@soulstar.local"
-                  className="flex min-h-[54px] items-center justify-center rounded-full bg-[#2B1A33] py-4 text-center text-[15px] font-bold text-white no-underline"
+                  className="flex min-h-[54px] items-center justify-center rounded-none bg-[#E12020] py-4 text-center text-[15px] font-bold text-white no-underline"
                 >
                   {t("supportCta")}
                 </a>
@@ -680,15 +680,15 @@ export function V2Cabinet({
 }
 
 function SphereChip({ id, name, st }: { id: SphereId | null; name: string; st: "o" | "x" | "l" }) {
-  const tint = id ? SPHERE_TINT[id] : V2_NEU;
+  const tint = id ? SPHERE_TINT[id] : V3_NEU;
   const v: Record<"o" | "x" | "l", CSSProperties> = {
     o: { background: tint.t, color: tint.ink },
     x: { background: "#FFFFFF", color: tint.ink, outline: "1.5px dashed " + tint.acc, outlineOffset: -2 },
-    l: { background: "transparent", color: "#8A8494" }
+    l: { background: "transparent", color: "#6B6461" }
   };
   return (
-    <span className="flex shrink-0 items-center gap-2 whitespace-nowrap rounded-full px-3 py-2 text-sm font-bold" style={v[st]}>
-      <span className="h-2 w-2 shrink-0 rounded-full" style={{ background: st === "l" ? "#D9D4DE" : tint.a2 }} />
+    <span className="flex shrink-0 items-center gap-2 whitespace-nowrap rounded-none px-3 py-2 text-sm font-bold" style={v[st]}>
+      <span className="h-2 w-2 shrink-0 rounded-none" style={{ background: st === "l" ? "#D9D4DE" : tint.a2 }} />
       {name}
       {st !== "o" ? <V2LockIcon /> : null}
     </span>

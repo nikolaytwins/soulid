@@ -3,11 +3,12 @@ import { auth } from "@/lib/auth";
 import { loadStarPage, loadSphereArcs } from "@/lib/domain/star-page";
 import { loadPatternReadings } from "@/lib/domain/patterns";
 import { SHOW_COMBINATIONS } from "@/lib/domain/features";
-import { StarExperience } from "@/components/star/StarExperience";
+import { V3StarExperience } from "@/components/v3/StarExperience";
 import { getInterpretation } from "@/lib/domain/content";
 import { SPHERE_IDS, type SphereId } from "@/lib/engine";
 import { getTranslations } from "next-intl/server";
 import type { ArcReading } from "@/lib/domain/star-page";
+import { listNavStars } from "@/lib/domain/nav-stars";
 
 export const dynamic = "force-dynamic";
 
@@ -59,14 +60,25 @@ export default async function StarPage({
       }
     : null;
   const patterns = SHOW_COMBINATIONS ? await loadPatternReadings(model.star, locale, model.unlocked) : [];
+  const stars = session?.user?.id ? await listNavStars(session.user.id, locale) : [];
 
   return (
-    <StarExperience
+    <V3StarExperience
       model={model}
       readings={readings}
       missionReading={missionReading}
       patterns={patterns}
       focusLatest={paid === "1"}
+      stars={stars}
+      user={
+        session?.user
+          ? {
+              name: session.user.name,
+              email: session.user.email,
+              role: session.user.role
+            }
+          : null
+      }
     />
   );
 }

@@ -4,15 +4,15 @@
 
 html,
 body {
-  background: #f5f0ea;
-  color: #2a211d;
+  background: #f6f3f3;
+  color: #1a1a1a;
   max-width: 100%;
   overflow-x: clip;
   -webkit-font-smoothing: antialiased;
 }
 
 html[dir="rtl"] body {
-  font-family: "IBM Plex Sans Arabic", Manrope, system-ui, sans-serif;
+  font-family: "IBM Plex Sans Arabic", "Noto Sans", system-ui, sans-serif;
 }
 
 .star-ltr {
@@ -20,10 +20,10 @@ html[dir="rtl"] body {
 }
 
 a {
-  color: #b9813f;
+  color: #1a1a1a;
 }
 a:hover {
-  color: #8e5f2a;
+  color: #e12020;
 }
 
 button {
@@ -37,21 +37,6 @@ button {
   scrollbar-width: none;
 }
 
-.v2-root {
-  background: #f8f1e9;
-  color: #2b1a33;
-}
-.v2-root a {
-  color: #b07a33;
-}
-.v2-root a:hover {
-  color: #8a5a24;
-}
-
-.v3-root {
-  background: #f6f3f3;
-  color: #1a1a1a;
-}
 .v3-root a {
   color: #1a1a1a;
 }

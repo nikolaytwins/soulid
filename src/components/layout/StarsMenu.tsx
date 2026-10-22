@@ -6,24 +6,11 @@ import { Link, usePathname } from "@/i18n/routing";
 import { LtrText } from "@/components/ui/LtrText";
 import { NewStarDialog } from "./NewStarDialog";
 import type { NavStar } from "@/lib/domain/nav-stars";
-import { isV2Path, v2Href } from "@/lib/v2";
-import { isV3Path, v3Href } from "@/lib/v3";
+import { V3_FAINT, V3_INK, V3_GOLD } from "@/lib/v3";
 
 export function StarsMenu({ stars }: { stars: NavStar[] }) {
   const t = useTranslations("nav");
   const pathname = usePathname();
-  const v2 = isV2Path(pathname);
-  const v3 = isV3Path(pathname);
-  function starHref(id: string) {
-    if (v3) return v3Href(`/star/${id}`);
-    if (v2) return v2Href(`/star/${id}`);
-    return `/star/${id}`;
-  }
-  function accountHref() {
-    if (v2) return v2Href("/account");
-    // v3 account comes later — keep classic cabinet for now
-    return "/account";
-  }
   const [open, setOpen] = useState(false);
   const [create, setCreate] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
@@ -43,7 +30,8 @@ export function StarsMenu({ stars }: { stars: NavStar[] }) {
         aria-expanded={open}
         aria-haspopup="menu"
         onClick={() => setOpen((v) => !v)}
-        className="flex h-9 shrink-0 items-center gap-1 whitespace-nowrap rounded-full border border-[rgba(80,60,45,0.2)] bg-card px-2.5 text-xs font-semibold text-muted md:h-11 md:gap-1.5 md:px-4 md:text-sm"
+        className="flex h-9 shrink-0 items-center gap-1 whitespace-nowrap border border-[rgba(26,26,26,0.15)] bg-[rgba(255,255,255,.55)] px-2.5 text-xs font-semibold md:h-11 md:gap-1.5 md:px-4 md:text-sm"
+        style={{ color: V3_INK }}
       >
         {t("myStars")}
         <svg width="10" height="6" viewBox="0 0 10 6" aria-hidden className={open ? "rotate-180" : undefined}>
@@ -53,37 +41,40 @@ export function StarsMenu({ stars }: { stars: NavStar[] }) {
       {open ? (
         <div
           role="menu"
-          className="absolute end-0 z-30 mt-2 w-[260px] rounded-[18px] border border-line bg-card p-2 shadow-[0_20px_50px_rgba(42,33,29,.15)]"
+          className="absolute end-0 z-30 mt-2 w-[260px] bg-white p-2 shadow-[0_20px_50px_rgba(26,26,26,.12)]"
         >
           {stars.length ? (
             <div className="mb-1.5 max-h-[240px] overflow-y-auto">
               {stars.map((s) => {
-                const href = starHref(s.id);
-                const on =
-                  pathname === href ||
-                  pathname === `/star/${s.id}` ||
-                  pathname === `/v2/star/${s.id}` ||
-                  pathname === `/v3/star/${s.id}`;
+                const href = `/star/${s.id}`;
+                const on = pathname === href || pathname.endsWith(`/star/${s.id}`);
                 return (
                   <Link
                     key={s.id}
                     href={href}
                     role="menuitem"
                     onClick={() => setOpen(false)}
-                    className={`flex items-center justify-between gap-2 rounded-[10px] px-3 py-2.5 text-sm no-underline ${
-                      on ? "bg-ink font-semibold text-card" : "text-ink hover:bg-sand"
-                    }`}
+                    className="flex items-center justify-between gap-2 px-3 py-2.5 text-sm no-underline"
+                    style={{
+                      background: on ? V3_INK : "transparent",
+                      color: on ? "#FFFFFF" : V3_INK,
+                      fontWeight: on ? 600 : 400
+                    }}
                   >
                     <span className="truncate">{s.label}</span>
                     {s.label !== s.date ? (
-                      <LtrText className={`shrink-0 text-[11px] ${on ? "text-card/70" : "text-faint"}`}>{s.date}</LtrText>
+                      <LtrText className={`shrink-0 text-[11px] ${on ? "text-white/70" : "text-[#6B6461]"}`}>
+                        {s.date}
+                      </LtrText>
                     ) : null}
                   </Link>
                 );
               })}
             </div>
           ) : (
-            <p className="px-3 py-2.5 text-sm text-faint">{t("noStars")}</p>
+            <p className="px-3 py-2.5 text-sm" style={{ color: V3_FAINT }}>
+              {t("noStars")}
+            </p>
           )}
           <button
             type="button"
@@ -92,15 +83,17 @@ export function StarsMenu({ stars }: { stars: NavStar[] }) {
               setOpen(false);
               setCreate(true);
             }}
-            className="flex w-full items-center rounded-[10px] px-3 py-2.5 text-left text-sm font-semibold text-gold-deep hover:bg-sand"
+            className="flex w-full items-center px-3 py-2.5 text-left text-sm font-semibold"
+            style={{ color: V3_GOLD }}
           >
             + {t("newStar")}
           </button>
           <Link
-            href={accountHref()}
+            href="/account"
             role="menuitem"
             onClick={() => setOpen(false)}
-            className="flex w-full items-center rounded-[10px] px-3 py-2.5 text-sm text-muted no-underline hover:bg-sand"
+            className="flex w-full items-center px-3 py-2.5 text-sm no-underline"
+            style={{ color: V3_FAINT }}
           >
             {t("allStars")}
           </Link>

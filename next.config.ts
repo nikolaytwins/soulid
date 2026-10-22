@@ -7,6 +7,14 @@ const nextConfig: NextConfig = {
   output: "standalone",
   poweredByHeader: false,
   eslint: { ignoreDuringBuilds: true },
+  async redirects() {
+    return [
+      { source: "/:locale/v2", destination: "/:locale", permanent: true },
+      { source: "/:locale/v2/:path*", destination: "/:locale/:path*", permanent: true },
+      { source: "/:locale/v3", destination: "/:locale", permanent: true },
+      { source: "/:locale/v3/:path*", destination: "/:locale/:path*", permanent: true }
+    ];
+  },
   async headers() {
     return [
       {

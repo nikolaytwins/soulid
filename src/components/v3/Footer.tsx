@@ -20,9 +20,6 @@ export async function V3Footer() {
           <Link href="/legal/terms" className="no-underline" style={{ color: V3_FAINT }}>
             {t("legal.terms")}
           </Link>
-          <Link href="/" className="no-underline" style={{ color: V3_FAINT }}>
-            {t("v2.classic")}
-          </Link>
         </div>
       </div>
     </footer>

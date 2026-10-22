@@ -7,7 +7,7 @@ import { formatMoney, isIndividuallySold, productName } from "@/lib/domain/catal
 import { ensureFreeEntitlements, getUnlockOrder, nextPurchasable } from "@/lib/domain/access";
 import { parseRelation } from "@/lib/domain/relations";
 import { SPHERE_IDS, type SphereId, type StarResult } from "@/lib/engine";
-import { Cabinet, type CabinetPurchase, type CabinetStarData } from "@/components/account/Cabinet";
+import { V3Cabinet as Cabinet, type CabinetPurchase, type CabinetStarData } from "@/components/v3/Cabinet";
 import type { CabinetStarLabels } from "@/components/account/CabinetStar";
 import { listSavedCards } from "@/lib/payments/saved";
 
@@ -107,6 +107,8 @@ export default async function AccountPage({
       relation,
       date: formatDob(p.dateOfBirth, locale),
       unlockedCount: order.filter((s) => unlocked.has(s)).length,
+      unlocked: order.filter((s) => unlocked.has(s)),
+      star,
       values: {
         personality: star?.core.personality.value ?? 0,
         spirituality: star?.core.spirituality.value ?? 0,
