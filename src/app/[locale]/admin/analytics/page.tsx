@@ -41,7 +41,7 @@ export default async function AdminAnalytics({
     <div>
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
-          <h1 className="font-serif text-4xl font-medium">{t("analytics")}</h1>
+          <h1 className="font-[Forum,serif] text-4xl font-normal tracking-[0.02em]">{t("analytics")}</h1>
           <p className="mt-3 max-w-xl text-sm text-muted">{t("analyticsLead")}</p>
         </div>
         <div className="flex gap-2">
@@ -49,8 +49,8 @@ export default async function AdminAnalytics({
             <Link
               key={item}
               href={`/admin/analytics?range=${item}`}
-              className={`rounded-full px-3 py-1.5 text-sm no-underline ${
-                range === item ? "bg-ink text-card" : "bg-card text-ink"
+              className={`rounded-none px-3.5 py-1.5 text-sm no-underline ${
+                range === item ? "admin-pill-on" : "admin-pill-off"
               }`}
             >
               {t(`analyticsRange_${item}`)}
@@ -61,7 +61,7 @@ export default async function AdminAnalytics({
 
       <div className="mt-6 grid grid-cols-2 gap-4 md:grid-cols-3 xl:grid-cols-6">
         {kpis.map(([label, value]) => (
-          <div key={label} className="rounded-2xl border border-line bg-card p-5">
+          <div key={label} className="rounded-none border border-[rgba(26,26,26,.10)] bg-[rgba(255,255,255,.55)] p-5">
             <div className="text-sm text-faint">{label}</div>
             <div className="font-sans text-4xl font-semibold">
               <LtrText>{value}</LtrText>
@@ -71,7 +71,7 @@ export default async function AdminAnalytics({
         ))}
       </div>
 
-      <div className="mt-4 rounded-2xl border border-line bg-card px-5 py-4 text-sm text-muted">
+      <div className="mt-4 rounded-none border border-[rgba(26,26,26,.10)] bg-[rgba(255,255,255,.55)] px-5 py-4 text-sm text-muted">
         {t("analyticsRevenue", {
           money: formatMoney(report.paidAmount, "RUB", "ru"),
           n: report.paidCount
@@ -81,8 +81,8 @@ export default async function AdminAnalytics({
       </div>
 
       <div className="mt-8 grid gap-6 lg:grid-cols-2">
-        <section className="rounded-2xl border border-line bg-card p-5">
-          <h2 className="font-serif text-2xl">{t("analyticsFunnel")}</h2>
+        <section className="rounded-none border border-[rgba(26,26,26,.10)] bg-[rgba(255,255,255,.55)] p-5">
+          <h2 className="font-[Forum,serif] text-2xl font-normal">{t("analyticsFunnel")}</h2>
           <p className="mt-1 text-sm text-muted">{t("analyticsFunnelLead")}</p>
           <div className="mt-5 flex flex-col gap-3">
             {report.funnel.map((step) => (
@@ -95,9 +95,9 @@ export default async function AdminAnalytics({
                     <LtrText>{pct(step.conversionFromStart)}</LtrText>
                   </span>
                 </div>
-                <div className="h-2 overflow-hidden rounded-full bg-cream">
+                <div className="h-2 overflow-hidden rounded-none bg-[rgba(26,26,26,.08)]">
                   <div
-                    className="h-full rounded-full bg-gold-deep"
+                    className="h-full rounded-none bg-[#B99353]"
                     style={{ width: `${Math.max(step.count === 0 ? 0 : 6, (step.count / funnelMax) * 100)}%` }}
                   />
                 </div>
@@ -106,10 +106,10 @@ export default async function AdminAnalytics({
           </div>
         </section>
 
-        <section className="rounded-2xl border border-line bg-card p-5">
-          <h2 className="font-serif text-2xl">{t("analyticsDrop")}</h2>
+        <section className="rounded-none border border-[rgba(26,26,26,.10)] bg-[rgba(255,255,255,.55)] p-5">
+          <h2 className="font-[Forum,serif] text-2xl font-normal">{t("analyticsDrop")}</h2>
           <p className="mt-1 text-sm text-muted">{t("analyticsDropLead")}</p>
-          <div className="mt-5 flex flex-col overflow-hidden rounded-xl border border-line">
+          <div className="mt-5 flex flex-col overflow-hidden rounded-none border border-[rgba(26,26,26,.10)]">
             {report.stuck.length === 0 ? (
               <div className="px-4 py-6 text-sm text-muted">{t("analyticsEmpty")}</div>
             ) : (
@@ -141,13 +141,13 @@ export default async function AdminAnalytics({
         </section>
       </div>
 
-      <section className="mt-8 rounded-2xl border border-line bg-card p-5">
-        <h2 className="font-serif text-2xl">{t("analyticsDaily")}</h2>
+      <section className="mt-8 rounded-none border border-[rgba(26,26,26,.10)] bg-[rgba(255,255,255,.55)] p-5">
+        <h2 className="font-[Forum,serif] text-2xl font-normal">{t("analyticsDaily")}</h2>
         <div className="mt-5 flex h-40 items-end gap-1">
           {report.daily.map((day) => (
             <div key={day.date} className="flex h-full min-w-0 flex-1 flex-col justify-end" title={`${day.date}: ${day.sessions}`}>
               <div
-                className="w-full rounded-t bg-gold-deep"
+                className="w-full rounded-none bg-[#B99353]"
                 style={{ height: `${Math.max(day.sessions === 0 ? 0 : 4, (day.sessions / maxDaily) * 100)}%` }}
               />
             </div>
@@ -160,9 +160,9 @@ export default async function AdminAnalytics({
       </section>
 
       <section className="mt-8">
-        <h2 className="font-serif text-2xl">{t("analyticsSources")}</h2>
+        <h2 className="font-[Forum,serif] text-2xl font-normal">{t("analyticsSources")}</h2>
         <p className="mt-1 text-sm text-muted">{t("analyticsSourcesLead")}</p>
-        <div className="mt-4 overflow-x-auto rounded-2xl border border-line bg-card">
+        <div className="mt-4 overflow-x-auto rounded-none border border-[rgba(26,26,26,.10)] bg-[rgba(255,255,255,.55)]">
           <table className="w-full text-left text-sm">
             <thead className="text-faint">
               <tr>

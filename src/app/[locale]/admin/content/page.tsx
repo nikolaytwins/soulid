@@ -60,19 +60,20 @@ export default async function AdminContent({
     return `/admin/content?${qs.toString()}`;
   };
 
-  const field = "mt-1 w-full rounded-xl border border-line bg-cream px-3 py-2.5 text-sm";
-  const saveBtn = "rounded-xl bg-ink px-4 py-2.5 text-sm font-semibold text-card";
+  const field =
+    "mt-1 w-full rounded-none border border-[rgba(26,26,26,.15)] bg-[rgba(255,255,255,.72)] px-3 py-2.5 text-sm text-[#1A1A1A]";
+  const saveBtn = "v3-btn-red rounded-none px-4 py-2.5 text-sm font-semibold";
 
   return (
     <div className="flex flex-col gap-6">
       <div>
-        <h1 className="font-serif text-3xl">{t("content")}</h1>
+        <h1 className="font-[Forum,serif] text-3xl font-normal tracking-[0.02em]">{t("content")}</h1>
         <p className="mt-2 max-w-2xl text-sm text-muted">{t("contentLead", { arcana })}</p>
         <p className="mt-2 max-w-2xl text-sm text-muted">{t("contentAutoNote")}</p>
       </div>
 
       {sp.saved ? (
-        <p className="rounded-2xl bg-open-bg px-4 py-3 text-sm text-open-text">
+        <p className="rounded-none bg-[#E3EBDD] px-4 py-3 text-sm text-open-text">
           {t("contentSaved")}
           {sp.auto ? ` ${t("contentSavedAuto", { locales: sp.auto.toUpperCase() })}` : ""}
           {sp.kept ? ` ${t("contentSavedKept", { locales: sp.kept.toUpperCase() })}` : ""}
@@ -88,8 +89,8 @@ export default async function AdminContent({
               sphere: id,
               point: id === "soulMission" ? "apex" : (SPHERE_POINT_IDS as readonly string[]).includes(point) ? point : "apex"
             })}
-            className={`rounded-full px-3.5 py-1.5 text-sm no-underline ${
-              sphere === id ? "bg-ink text-card" : "border border-line bg-card text-ink"
+            className={`rounded-none px-3.5 py-1.5 text-sm no-underline ${
+              sphere === id ? "admin-pill-on" : "admin-pill-off"
             }`}
           >
             {sphereName(id)}
@@ -102,8 +103,8 @@ export default async function AdminContent({
           <Link
             key={id}
             href={href({ point: id })}
-            className={`rounded-full px-3 py-1.5 text-sm no-underline ${
-              point === id ? "bg-gold text-ink" : "border border-line bg-card text-ink"
+            className={`rounded-none px-3.5 py-1.5 text-sm no-underline ${
+              point === id ? "admin-pill-on" : "admin-pill-off"
             }`}
           >
             {id === "leftBase" || id === "rightBase"
@@ -118,8 +119,8 @@ export default async function AdminContent({
           <Link
             key={l}
             href={href({ locale: l })}
-            className={`rounded-full px-3 py-1 text-xs font-semibold no-underline ${
-              contentLocale === l ? "bg-ink text-card" : "border border-line bg-card text-muted"
+            className={`rounded-none px-3 py-1 text-xs font-semibold no-underline ${
+              contentLocale === l ? "admin-pill-on" : "admin-pill-off"
             }`}
           >
             {l.toUpperCase()}
@@ -140,7 +141,7 @@ export default async function AdminContent({
             <a
               key={r.id}
               href={`#arc-${r.arcanaValue}`}
-              className="flex h-8 w-8 items-center justify-center rounded-lg border border-line bg-card text-xs font-semibold no-underline text-ink"
+              className="flex h-8 w-8 items-center justify-center rounded-none border border-[rgba(26,26,26,.15)] bg-card text-xs font-semibold no-underline text-ink"
             >
               {r.arcanaValue}
             </a>
@@ -159,7 +160,7 @@ export default async function AdminContent({
               key={r.id}
               id={`arc-${r.arcanaValue}`}
               action={saveInterpretationAction}
-              className="scroll-mt-24 rounded-2xl border border-line bg-card p-5"
+              className="scroll-mt-24 rounded-none border border-[rgba(26,26,26,.10)] bg-[rgba(255,255,255,.55)] p-5"
             >
               <input type="hidden" name="id" value={r.id} />
               <input type="hidden" name="contentType" value={r.contentType} />
@@ -168,15 +169,15 @@ export default async function AdminContent({
               <input type="hidden" name="returnPoint" value={point} />
               <input type="hidden" name="returnLocale" value={contentLocale} />
               <div className="mb-4 flex items-center gap-3">
-                <span className="flex h-11 w-11 items-center justify-center rounded-full bg-gradient-to-br from-gold-pale to-gold-mid text-sm font-bold text-[#3A2716]">
+                <span className="flex h-11 w-11 items-center justify-center rounded-none bg-[#B99353] text-sm font-bold text-white">
                   {r.arcanaValue}
                 </span>
                 <div>
-                  <div className="text-[11px] font-bold tracking-[0.16em] text-gold-deep">{t("contentArcana", { n: r.arcanaValue, arcana })}</div>
+                  <div className="text-[11px] font-bold tracking-[0.16em] text-[#B99353]">{t("contentArcana", { n: r.arcanaValue, arcana })}</div>
                   <div className="flex flex-wrap items-center gap-2 text-sm text-muted">
                     <span>{sphereName(sphere)}</span>
                     <span
-                      className={`rounded-full px-2 py-0.5 text-[11px] font-semibold ${
+                      className={`rounded-none px-2 py-0.5 text-[11px] font-semibold ${
                         r.origin === "manual"
                           ? "bg-open-bg text-open-text"
                           : r.origin === "auto"
@@ -196,7 +197,7 @@ export default async function AdminContent({
               {structured ? (
                 <div className="mt-4 grid gap-3">
                   {edit.blocks.map((b, i) => (
-                    <div key={i} className="rounded-xl border border-line bg-cream p-3">
+                    <div key={i} className="rounded-none border border-[rgba(26,26,26,.15)] bg-[rgba(255,255,255,.72)] p-3">
                       <input type="hidden" name={`blockMark${i}`} value={b.mark} />
                       <label className="text-xs font-semibold tracking-wide text-faint">
                         {t("contentBlockLabel")}

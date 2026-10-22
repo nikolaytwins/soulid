@@ -12,6 +12,9 @@ export const V3_CARD = "rgba(255,255,255,.44)";
 export const V3_CARD_STRONG = "rgba(255,255,255,.55)";
 export const V3_BOOK_BG = "/v3/book-bg.png";
 
+/** Primary red CTA class — white label at rest and on hover (see globals.css). */
+export const V3_BTN_RED = "v3-btn-red";
+
 export const V3_FONT_DISPLAY = "Forum, serif";
 export const V3_FONT_BODY = "'Noto Sans', system-ui, sans-serif";
 

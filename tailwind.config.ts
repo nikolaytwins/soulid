@@ -5,31 +5,31 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        cream: "#F5F0EA",
-        card: "#FBF8F4",
-        ink: "#2A211D",
-        muted: "#5E534C",
-        faint: "#8E8178",
-        line: "rgba(80,60,45,0.10)",
+        cream: "#F6F3F3",
+        card: "#FFFFFF",
+        ink: "#1A1A1A",
+        muted: "#4A4441",
+        faint: "#6B6461",
+        line: "rgba(26,26,26,0.10)",
         gold: {
-          DEFAULT: "#E2AE63",
-          deep: "#B9813F",
-          text: "#8E5F2A",
-          pale: "#F3CF94",
-          mid: "#D9A055",
-          glow: "#F0B865"
+          DEFAULT: "#B99353",
+          deep: "#B99353",
+          text: "#B99353",
+          pale: "#E8D4B0",
+          mid: "#B99353",
+          glow: "#B99353"
         },
         open: {
           bg: "#E3EBDD",
           text: "#4B6B43"
         },
-        sand: "#F1E7DA",
-        lock: "#A89A8F"
+        sand: "#F6F3F3",
+        lock: "#6B6461"
       },
       fontFamily: {
-        serif: ["Cormorant Garamond", "Georgia", "serif"],
-        sans: ["Manrope", "IBM Plex Sans Arabic", "system-ui", "sans-serif"],
-        display: ["Unbounded", "Manrope", "system-ui", "sans-serif"]
+        serif: ["Forum", "Georgia", "serif"],
+        sans: ["Noto Sans", "IBM Plex Sans Arabic", "system-ui", "sans-serif"],
+        display: ["Forum", "Georgia", "serif"]
       },
       boxShadow: {
         panel: "0 20px 50px rgba(120,85,50,0.08)",

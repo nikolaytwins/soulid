@@ -1,6 +1,6 @@
 import { getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/routing";
-import { V3_FONT_DISPLAY, V3_INK, V3_MUTED, V3_RED } from "@/lib/v3";
+import { V3_BTN_RED, V3_FONT_DISPLAY, V3_INK, V3_MUTED, V3_RED } from "@/lib/v3";
 
 export default async function NotFound() {
   const t = await getTranslations("notFound");
@@ -15,8 +15,7 @@ export default async function NotFound() {
       <p style={{ color: V3_MUTED }}>{t("body")}</p>
       <Link
         href="/"
-        className="px-5 py-3 text-sm font-semibold uppercase tracking-[0.1em] text-white no-underline"
-        style={{ background: V3_RED }}
+        className={`${V3_BTN_RED} px-5 py-3 text-sm font-semibold uppercase tracking-[0.1em] no-underline`}
       >
         {t("home")}
       </Link>

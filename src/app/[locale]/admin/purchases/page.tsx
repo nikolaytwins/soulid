@@ -36,9 +36,9 @@ export default async function AdminPurchases({
 
   return (
     <div>
-      <h1 className="font-serif text-3xl">{t("ledgerTitle")}</h1>
+      <h1 className="font-[Forum,serif] text-3xl font-normal tracking-[0.02em]">{t("ledgerTitle")}</h1>
       <p className="mt-2 max-w-2xl text-sm text-muted">{t("ledgerLead")}</p>
-      <div className="mt-4 rounded-2xl border border-line bg-card px-5 py-4 text-sm text-muted">
+      <div className="mt-4 rounded-none border border-[rgba(26,26,26,.10)] bg-[rgba(255,255,255,.55)] px-5 py-4 text-sm text-muted">
         {t("ledgerPaidSummary", {
           n: paid._count,
           money: formatMoney(paid._sum.amount ?? 0, rows[0]?.currency ?? "USD", "ru")
@@ -49,15 +49,15 @@ export default async function AdminPurchases({
           <Link
             key={id}
             href={id === "all" ? "/admin/purchases" : `/admin/purchases?status=${id}`}
-            className={`rounded-full px-3 py-1.5 text-sm no-underline ${
-              (id === "all" && !status) || status === id ? "bg-ink text-card" : "bg-card text-ink"
+            className={`rounded-none px-3.5 py-1.5 text-sm no-underline ${
+              (id === "all" && !status) || status === id ? "admin-pill-on" : "admin-pill-off"
             }`}
           >
             {t(`ledgerFilter_${id}`)}
           </Link>
         ))}
       </div>
-      <div className="mt-4 overflow-x-auto rounded-2xl border border-line bg-card">
+      <div className="mt-4 overflow-x-auto rounded-none border border-[rgba(26,26,26,.10)] bg-[rgba(255,255,255,.55)]">
         <table className="w-full text-left text-sm">
           <thead className="text-faint">
             <tr>
@@ -84,7 +84,7 @@ export default async function AdminPurchases({
                     <LtrText>{(r.paidAt ?? r.createdAt).toISOString().slice(0, 19)}</LtrText>
                   </td>
                   <td className="px-4 py-3">
-                    <Link href={`/admin/users/${r.userId}`} className="font-semibold text-gold-deep">
+                    <Link href={`/admin/users/${r.userId}`} className="font-semibold text-[#B99353]">
                       {r.user.email}
                     </Link>
                   </td>
@@ -100,9 +100,9 @@ export default async function AdminPurchases({
         </table>
       </div>
 
-      <h2 className="mt-10 font-serif text-2xl">{t("ledgerLog")}</h2>
+      <h2 className="mt-10 font-[Forum,serif] text-2xl font-normal">{t("ledgerLog")}</h2>
       <p className="mt-1 text-sm text-muted">{t("ledgerLogLead")}</p>
-      <div className="mt-4 overflow-x-auto rounded-2xl border border-line bg-card">
+      <div className="mt-4 overflow-x-auto rounded-none border border-[rgba(26,26,26,.10)] bg-[rgba(255,255,255,.55)]">
         <table className="w-full text-left text-sm">
           <thead className="text-faint">
             <tr>

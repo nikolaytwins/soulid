@@ -16,7 +16,7 @@ import { STAR_RELATIONS, type StarRelation } from "@/lib/domain/relations";
 import { ZONE_TO_SPHERE, type SphereId, type StarResult } from "@/lib/engine";
 import { PayHint } from "@/components/pay/PayHint";
 import { cardLabel } from "@/lib/payments/card-label";
-import { SPHERE_TINT, V3_GOLD, V3_INK, V3_NEU, V3_RED, V3_FONT_DISPLAY } from "@/lib/v3";
+import { SPHERE_TINT, V3_BTN_RED, V3_GOLD, V3_INK, V3_NEU, V3_RED, V3_FONT_DISPLAY } from "@/lib/v3";
 import { V2StarSvg } from "./StarSvg";
 import { V2LockIcon, V2MiniStar } from "./TriangleSvg";
 
@@ -283,7 +283,7 @@ export function V3Cabinet({
           <button
             type="button"
             onClick={openCreate}
-            className="flex min-h-11 items-center rounded-none bg-[#E12020] px-5 py-2.5 text-sm font-bold text-white"
+            className={`${V3_BTN_RED} flex min-h-11 items-center rounded-none px-5 py-2.5 text-sm font-bold`}
           >
             + {t("newStar")}
           </button>
@@ -369,7 +369,7 @@ export function V3Cabinet({
 
               <Link
                 href={`/star/${cur.id}`}
-                className="relative flex min-h-14 items-center justify-between rounded-none bg-[#E12020] py-2 pe-2 ps-[22px] text-[15px] font-bold text-white no-underline"
+                className={`${V3_BTN_RED} relative flex min-h-14 items-center justify-between rounded-none py-2 pe-2 ps-[22px] text-[15px] font-bold no-underline`}
               >
                 {t("continue")}
                 <span className="flex h-10 w-10 items-center justify-center rounded-none bg-white text-lg text-[#1A1A1A]">→</span>
@@ -572,7 +572,7 @@ export function V3Cabinet({
                   type="button"
                   onClick={saveStar}
                   disabled={pending}
-                  className="min-h-[54px] rounded-none bg-[#E12020] py-4 text-[15px] font-bold text-white disabled:opacity-70"
+                  className={`${V3_BTN_RED} min-h-[54px] rounded-none py-4 text-[15px] font-bold`}
                 >
                   {sheet === "edit" ? t("save") : t("build")}
                 </button>
@@ -623,7 +623,7 @@ export function V3Cabinet({
                   type="button"
                   onClick={saveProfile}
                   disabled={pending}
-                  className="min-h-[54px] rounded-none bg-[#E12020] py-4 text-[15px] font-bold text-white"
+                  className={`${V3_BTN_RED} min-h-[54px] rounded-none py-4 text-[15px] font-bold`}
                 >
                   {t("save")}
                 </button>
@@ -666,7 +666,7 @@ export function V3Cabinet({
                 <p className="text-[15px] leading-relaxed text-[#4A4441]">{t("supportBody")}</p>
                 <a
                   href="mailto:hello@soulstar.local"
-                  className="flex min-h-[54px] items-center justify-center rounded-none bg-[#E12020] py-4 text-center text-[15px] font-bold text-white no-underline"
+                  className={`${V3_BTN_RED} flex min-h-[54px] items-center justify-center rounded-none py-4 text-center text-[15px] font-bold no-underline`}
                 >
                   {t("supportCta")}
                 </a>

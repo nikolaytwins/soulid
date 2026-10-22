@@ -29,12 +29,12 @@ export default async function AdminProducts({ params }: { params: Promise<{ loca
   return (
     <div className="flex flex-col gap-10">
       <div>
-        <h1 className="font-serif text-3xl">{t("products")}</h1>
+        <h1 className="font-[Forum,serif] text-3xl font-normal tracking-[0.02em]">{t("products")}</h1>
         <p className="mt-2 max-w-2xl text-sm text-muted">{t("pricesLead")}</p>
       </div>
 
       <section>
-        <h2 className="font-serif text-2xl">{t("orderTitle")}</h2>
+        <h2 className="font-[Forum,serif] text-2xl font-normal">{t("orderTitle")}</h2>
         <p className="mt-1 text-sm text-muted">{t("orderLead")}</p>
         <div className="mt-4">
           <UnlockOrder items={orderItems} />
@@ -42,7 +42,7 @@ export default async function AdminProducts({ params }: { params: Promise<{ loca
       </section>
 
       <section>
-        <h2 className="font-serif text-2xl">{t("pricesTitle")}</h2>
+        <h2 className="font-[Forum,serif] text-2xl font-normal">{t("pricesTitle")}</h2>
         <p className="mt-1 text-sm text-muted">{t("pricesHint")}</p>
         <div className="mt-4 flex flex-col gap-2">
           {spheres.map((p) => (

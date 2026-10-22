@@ -2,19 +2,16 @@
 
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/routing";
+import { au } from "@/lib/admin-ui";
 
 export function AdminModeSwitch({ mode }: { mode: "admin" | "cabinet" }) {
   const t = useTranslations("admin");
-  const pill = (active: boolean) =>
-    `rounded-full px-3 py-1.5 text-sm font-semibold no-underline ${
-      active ? "bg-ink text-card" : "text-muted"
-    }`;
   return (
-    <div className="flex shrink-0 items-center rounded-full border border-[rgba(80,60,45,0.16)] bg-card p-1">
-      <Link href="/admin" className={pill(mode === "admin")}>
+    <div className={au.switchTrack}>
+      <Link href="/admin" className={mode === "admin" ? au.pillOn : `${au.pillOff} border-0 bg-transparent`}>
         {t("modeAdmin")}
       </Link>
-      <Link href="/account" className={pill(mode === "cabinet")}>
+      <Link href="/account" className={mode === "cabinet" ? au.pillOn : `${au.pillOff} border-0 bg-transparent`}>
         {t("modeCabinet")}
       </Link>
     </div>

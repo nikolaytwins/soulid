@@ -75,8 +75,9 @@ export default async function AdminUserCard({
 
   const blocked = Boolean(user.blockedAt);
   const soft = !userHasPassword(user.passwordHash);
-  const field = "mt-1 w-full rounded-xl border border-line bg-cream px-3 py-2.5 text-sm";
-  const saveBtn = "rounded-xl bg-ink px-4 py-2.5 text-sm font-semibold text-card";
+  const field =
+    "mt-1 w-full rounded-none border border-[rgba(26,26,26,.15)] bg-[rgba(255,255,255,.72)] px-3 py-2.5 text-sm text-[#1A1A1A]";
+  const saveBtn = "v3-btn-red rounded-none px-4 py-2.5 text-sm font-semibold";
   const noticeKind = notice ? NOTICES[notice] : undefined;
 
   const sphereActions = SPHERE_IDS.map((sid) => ({ action: sid, label: t("unlockSphere", { name: sphereName(sid) }) }));
@@ -84,19 +85,19 @@ export default async function AdminUserCard({
   return (
     <div className="flex flex-col gap-8">
       <div>
-        <Link href="/admin/users" className="text-sm font-semibold no-underline text-gold-deep">
+        <Link href="/admin/users" className="text-sm font-semibold no-underline text-[#B99353]">
           ← {t("backUsers")}
         </Link>
         <div className="mt-3 flex flex-wrap items-center gap-2">
-          <h1 className="font-serif text-3xl">{user.name || user.email}</h1>
+          <h1 className="font-[Forum,serif] text-3xl font-normal tracking-[0.02em]">{user.name || user.email}</h1>
           {user.role === "admin" ? (
-            <span className="rounded-full bg-[#F1EBE4] px-2.5 py-1 text-xs font-semibold">{t("badgeAdmin")}</span>
+            <span className="rounded-none bg-[rgba(185,147,83,.18)] px-2.5 py-1 text-xs font-semibold">{t("badgeAdmin")}</span>
           ) : null}
           {blocked ? (
-            <span className="rounded-full bg-[#F4D6D0] px-2.5 py-1 text-xs font-semibold text-[#8A2F22]">{t("badgeBlocked")}</span>
+            <span className="rounded-none bg-[#F4D6D0] px-2.5 py-1 text-xs font-semibold text-[#8A2F22]">{t("badgeBlocked")}</span>
           ) : null}
           {soft ? (
-            <span className="rounded-full bg-[#F1EBE4] px-2.5 py-1 text-xs font-semibold text-muted">{t("badgeSoft")}</span>
+            <span className="rounded-none bg-[rgba(185,147,83,.18)] px-2.5 py-1 text-xs font-semibold text-muted">{t("badgeSoft")}</span>
           ) : null}
         </div>
         <p className="mt-1 text-sm text-muted">
@@ -106,7 +107,7 @@ export default async function AdminUserCard({
 
       {noticeKind ? (
         <p
-          className={`rounded-2xl px-4 py-3 text-sm ${
+          className={`rounded-none px-4 py-3 text-sm ${
             noticeKind === "ok" ? "bg-open-bg text-open-text" : "bg-[#F4D6D0] text-[#8A2F22]"
           }`}
         >
@@ -114,8 +115,8 @@ export default async function AdminUserCard({
         </p>
       ) : null}
 
-      <section className="rounded-2xl border border-line bg-card p-5">
-        <h2 className="font-serif text-2xl">{t("person")}</h2>
+      <section className="rounded-none border border-[rgba(26,26,26,.10)] bg-[rgba(255,255,255,.55)] p-5">
+        <h2 className="font-[Forum,serif] text-2xl font-normal">{t("person")}</h2>
         <p className="mt-1 text-sm text-muted">{t("personLead")}</p>
 
         <form action={updateUserEmailAction} className="mt-5 grid gap-2 md:grid-cols-[1fr_auto] md:items-end">
@@ -152,7 +153,7 @@ export default async function AdminUserCard({
           <form action={sendUserPasswordLinkAction}>
             <input type="hidden" name="userId" value={user.id} />
             <input type="hidden" name="locale" value={locale} />
-            <button className="rounded-xl border border-line bg-cream px-4 py-2.5 text-sm font-semibold">
+            <button className="rounded-none border border-[rgba(26,26,26,.15)] bg-[rgba(255,255,255,.72)] px-4 py-2.5 text-sm font-semibold">
               {t("sendPassword")}
             </button>
           </form>
@@ -164,8 +165,8 @@ export default async function AdminUserCard({
             <input type="hidden" name="locale" value={locale} />
             <input type="hidden" name="block" value={blocked ? "0" : "1"} />
             <button
-              className={`rounded-xl px-4 py-2.5 text-sm font-semibold ${
-                blocked ? "bg-ink text-card" : "border border-[#C98478] text-[#8A2F22]"
+              className={`rounded-none px-4 py-2.5 text-sm font-semibold ${
+                blocked ? "admin-pill-on" : "border border-[#C98478] text-[#8A2F22]"
               }`}
             >
               {blocked ? t("unblock") : t("block")}
@@ -176,14 +177,14 @@ export default async function AdminUserCard({
       </section>
 
       <section>
-        <h2 className="font-serif text-2xl">{t("starsSection")}</h2>
+        <h2 className="font-[Forum,serif] text-2xl font-normal">{t("starsSection")}</h2>
         <p className="mt-1 text-sm text-muted">{t("starsLead")}</p>
         {user.profiles.length === 0 ? <p className="mt-4 text-sm text-muted">{t("noStars")}</p> : null}
         <div className="mt-4 flex flex-col gap-4">
           {user.profiles.map((profile) => {
             const open = new Set(profile.entitlements.map((e) => e.sphere));
             return (
-              <article key={profile.id} className="rounded-2xl border border-line bg-card p-5">
+              <article key={profile.id} className="rounded-none border border-[rgba(26,26,26,.10)] bg-[rgba(255,255,255,.55)] p-5">
                 <div className="flex flex-wrap items-center justify-between gap-3">
                   <div>
                     <div className="font-semibold">
@@ -193,7 +194,7 @@ export default async function AdminUserCard({
                       {t("openCount", { n: open.size, total: SPHERE_IDS.length })}
                     </div>
                   </div>
-                  <Link href={`/star/${profile.id}`} className="text-sm font-semibold text-gold-deep">
+                  <Link href={`/star/${profile.id}`} className="text-sm font-semibold text-[#B99353]">
                     {t("openStar")} →
                   </Link>
                 </div>
@@ -201,7 +202,7 @@ export default async function AdminUserCard({
                   {SPHERE_IDS.map((sid) => (
                     <span
                       key={sid}
-                      className={`rounded-full px-2.5 py-1 text-xs font-semibold ${
+                      className={`rounded-none px-2.5 py-1 text-xs font-semibold ${
                         open.has(sid) ? "bg-open-bg text-open-text" : "bg-[#F1EBE4] text-muted"
                       }`}
                     >
@@ -215,18 +216,18 @@ export default async function AdminUserCard({
                     <form key={a.action} action={adminGrantSphereAction}>
                       <input type="hidden" name="profileId" value={profile.id} />
                       <input type="hidden" name="action" value={a.action} />
-                      <button className="rounded-xl bg-ink px-3 py-2 text-xs font-semibold text-card">{a.label}</button>
+                      <button className="v3-btn-red rounded-none px-3 py-2 text-xs font-semibold">{a.label}</button>
                     </form>
                   ))}
                   <form action={adminGrantSphereAction}>
                     <input type="hidden" name="profileId" value={profile.id} />
                     <input type="hidden" name="action" value="all" />
-                    <button className="rounded-xl bg-gold px-3 py-2 text-xs font-semibold text-ink">{t("unlockAll")}</button>
+                    <button className="rounded-none bg-[#B99353] px-3 py-2 text-xs font-semibold text-[#1A1A1A]">{t("unlockAll")}</button>
                   </form>
                   <form action={adminGrantSphereAction}>
                     <input type="hidden" name="profileId" value={profile.id} />
                     <input type="hidden" name="action" value="reset" />
-                    <button className="rounded-xl border border-line bg-cream px-3 py-2 text-xs font-semibold">
+                    <button className="rounded-none border border-[rgba(26,26,26,.15)] bg-[rgba(255,255,255,.72)] px-3 py-2 text-xs font-semibold">
                       {t("resetSpheres")}
                     </button>
                   </form>
@@ -238,10 +239,10 @@ export default async function AdminUserCard({
       </section>
 
       <section>
-        <h2 className="font-serif text-2xl">{t("paymentsSection")}</h2>
+        <h2 className="font-[Forum,serif] text-2xl font-normal">{t("paymentsSection")}</h2>
         {user.purchases.length === 0 ? <p className="mt-3 text-sm text-muted">{t("noPayments")}</p> : null}
         {user.purchases.length > 0 ? (
-          <div className="mt-4 overflow-x-auto rounded-2xl border border-line bg-card">
+          <div className="mt-4 overflow-x-auto rounded-none border border-[rgba(26,26,26,.10)] bg-[rgba(255,255,255,.55)]">
             <table className="w-full text-left text-sm">
               <thead className="text-faint">
                 <tr>
@@ -267,11 +268,11 @@ export default async function AdminUserCard({
       </section>
 
       <section>
-        <h2 className="font-serif text-2xl">{t("emailsSection")}</h2>
+        <h2 className="font-[Forum,serif] text-2xl font-normal">{t("emailsSection")}</h2>
         {user.emails.length === 0 ? <p className="mt-3 text-sm text-muted">{t("noEmails")}</p> : null}
         <ul className="mt-3 flex flex-col gap-2">
           {user.emails.map((mail) => (
-            <li key={mail.id} className="rounded-2xl border border-line bg-card px-4 py-3 text-sm">
+            <li key={mail.id} className="rounded-none border border-[rgba(26,26,26,.10)] bg-[rgba(255,255,255,.55)] px-4 py-3 text-sm">
               <div className="font-semibold">{mail.subject}</div>
               <div className="text-xs text-faint">
                 {mail.template} · {mail.status} · {formatWhen(mail.createdAt, locale)}

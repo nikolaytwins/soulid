@@ -23,6 +23,7 @@ import { LtrText } from "@/components/ui/LtrText";
 import {
   SPHERE_TINT,
   V3_BOOK_BG,
+  V3_BTN_RED,
   V3_CARD,
   V3_FONT_BODY,
   V3_FONT_DISPLAY,
@@ -578,8 +579,8 @@ export function V3StarExperience({
               <button
                 type="button"
                 onClick={() => scrollTo("decode")}
-                className="relative flex min-h-14 w-full items-center justify-between px-[22px] text-[18px] uppercase tracking-[0.12em] text-white"
-                style={{ background: V3_RED, fontFamily: V3_FONT_DISPLAY }}
+                className={`${V3_BTN_RED} relative flex min-h-14 w-full items-center justify-between px-[22px] text-[18px] uppercase tracking-[0.12em]`}
+                style={{ fontFamily: V3_FONT_DISPLAY }}
               >
                 {t("v2.readDecode")}
                 <span aria-hidden className="text-xl">
@@ -952,8 +953,7 @@ export function V3StarExperience({
                       setActive(nextId);
                       scrollTo("decode");
                     }}
-                    className="min-h-[52px] px-6 py-4 text-[15px] font-bold uppercase tracking-[0.1em] text-white"
-                    style={{ background: V3_RED }}
+                    className={`${V3_BTN_RED} min-h-[52px] px-6 py-4 text-[15px] font-bold uppercase tracking-[0.1em]`}
                   >
                     {t("starPage.readSphere")}
                   </button>
@@ -1103,8 +1103,8 @@ export function V3StarExperience({
                         e.preventDefault();
                         e.stopPropagation();
                       }}
-                      className="relative z-10 min-h-[54px] touch-manipulation py-4 text-[15px] font-bold uppercase tracking-[0.1em] text-white [-webkit-tap-highlight-color:transparent]"
-                      style={{ background: V3_RED, touchAction: "manipulation" }}
+                      className={`${V3_BTN_RED} relative z-10 min-h-[54px] touch-manipulation py-4 text-[15px] font-bold uppercase tracking-[0.1em] [-webkit-tap-highlight-color:transparent]`}
+                      style={{ touchAction: "manipulation" }}
                     >
                       {busy ? "…" : t("starPage.openSpherePrice", { price: model.prices[panel.k].formatted })}
                     </button>
@@ -1184,8 +1184,7 @@ export function V3StarExperience({
                     <button
                       type="button"
                       onClick={() => setPanel({ type: "offer", k: model.nextSphere! })}
-                      className="min-h-[54px] touch-manipulation py-4 text-[15px] font-bold uppercase tracking-[0.1em] text-white"
-                      style={{ background: V3_RED }}
+                      className={`${V3_BTN_RED} min-h-[54px] touch-manipulation py-4 text-[15px] font-bold uppercase tracking-[0.1em]`}
                     >
                       {t("offer.goToNeeded", { name: model.spheres[model.nextSphere].name })}
                     </button>

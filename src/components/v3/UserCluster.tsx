@@ -6,7 +6,7 @@ import { Link, usePathname } from "@/i18n/routing";
 import { signOutAction } from "@/app/[locale]/auth-actions";
 import { StarsMenu } from "@/components/layout/StarsMenu";
 import type { NavStar } from "@/lib/domain/nav-stars";
-import { V3_FAINT, V3_FONT_DISPLAY, V3_GOLD, V3_INK, V3_RED } from "@/lib/v3";
+import { V3_BTN_RED, V3_FAINT, V3_FONT_DISPLAY, V3_GOLD, V3_INK } from "@/lib/v3";
 
 const LOCALES = [
   { id: "ru", label: "RU" },
@@ -62,8 +62,7 @@ export function V3UserCluster({
       ) : (
         <a
           href={`/${locale}/login?next=${encodeURIComponent(`/${locale}${pathname || ""}`)}`}
-          className="flex h-11 items-center px-4 text-sm font-semibold text-white no-underline"
-          style={{ background: V3_RED }}
+          className={`${V3_BTN_RED} flex h-11 items-center px-4 text-sm font-semibold no-underline`}
         >
           {t("nav.login")}
         </a>

@@ -154,8 +154,8 @@ export function FormulaEditor({ initial }: { initial: StarFormula }) {
                 key={part}
                 type="button"
                 onClick={() => togglePart(id, part)}
-                className={`rounded-full px-3 py-1.5 text-sm ${
-                  on ? "bg-ink text-card" : "border border-line bg-cream text-ink"
+                className={`rounded-none px-3 py-1.5 text-sm ${
+                  on ? "admin-pill-on" : "admin-pill-off"
                 }`}
               >
                 {partLabel(part)}
@@ -169,8 +169,8 @@ export function FormulaEditor({ initial }: { initial: StarFormula }) {
 
   return (
     <div className={`flex flex-col gap-10 ${pending ? "opacity-80" : ""}`}>
-      <section className="rounded-2xl border border-line bg-card p-5">
-        <h2 className="font-serif text-2xl">{t("formulaExampleDate")}</h2>
+      <section className="rounded-none border border-[rgba(26,26,26,.10)] bg-[rgba(255,255,255,.55)] p-5">
+        <h2 className="font-[Forum,serif] text-2xl font-normal">{t("formulaExampleDate")}</h2>
         <p className="mt-1 max-w-2xl text-sm text-muted">{t("formulaExampleHint")}</p>
         <div className="mt-4 flex flex-wrap items-end gap-3">
           <label className="flex flex-col gap-1 text-xs text-faint">
@@ -179,7 +179,7 @@ export function FormulaEditor({ initial }: { initial: StarFormula }) {
               type="number"
               value={day}
               onChange={(e) => setDay(Number(e.target.value))}
-              className="w-20 rounded-xl border border-line bg-cream px-3 py-2 text-sm text-ink"
+              className="w-20 rounded-none border border-[rgba(26,26,26,.15)] bg-[rgba(255,255,255,.72)] px-3 py-2 text-sm text-ink"
             />
           </label>
           <label className="flex flex-col gap-1 text-xs text-faint">
@@ -188,7 +188,7 @@ export function FormulaEditor({ initial }: { initial: StarFormula }) {
               type="number"
               value={month}
               onChange={(e) => setMonth(Number(e.target.value))}
-              className="w-20 rounded-xl border border-line bg-cream px-3 py-2 text-sm text-ink"
+              className="w-20 rounded-none border border-[rgba(26,26,26,.15)] bg-[rgba(255,255,255,.72)] px-3 py-2 text-sm text-ink"
             />
           </label>
           <label className="flex flex-col gap-1 text-xs text-faint">
@@ -197,15 +197,15 @@ export function FormulaEditor({ initial }: { initial: StarFormula }) {
               type="number"
               value={year}
               onChange={(e) => setYear(Number(e.target.value))}
-              className="w-28 rounded-xl border border-line bg-cream px-3 py-2 text-sm text-ink"
+              className="w-28 rounded-none border border-[rgba(26,26,26,.15)] bg-[rgba(255,255,255,.72)] px-3 py-2 text-sm text-ink"
             />
           </label>
           {!valid ? <p className="text-sm text-red-700">{t("formulaBadDate")}</p> : null}
           <div className="flex flex-wrap items-center gap-2 pb-0.5">
-            <button type="button" onClick={save} className="rounded-xl bg-ink px-4 py-2 text-sm text-card">
+            <button type="button" onClick={save} className="v3-btn-red rounded-none px-4 py-2 text-sm font-semibold">
               {t("save")}
             </button>
-            <button type="button" onClick={reset} className="rounded-xl border border-line bg-card px-4 py-2 text-sm text-ink">
+            <button type="button" onClick={reset} className="rounded-none border border-[rgba(26,26,26,.10)] bg-[rgba(255,255,255,.55)] px-4 py-2 text-sm text-ink">
               {t("formulaReset")}
             </button>
             {saved ? <p className="text-sm text-muted">{t("formulaSaved")}</p> : null}
@@ -214,7 +214,7 @@ export function FormulaEditor({ initial }: { initial: StarFormula }) {
         {rows ? (
           <div className="mt-5 grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-6">
             {DESTINIES.map(({ id, n }) => (
-              <div key={id} className="rounded-xl bg-cream px-3 py-3 text-center">
+              <div key={id} className="rounded-none bg-[rgba(255,255,255,.72)] px-3 py-3 text-center">
                 <div className="text-[10px] font-semibold tracking-[0.12em] text-faint">
                   {n}. {names[id]}
                 </div>
@@ -228,14 +228,14 @@ export function FormulaEditor({ initial }: { initial: StarFormula }) {
       </section>
 
       <section>
-        <h2 className="font-serif text-2xl">{t("formulaVertices")}</h2>
+        <h2 className="font-[Forum,serif] text-2xl font-normal">{t("formulaVertices")}</h2>
         <p className="mt-1 max-w-2xl text-sm text-muted">{t("formulaVerticesLead")}</p>
         <div className="mt-4 flex flex-col gap-3">
           {DESTINIES.map(({ id, n }) => {
             const spec = formula[id];
             const isDate = DATE_POINT_IDS.includes(id);
             return (
-              <article key={id} className="rounded-2xl border border-line bg-card p-5">
+              <article key={id} className="rounded-none border border-[rgba(26,26,26,.10)] bg-[rgba(255,255,255,.55)] p-5">
                 <header className="flex items-start justify-between gap-3">
                   <div>
                     <p className="font-semibold">{t("formulaDestinyTitle", { n, name: names[id] })}</p>
@@ -249,7 +249,7 @@ export function FormulaEditor({ initial }: { initial: StarFormula }) {
                     <select
                       value={spec.type === "date" ? spec.source : "day"}
                       onChange={(e) => setDateSource(id, e.target.value as DateSource)}
-                      className="mt-1 max-w-xs rounded-xl border border-line bg-cream px-3 py-2 text-ink"
+                      className="mt-1 max-w-xs rounded-none border border-[rgba(26,26,26,.15)] bg-[rgba(255,255,255,.72)] px-3 py-2 text-ink"
                     >
                       {DATE_SOURCES.map((source) => (
                         <option key={source} value={source}>
@@ -269,11 +269,11 @@ export function FormulaEditor({ initial }: { initial: StarFormula }) {
       </section>
 
       <section>
-        <h2 className="font-serif text-2xl">{t("formulaBridges")}</h2>
+        <h2 className="font-[Forum,serif] text-2xl font-normal">{t("formulaBridges")}</h2>
         <p className="mt-1 max-w-2xl text-sm text-muted">{t("formulaBridgesLead")}</p>
         <div className="mt-4 flex flex-col gap-3">
           {EDGES.map(({ id, n, a, b }) => (
-            <article key={id} className="rounded-2xl border border-line bg-card p-5">
+            <article key={id} className="rounded-none border border-[rgba(26,26,26,.10)] bg-[rgba(255,255,255,.55)] p-5">
               <header className="flex items-start justify-between gap-3">
                 <div>
                   <p className="font-semibold">{t("formulaEdgeTitle", { n, a, b })}</p>
@@ -294,7 +294,7 @@ export function FormulaEditor({ initial }: { initial: StarFormula }) {
 
       {star ? (
         <section>
-          <h2 className="font-serif text-2xl">{t("formulaInner")}</h2>
+          <h2 className="font-[Forum,serif] text-2xl font-normal">{t("formulaInner")}</h2>
           <p className="mt-1 max-w-2xl text-sm text-muted">{t("formulaInnerLead")}</p>
           <div className="mt-4 grid gap-3 md:grid-cols-2 xl:grid-cols-3">
             {SPHERE_IDS.map((id) => {
@@ -305,7 +305,7 @@ export function FormulaEditor({ initial }: { initial: StarFormula }) {
                 [t("formulaInnerBase"), tri.leftBase.value, tri.rightBase.value]
               ] as const;
               return (
-                <article key={id} className="rounded-2xl border border-line bg-card p-5">
+                <article key={id} className="rounded-none border border-[rgba(26,26,26,.10)] bg-[rgba(255,255,255,.55)] p-5">
                   <p className="font-semibold">{sphereNames[id]}</p>
                   <ul className="mt-3 flex flex-col gap-2 text-sm">
                     {bits.map(([label, x, y]) => {
@@ -330,10 +330,10 @@ export function FormulaEditor({ initial }: { initial: StarFormula }) {
       ) : null}
 
       <div className="flex flex-wrap items-center gap-3">
-        <button type="button" onClick={save} className="rounded-xl bg-ink px-4 py-2 text-card">
+        <button type="button" onClick={save} className="v3-btn-red rounded-none px-4 py-2 text-sm font-semibold">
           {t("save")}
         </button>
-        <button type="button" onClick={reset} className="rounded-xl border border-line bg-card px-4 py-2 text-ink">
+        <button type="button" onClick={reset} className="rounded-none border border-[rgba(26,26,26,.10)] bg-[rgba(255,255,255,.55)] px-4 py-2 text-ink">
           {t("formulaReset")}
         </button>
         {saved ? <p className="text-sm text-muted">{t("formulaSaved")}</p> : null}
@@ -344,7 +344,7 @@ export function FormulaEditor({ initial }: { initial: StarFormula }) {
 
 function Arcana({ n, label }: { n: number; label: string }) {
   return (
-    <div className="flex h-12 min-w-12 flex-col items-center justify-center rounded-full bg-[linear-gradient(180deg,#F7D9A4,#D9A055)] px-3 text-[#3A2716]">
+    <div className="flex h-12 min-w-12 flex-col items-center justify-center rounded-none bg-[#B99353] px-3 text-white">
       <span className="font-sans text-xl font-bold leading-none">
         <LtrText>{n}</LtrText>
       </span>
@@ -366,7 +366,7 @@ function Working({
 }) {
   const showSum = row.expr.includes("+") || row.reductions.length > 0;
   return (
-    <div className="mt-4 rounded-xl bg-cream px-4 py-3 font-sans text-[15px] leading-relaxed text-ink">
+    <div className="mt-4 rounded-none bg-[rgba(255,255,255,.72)] px-4 py-3 font-sans text-[15px] leading-relaxed text-ink">
       {showSum ? (
         <p>
           <LtrText className="font-semibold">

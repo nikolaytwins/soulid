@@ -28,7 +28,7 @@ export function PriceRow({
   return (
     <form
       ref={formRef}
-      className={`flex flex-wrap items-center gap-3 rounded-2xl border border-line bg-card px-4 py-3 ${pending ? "opacity-70" : ""}`}
+      className={`flex flex-wrap items-center gap-3 rounded-none border border-[rgba(26,26,26,.10)] bg-[rgba(255,255,255,.55)] px-4 py-3 ${pending ? "opacity-70" : ""}`}
       onSubmit={(e) => {
         e.preventDefault();
         submit();
@@ -58,7 +58,7 @@ export function PriceRow({
           step={1}
           defaultValue={amount}
           onBlur={submit}
-          className="w-24 rounded-xl border border-line bg-cream px-3 py-2 text-right"
+          className="w-24 rounded-none border border-[rgba(26,26,26,.15)] bg-[rgba(255,255,255,.72)] px-3 py-2 text-right"
         />
       </label>
     </form>

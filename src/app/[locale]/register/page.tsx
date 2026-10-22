@@ -7,7 +7,7 @@ import { signIn } from "next-auth/react";
 import { useParams, useSearchParams } from "next/navigation";
 import { safeNextPath } from "@/lib/safe-url";
 import { V3AuthCard } from "@/components/v3/AuthCard";
-import { V3_FONT_DISPLAY, V3_MUTED, V3_RED } from "@/lib/v3";
+import { V3_BTN_RED, V3_FONT_DISPLAY, V3_MUTED, V3_RED } from "@/lib/v3";
 
 function RegisterForm() {
   const t = useTranslations("auth");
@@ -65,8 +65,7 @@ function RegisterForm() {
         {error ? <p className="text-sm text-red-700">{error}</p> : null}
         <button
           disabled={pending}
-          className="min-h-12 py-4 text-[15px] font-semibold uppercase tracking-[0.1em] text-white disabled:opacity-60"
-          style={{ background: V3_RED }}
+          className={`${V3_BTN_RED} min-h-12 py-4 text-[15px] font-semibold uppercase tracking-[0.1em]`}
         >
           {t("submitRegister")}
         </button>

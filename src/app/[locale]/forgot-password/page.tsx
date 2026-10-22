@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { V3AuthCard } from "@/components/v3/AuthCard";
+import { V3_BTN_RED } from "@/lib/v3";
 
 export default function ForgotPage() {
   const t = useTranslations("auth");
@@ -35,7 +36,7 @@ export default function ForgotPage() {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
           />
-          <button className="min-h-12 bg-[#E12020] py-4 font-bold text-white">{t("resetSubmit")}</button>
+          <button className={`${V3_BTN_RED} min-h-12 py-4 font-bold`}>{t("resetSubmit")}</button>
         </form>
       )}
     </V3AuthCard>

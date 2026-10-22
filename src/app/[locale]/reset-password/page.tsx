@@ -5,6 +5,7 @@ import { useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/routing";
 import { V3AuthCard } from "@/components/v3/AuthCard";
+import { V3_BTN_RED } from "@/lib/v3";
 
 function ResetForm() {
   const t = useTranslations("auth");
@@ -47,7 +48,7 @@ function ResetForm() {
           onChange={(e) => setPassword(e.target.value)}
         />
         {error ? <p className="text-sm text-red-700">{error}</p> : null}
-        <button className="min-h-12 bg-[#E12020] py-4 font-bold text-white">{t("savePassword")}</button>
+        <button className={`${V3_BTN_RED} min-h-12 py-4 font-bold`}>{t("savePassword")}</button>
       </form>
     </V3AuthCard>
   );

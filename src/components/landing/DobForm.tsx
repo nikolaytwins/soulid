@@ -3,6 +3,7 @@
 import { useRouter } from "@/i18n/routing";
 import { useTranslations } from "next-intl";
 import { useEffect, useMemo, useState } from "react";
+import { V3_BTN_RED } from "@/lib/v3";
 
 function daysInMonth(year: number, month: number) {
   return new Date(year, month, 0).getDate();
@@ -95,7 +96,7 @@ export function DobForm({
       <button
         type="submit"
         disabled={pending}
-        className="min-h-12 bg-[#E12020] px-4 py-4 text-[15px] font-semibold uppercase tracking-[0.1em] text-white disabled:opacity-60"
+        className={`${V3_BTN_RED} min-h-12 px-4 py-4 text-[15px] font-semibold uppercase tracking-[0.1em]`}
       >
         {pending ? "…" : t("cta")}
       </button>
