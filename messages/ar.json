@@ -431,6 +431,7 @@
     "contentBlockText": "نص القسم",
     "contentClear": "مسح النص",
     "contentSaved": "تم الحفظ.",
+    "contentSaveFailed": "تعذر الحفظ.",
     "contentEmpty": "لا نصوص لهذه النقطة بعد.",
     "pricesLead": "ترتيب الفتح أولاً ثم الأسعار. الأسماء كما على النجمة.",
     "orderTitle": "ترتيب الفتح",

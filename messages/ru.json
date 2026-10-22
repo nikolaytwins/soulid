@@ -431,6 +431,7 @@
     "contentBlockText": "Текст блока",
     "contentClear": "очистить текст",
     "contentSaved": "Сохранено.",
+    "contentSaveFailed": "Не удалось сохранить.",
     "contentEmpty": "Для этой точки ещё нет текстов.",
     "pricesLead": "Сначала очередь сфер, потом цены. Названия — как на звезде.",
     "orderTitle": "Очередь открытия",

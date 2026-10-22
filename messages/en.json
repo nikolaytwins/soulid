@@ -431,6 +431,7 @@
     "contentBlockText": "Block text",
     "contentClear": "clear text",
     "contentSaved": "Saved.",
+    "contentSaveFailed": "Could not save.",
     "contentEmpty": "No texts for this point yet.",
     "pricesLead": "Unlock order first, then prices. Names match the star.",
     "orderTitle": "Unlock order",

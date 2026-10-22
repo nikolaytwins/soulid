@@ -86,11 +86,15 @@ export async function reorderUnlocksAction(orderedIds: string[]) {
   revalidateCatalog();
 }
 
-export async function saveInterpretationAction(form: FormData) {
+export async function saveInterpretationAction(form: FormData): Promise<{
+  ok: boolean;
+  sync: { auto: string[]; kept: string[]; fail: string[] };
+}> {
+  const empty = { ok: false as const, sync: { auto: [] as string[], kept: [] as string[], fail: [] as string[] } };
   const admin = await requireAdmin();
-  if (!admin) return;
+  if (!admin) return empty;
   const { serializePlainBody, serializeStructuredBody } = await import("@/lib/domain/content");
-  const { syncAutoTranslations, syncQuery } = await import("@/lib/domain/sync-translations");
+  const { syncAutoTranslations } = await import("@/lib/domain/sync-translations");
   const contentType = String(form.get("contentType") ?? "plain");
   const title = String(form.get("title") ?? "");
   const body =
@@ -104,7 +108,7 @@ export async function saveInterpretationAction(form: FormData) {
         )
       : serializePlainBody(String(form.get("text") ?? ""));
   const current = await prisma.interpretation.findUnique({ where: { id: String(form.get("id")) } });
-  if (!current) return;
+  if (!current) return empty;
   await prisma.interpretation.update({
     where: { id: current.id },
     data: {
@@ -124,15 +128,7 @@ export async function saveInterpretationAction(form: FormData) {
     contentType,
     body
   });
-  const ui = String(form.get("uiLocale") ?? "ru");
-  const sphere = String(form.get("returnSphere") ?? "personality");
-  const point = String(form.get("returnPoint") ?? "apex");
-  const locale = String(form.get("returnLocale") ?? "ru");
-  const { redirect } = await import("next/navigation");
-  const safe = ui === "en" || ui === "ar" ? ui : "ru";
-  redirect(
-    `/${safe}/admin/content?sphere=${encodeURIComponent(sphere)}&point=${encodeURIComponent(point)}&locale=${encodeURIComponent(locale)}&${syncQuery(sync)}`
-  );
+  return { ok: true, sync };
 }
 
 function parseArcanaList(raw: string): number[] {
