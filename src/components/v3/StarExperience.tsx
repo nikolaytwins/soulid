@@ -5,7 +5,7 @@ import { createPortal } from "react-dom";
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/routing";
 import type { SphereId } from "@/lib/engine";
-import { BRIDGE_KIND, ZONE_TO_SPHERE } from "@/lib/engine";
+import { sphereSlotKind, ZONE_TO_SPHERE } from "@/lib/engine";
 import { V2StarSvg, type HoverTip } from "./StarSvg";
 import { V2LockIcon, V2MiniStar, V2TriangleSvg } from "./TriangleSvg";
 import { SphereArt } from "./SphereArt";
@@ -328,7 +328,9 @@ export function V3StarExperience({
       const ks = ptSpheres(hoverTip.j);
       const open = ks.some((s) => unlocked.has(s));
       const ctx = active !== "soulMission" && ks.includes(active) ? active : ks.find((s) => unlocked.has(s));
-      const fatal = BRIDGE_KIND[BRIDGES[hoverTip.j]] === "fatal_error";
+      const pointKey =
+        ctx && model.star.spheres[ctx].leftBase.id === BRIDGES[hoverTip.j] ? "leftBase" : "rightBase";
+      const fatal = ctx ? sphereSlotKind(ctx, pointKey) === "fatal_error" : false;
       eyebrow = (fatal ? t("points.fatal") : t("points.ancestral")).toUpperCase();
       value = open ? t("points.arcana", { arcana, value: model.star.bridges[BRIDGES[hoverTip.j]].value }) : t("points.hidden");
       hint =
@@ -1355,8 +1357,8 @@ function PointPanel({
   const value = model.star.bridges[bridge].value;
   const ks = model.star.bridges[bridge].spheres;
   const other = ks.find((k) => k !== ctx)!;
-  const fatal = BRIDGE_KIND[bridge] === "fatal_error";
   const pointKey = model.star.spheres[ctx].leftBase.id === bridge ? "leftBase" : "rightBase";
+  const fatal = sphereSlotKind(ctx, pointKey) === "fatal_error";
   const content = readings[ctx]?.find((a) => a.point === pointKey)?.content;
   const typeLabel = readings[ctx]?.find((a) => a.point === pointKey)?.role ?? (fatal ? t("points.fatal") : t("points.ancestral"));
   return (

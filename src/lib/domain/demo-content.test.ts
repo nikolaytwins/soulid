@@ -39,26 +39,26 @@ describe("demo placeholders follow the actual point type", () => {
     expect(JSON.parse(money.body).blocks).toHaveLength(4);
   });
 
-  it("marks both bases ancestral and only the bottom inner point as fatal in every sphere", () => {
+  it("marks left base ancestral and right base fatal in every sphere; bottom inner stays ordinary", () => {
     for (const sphere of SPHERE_IDS) {
       expect(demoPointKind(sphere, "leftBase")).toBe("ancestral_program");
-      expect(demoPointKind(sphere, "rightBase")).toBe("ancestral_program");
-      expect(demoPointKind(sphere, "innerBottom")).toBe("fatal_error");
+      expect(demoPointKind(sphere, "rightBase")).toBe("fatal_error");
+      expect(demoPointKind(sphere, "innerBottom")).toBe("past_life");
     }
 
     for (const locale of ["ru", "en", "ar"] as const) {
       for (const sphere of SPHERE_IDS) {
-        expect(demoPointLabel(sphere, "innerBottom", locale)).toBe(ROLE.fatal_error[locale]);
-        const demo = buildDemoInterpretation({ sphere, point: "innerBottom", value: 9, locale });
-        expect(demo.body).toContain(ROLE.fatal_error[locale]);
-        expect(demo.body).not.toContain(ROLE.ancestral_program[locale]);
+        expect(demoPointLabel(sphere, "leftBase", locale)).toBe(ROLE.ancestral_program[locale]);
+        expect(demoPointLabel(sphere, "rightBase", locale)).toBe(ROLE.fatal_error[locale]);
+        expect(demoPointLabel(sphere, "innerBottom", locale)).toBe(ROLE.past_life[locale]);
 
-        for (const point of ["leftBase", "rightBase"] as const) {
-          expect(demoPointLabel(sphere, point, locale)).toBe(ROLE.ancestral_program[locale]);
-          const base = buildDemoInterpretation({ sphere, point, value: 9, locale });
-          expect(base.body).toContain(ROLE.ancestral_program[locale]);
-          expect(base.body).not.toContain(ROLE.fatal_error[locale]);
-        }
+        const left = buildDemoInterpretation({ sphere, point: "leftBase", value: 9, locale });
+        expect(left.body).toContain(ROLE.ancestral_program[locale]);
+        expect(left.body).not.toContain(ROLE.fatal_error[locale]);
+
+        const right = buildDemoInterpretation({ sphere, point: "rightBase", value: 9, locale });
+        expect(right.body).toContain(ROLE.fatal_error[locale]);
+        expect(right.body).not.toContain(ROLE.ancestral_program[locale]);
       }
     }
   });

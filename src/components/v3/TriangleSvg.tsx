@@ -61,8 +61,10 @@ export function V2TriangleSvg({
       v
     );
   const D = (p: Pt, kk: string, r = 2.4) => h("circle", { key: kk, cx: p[0], cy: p[1], r, fill: G, ...NP });
-  const corner = (p: Pt, j: number, kk: string) => [
-    D(p, kk, 3.6),
+  const corner = (p: Pt, j: number, kk: string, fatal = false) => [
+    fatal
+      ? h("polygon", { key: kk, points: diamond(p[0], p[1], 5), fill: G, ...NP })
+      : D(p, kk, 3.6),
     h("circle", {
       key: kk + "h",
       cx: p[0],
@@ -92,13 +94,12 @@ export function V2TriangleSvg({
     L(SpR, M, "l4"),
     D(SpL, "d1"),
     D(SpR, "d2"),
-    // Inner bottom = fatal error in every sphere
-    h("polygon", { key: "fatal", points: diamond(M[0], M[1], 5), fill: G, ...NP }),
+    D(M, "d3"),
     T(-45, 94, sm[0], INK, 12, "t1"),
     T(45, 94, sm[1], INK, 12, "t2"),
-    T(0, 152, sm[2], R, 12, "t3"),
-    ...corner(Cl, jl, "cl"),
-    ...corner(Cr, jr, "cr"),
+    T(0, 152, sm[2], INK, 12, "t3"),
+    ...corner(Cl, jl, "cl", false),
+    ...corner(Cr, jr, "cr", true),
     T(-60, 152, IV[jl], R, 15, "t4"),
     T(60, 152, IV[jr], R, 15, "t5"),
     D(A, "ac", 4.4),

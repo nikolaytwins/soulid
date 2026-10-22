@@ -105,8 +105,9 @@ export const SPHERE_META: Record<
 };
 
 /**
- * Outer bridges between neighbouring spheres are ancestral programs.
- * The fatal error is the bottom inner point of each sphere triangle (apex+… bases → innerBottom).
+ * Outer bridges between spheres are shared edge numbers.
+ * Role inside a sphere triangle: left base = ancestral program, right base = fatal error
+ * (in every sphere). Inner points stay ordinary sphere arcana.
  */
 export const BRIDGE_KIND: Record<BridgeId, Extract<PointKind, "ancestral_program" | "fatal_error">> = {
   p12: "ancestral_program",
@@ -118,8 +119,8 @@ export const BRIDGE_KIND: Record<BridgeId, Extract<PointKind, "ancestral_program
 
 export function sphereSlotKind(_sphere: SphereId, point: SpherePointId): PointKind {
   if (point === "apex") return "apex";
-  if (point === "innerBottom") return "fatal_error";
-  if (point === "innerLeft" || point === "innerRight") return "past_life";
+  if (point === "innerLeft" || point === "innerRight" || point === "innerBottom") return "past_life";
+  if (point === "rightBase") return "fatal_error";
   return "ancestral_program";
 }
 

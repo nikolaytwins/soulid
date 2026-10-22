@@ -89,18 +89,15 @@ describe("calculateStar — book example 05.03.1992", () => {
     expect(star.bridges.p45.spheres).toEqual(["relationships", "health"]);
   });
 
-  it("marks both bases as ancestral and inner bottom as fatal error in every sphere", () => {
+  it("marks left base ancestral and right base fatal in every sphere; inners stay ordinary", () => {
     for (const id of SPHERE_IDS) {
-      const t = star.spheres[id];
       expect(sphereSlotKind(id, "leftBase")).toBe("ancestral_program");
-      expect(sphereSlotKind(id, "rightBase")).toBe("ancestral_program");
+      expect(sphereSlotKind(id, "rightBase")).toBe("fatal_error");
       expect(sphereSlotKind(id, "apex")).toBe("apex");
       expect(sphereSlotKind(id, "innerLeft")).toBe("past_life");
       expect(sphereSlotKind(id, "innerRight")).toBe("past_life");
-      expect(sphereSlotKind(id, "innerBottom")).toBe("fatal_error");
-      expect(t.leftBase.kind).toBe("ancestral_program");
-      expect(t.rightBase.kind).toBe("ancestral_program");
-      expect(t.innerBottom.kind).toBe("fatal_error");
+      expect(sphereSlotKind(id, "innerBottom")).toBe("past_life");
+      expect(star.spheres[id].innerBottom.kind).toBe("past_life");
     }
   });
 
